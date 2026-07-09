@@ -1,0 +1,370 @@
+# Build Plan: Player Performance Data System
+
+This file defines the planned implementation order for the Player Performance Data System.
+It is a planning artifact, not an implementation spec. Each numbered unit should receive its own scoped feature spec before implementation begins.
+
+## Planning Rules
+
+- Implement one unit at a time.
+- Keep feature specs small, verifiable, and dependency-aware.
+- Do not implement product behavior before its foundations exist.
+- Do not introduce speculative integrations, packages, data fields, or vendor mappings.
+- Keep backend authorization as the source of truth.
+- Keep UI light-only and Bosnian Latin by default.
+- Use semantic design tokens and shadcn/ui primitives without ad-hoc visual overrides.
+- Use `format:check` for all frontend and full-stack units after Unit 04.
+- Keep Gpexe and Zone14 field-specific imports blocked until real export samples are reviewed.
+
+## Current Completed / Started Foundation Units
+
+### Unit 01: Project Boilerplate Cleanup
+
+Builds a clean baseline by removing default starter/demo code while preserving project tooling, shadcn/ui setup, theme tokens, aliases, and minimal Bosnian Latin placeholder copy.
+
+Dependencies: none.
+
+### Unit 02: Frontend App Shell Baseline
+
+Builds the first static frontend application shell with sidebar, topbar, main content area, responsive behavior, and minimal placeholder UI.
+
+Dependencies: Unit 01.
+
+### Unit 03: Frontend Routing Foundation
+
+Adds frontend routing, placeholder pages, active navigation state, topbar title behavior, and not-found handling without real domain features or data fetching.
+
+Dependencies: Unit 02.
+
+### Unit 04: Code Formatting Foundation
+
+Adds Prettier, Tailwind class sorting, ESLint compatibility, formatting scripts, ignore rules, and formatting verification.
+
+Dependencies: Unit 03.
+
+### Unit 05: Common UI Primitives Foundation
+
+Adds reusable app-level UI primitives such as page headers, empty/loading/error states, and content sections, then refactors placeholders to use them.
+
+Dependencies: Unit 04.
+
+### Unit 06: Backend Solution Baseline
+
+Adds the ASP.NET Core solution, Clean Architecture projects, dependency direction, basic API host, DI extension points, and a minimal health endpoint.
+
+Dependencies: Unit 05.
+
+### Unit 07: Backend Configuration Baseline
+
+Adds backend environment configuration, `.env.example`, local env loading, typed options, startup validation, and safe configuration behavior.
+
+Dependencies: Unit 06.
+
+### Unit 08: Backend API Error Handling Foundation
+
+Adds ProblemDetails, global exception handling, safe trace IDs, API endpoint mapping structure, and consistent backend error foundations.
+
+Dependencies: Unit 07.
+
+## Next Foundation Units
+
+### Unit 09: Backend Testing Foundation
+
+Add backend unit/integration test project structure, shared test conventions, first health/error-handling tests where practical, and `dotnet test` verification.
+
+Dependencies: Unit 08.
+
+### Unit 10: Frontend API Client and Environment Foundation
+
+Add frontend API base URL configuration, typed fetch wrapper, safe error handling, and TanStack Query provider foundation without calling real domain endpoints.
+
+Dependencies: Unit 08.
+
+### Unit 11: Frontend Form and Validation Foundation
+
+Add React Hook Form + Zod conventions, reusable form error display patterns, and one non-domain sample/internal demonstration only if needed for verification.
+
+Dependencies: Unit 05, Unit 10.
+
+### Unit 12: Backend Persistence Foundation
+
+Add EF Core, Npgsql/PostgreSQL provider configuration, Infrastructure DbContext baseline, migration structure, and database health checks without full domain modules.
+
+Dependencies: Unit 07, Unit 08, Unit 09.
+
+### Unit 13: Backend Domain Shared Primitives
+
+Add shared domain primitives such as entity base patterns, audit metadata contracts where appropriate, result/error abstractions if needed, and system clock abstractions.
+
+Dependencies: Unit 06, Unit 09.
+
+## Authentication and Staff Access
+
+### Unit 14: Backend Auth and Identity Foundation
+
+Add ASP.NET Core Identity-style persistence, user account statuses, secure cookie authentication baseline, password hashing/session behavior, and no public registration.
+
+Dependencies: Unit 12, Unit 13.
+
+### Unit 15: Backend CSRF and Session API
+
+Add CSRF protection for unsafe cookie-authenticated requests, session endpoint, logout endpoint, and consistent unauthorized/forbidden behavior.
+
+Dependencies: Unit 14.
+
+### Unit 16: Frontend Auth Shell and Session Provider
+
+Add sign-in, forgot/reset password surfaces where supported by backend, session provider, protected route handling, user menu placeholder behavior, and Bosnian Latin copy.
+
+Dependencies: Unit 10, Unit 15.
+
+### Unit 17: First Admin Bootstrap
+
+Add environment-based first admin creation when no admin exists, temporary password handling, required password change marker, and startup safeguards.
+
+Dependencies: Unit 14, Unit 15.
+
+### Unit 18: Staff Users, Roles, and Team Scope Backend
+
+Add backend user management model, primary role, team scope model, permission flags, account lifecycle actions, and backend authorization policy foundation.
+
+Dependencies: Unit 14, Unit 17.
+
+### Unit 19: Staff Users and Roles UI
+
+Add admin-facing staff list, invite/create flow, role/scope assignment UI, disable/reactivate actions, and permission-aware interface behavior.
+
+Dependencies: Unit 16, Unit 18.
+
+## Club Configuration Foundations
+
+### Unit 20: Seasons and Competitions Backend
+
+Add settings backend for seasons and competitions with CRUD, validation, archive behavior, and authorization checks.
+
+Dependencies: Unit 18.
+
+### Unit 21: Teams / Selections Backend
+
+Add configurable selections, tracking levels, default seed behavior where appropriate, active/archive state, ordering, and backend permission checks.
+
+Dependencies: Unit 18, Unit 20.
+
+### Unit 22: Venues and Opponents Backend
+
+Add venues and opponents settings with CRUD, validation, archive behavior, and authorization checks.
+
+Dependencies: Unit 20.
+
+### Unit 23: Settings UI Foundation
+
+Add settings navigation and UI screens for seasons, competitions, selections, tracking levels, venues, and opponents.
+
+Dependencies: Unit 16, Unit 20, Unit 21, Unit 22.
+
+## Player Foundations
+
+### Unit 24: Players Backend Foundation
+
+Add player records, profile metadata, archive/status behavior, and basic CRUD with backend authorization.
+
+Dependencies: Unit 18, Unit 21.
+
+### Unit 25: Player Team Assignment Backend
+
+Add persistent player assignment history, time-bound selection movement, multiple active assignments support where allowed, and invariant tests.
+
+Dependencies: Unit 21, Unit 24.
+
+### Unit 26: Players UI Foundation
+
+Add players list, filters, create/edit dialogs, archive behavior, and player detail shell with assignment history display.
+
+Dependencies: Unit 16, Unit 24, Unit 25.
+
+## Match and Report Foundations
+
+### Unit 27: Matches Backend Foundation
+
+Add match metadata, season/competition/opponent/venue/team selection references, match status basics, and authorized CRUD.
+
+Dependencies: Unit 20, Unit 21, Unit 22, Unit 24.
+
+### Unit 28: Match Lineup and Appearance Backend
+
+Add lineup, starters, substitutes, captain, substitutions, player minutes, and concrete match appearances linked to players.
+
+Dependencies: Unit 25, Unit 27.
+
+### Unit 29: Match Report Workflow Backend
+
+Add match report statuses, allowed transitions, allowed actions, verification permission behavior, correction request behavior, and audit hooks where available.
+
+Dependencies: Unit 18, Unit 27, Unit 28.
+
+### Unit 30: Manual Match Statistics Backend
+
+Add player match statistics and goalkeeper statistics for manual entry according to tracking level rules, with validation and report status rules.
+
+Dependencies: Unit 21, Unit 28, Unit 29.
+
+### Unit 31: Matches UI Foundation
+
+Add matches list, filters, status tabs, match creation/edit dialogs, and match detail shell.
+
+Dependencies: Unit 16, Unit 23, Unit 27.
+
+### Unit 32: Lineup and Appearances UI
+
+Add match lineup editor, appearances/minutes UI, substitution handling, and validation feedback.
+
+Dependencies: Unit 28, Unit 31.
+
+### Unit 33: Manual Match Statistics UI
+
+Add player statistics and goalkeeper statistics entry UI optimized for desktop/tablet, with save states and validation feedback.
+
+Dependencies: Unit 30, Unit 32.
+
+### Unit 34: Match Report Review UI
+
+Add submit for review, request correction, verify, archive/restore where allowed, backend-provided allowed action rendering, and workflow status display.
+
+Dependencies: Unit 29, Unit 33.
+
+## Audit and Data Integrity
+
+### Unit 35: Audit Backend Foundation
+
+Add audit log entity, audit service abstraction, persistence, and audit coverage for already implemented critical mutations.
+
+Dependencies: Unit 18, Unit 29.
+
+### Unit 36: Audit UI Foundation
+
+Add audit history display for authorized users on relevant detail pages, starting with match reports and user/account changes.
+
+Dependencies: Unit 16, Unit 35.
+
+## Media and File Storage
+
+### Unit 37: File Storage Abstraction
+
+Add Application-layer file storage abstraction, local development adapter, storage metadata model, and safe upload configuration without production provider lock-in.
+
+Dependencies: Unit 12, Unit 13, Unit 18.
+
+### Unit 38: Media Backend Foundation
+
+Add media assets, external media references, entity linking, archive behavior, and authorization checks.
+
+Dependencies: Unit 37.
+
+### Unit 39: Media UI Foundation
+
+Add media library, upload/reference dialogs, entity attachment UI, and safe empty/error states.
+
+Dependencies: Unit 16, Unit 38.
+
+## Imports and GPS Data
+
+### Unit 40: Import Workflow Backend Foundation
+
+Add import job model, upload metadata, statuses, preview/validation/confirmation flow skeleton, and audit-ready original file retention.
+
+Dependencies: Unit 35, Unit 37.
+
+### Unit 41: Import UI Foundation
+
+Add import workflow screens for upload, type selection, preview, validation result display, and explicit confirmation.
+
+Dependencies: Unit 16, Unit 40.
+
+### Unit 42: Generic CSV/XLSX Parsing Foundation
+
+Add mature CSV/XLSX reader packages, format detection, row parsing abstraction, column preview, validation result structure, and tests without vendor-specific mappings.
+
+Dependencies: Unit 40.
+
+### Unit 43: Gpexe Mapping Spec After Sample Review
+
+Implement confirmed Gpexe import mappings only after real export samples are reviewed and documented.
+
+Dependencies: Unit 42. Blocked until samples are available.
+
+### Unit 44: Zone14 Mapping Spec After Sample Review
+
+Implement confirmed Zone14 data handling only after real exports or documentation prove available fields. Do not assume full event data.
+
+Dependencies: Unit 42. Blocked until samples are available.
+
+## Training, Medical, and Dashboard
+
+### Unit 45: Training GPS Backend Foundation
+
+Add training session metadata and GPS/physical workload models using confirmed generic metric structure where practical.
+
+Dependencies: Unit 21, Unit 24, Unit 40.
+
+### Unit 46: Training GPS UI Foundation
+
+Add training session list/detail UI and GPS workload display where data exists.
+
+Dependencies: Unit 45.
+
+### Unit 47: Medical Availability Backend
+
+Add availability statuses, injury/availability records, restricted notes, medical permissions, and audit coverage.
+
+Dependencies: Unit 18, Unit 24, Unit 35.
+
+### Unit 48: Medical Availability UI
+
+Add team-filtered availability views, player availability editing for authorized roles, restricted note behavior, and coach-safe summaries.
+
+Dependencies: Unit 47.
+
+### Unit 49: Dashboard Backend Read Models
+
+Add dashboard read endpoints for selected season/team: recent matches, report statuses, availability summary, top performers, workload summary, and data quality alerts where data exists.
+
+Dependencies: Unit 29, Unit 30, Unit 45, Unit 47.
+
+### Unit 50: Dashboard UI
+
+Add dashboard page with filters, KPI cards, summaries, charts, empty states, and token-based visualization.
+
+Dependencies: Unit 49.
+
+## Localization and Polish
+
+### Unit 51: Localization Foundation
+
+Add i18next/react-i18next or approved localization stack, Bosnian Latin default resources, optional English infrastructure, and translation conventions.
+
+Dependencies: Unit 16, Unit 23.
+
+### Unit 52: Localization Pass for Existing UI
+
+Move long-lived visible UI strings into translation resources and verify Bosnian Latin default behavior.
+
+Dependencies: Unit 51.
+
+### Unit 53: Responsive and Accessibility Hardening
+
+Audit key pages for keyboard navigation, focus states, mobile/tablet rendering, semantic tables, status labels, and accessible actions.
+
+Dependencies: Unit 34, Unit 41, Unit 48, Unit 50.
+
+### Unit 54: Production Configuration Readiness
+
+Add production configuration validation, deployment notes, object storage provider decision points, and environment documentation. Do not choose hosting unless confirmed.
+
+Dependencies: Unit 37, Unit 50.
+
+## Next Immediate Unit
+
+The next implementation unit after Unit 08 should be:
+
+**Unit 09: Backend Testing Foundation**
+
+Reason: backend error handling and API foundations now exist; before adding persistence, auth, and domain rules, the backend should have test project structure and verification commands in place.
