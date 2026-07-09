@@ -10,7 +10,7 @@ This file intentionally starts lightweight. It should become more detailed as bu
 
 ## Current Goal
 
-- Complete Unit 05 common UI primitives foundation and keep the frontend buildable.
+- Complete Unit 06 backend solution baseline and keep the backend buildable.
 
 ## Completed
 
@@ -54,6 +54,12 @@ This file intentionally starts lightweight. It should become more detailed as bu
   - Refactored the dashboard placeholder, generic module placeholder, and not-found page to compose the new shared primitives instead of repeating bespoke markup.
   - Preserved the routed shell structure and kept placeholder content generic, Bosnian Latin, and free of fake domain datasets or backend integration.
   - Kept the work frontend-only with no backend changes.
+- Unit 06 completed:
+  - Replaced the old single-project backend starter layout with the documented backend baseline under `backend/src` and `backend/tests`.
+  - Added `PlayerPerformance.Api`, `PlayerPerformance.Application`, `PlayerPerformance.Domain`, and `PlayerPerformance.Infrastructure` projects with Clean Architecture references in `backend/PlayerPerformance.sln`.
+  - Added minimal `AddApplication()` and `AddInfrastructure()` composition extension points without registering speculative services.
+  - Replaced the stock controller/swagger host with a minimal ASP.NET Core 8 API that exposes only `GET /health`.
+  - Added a placeholder `backend/.env.example` and removed obsolete root-level backend template artifacts that conflicted with the new structure.
 
 ## In Progress
 
@@ -62,7 +68,7 @@ This file intentionally starts lightweight. It should become more detailed as bu
 ## Next Up
 
 - Start the next scoped feature spec on top of the shared UI primitive baseline.
-- Introduce the real backend solution structure defined in the architecture context when the next backend foundation unit is implemented.
+- Build the next backend foundation unit on top of the new Clean Architecture solution baseline.
 
 ## Open Questions
 
@@ -126,3 +132,9 @@ This file intentionally starts lightweight. It should become more detailed as bu
   - `frontend`: `npm.cmd run build` passed.
   - `backend`: no backend files were changed, so no backend build was required for Unit 05.
   - `frontend`: the formatter also updated pre-existing frontend files outside the new primitives so the repository now satisfies the configured Prettier checks.
+- Unit 06 verification results:
+  - `backend`: `dotnet restore PlayerPerformance.sln` passed.
+  - `backend`: `dotnet build PlayerPerformance.sln --no-restore` passed.
+  - `backend`: `dotnet test PlayerPerformance.sln --no-build` completed successfully with no test projects present in the solution.
+  - `backend`: `dotnet run --project src/Api/PlayerPerformance.Api.csproj --no-build --urls http://127.0.0.1:5099` served `GET /health` successfully and returned the expected safe JSON response.
+  - `frontend`: no frontend files were changed for Unit 06, so no frontend verification commands were required.
