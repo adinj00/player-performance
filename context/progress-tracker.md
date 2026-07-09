@@ -10,7 +10,7 @@ This file intentionally starts lightweight. It should become more detailed as bu
 
 ## Current Goal
 
-- Unit 09 completed; backend testing foundations are in place with unit and integration test projects, and `dotnet test` is now part of standard backend verification.
+- Unit 10 completed; the frontend now has environment-backed API and TanStack Query foundations for future authenticated and data-driven features.
 
 ## Completed
 
@@ -78,6 +78,13 @@ This file intentionally starts lightweight. It should become more detailed as bu
   - Added integration tests covering `GET /health` and the safe unknown-route ProblemDetails behavior already implemented in Unit 08.
   - Added `public partial class Program;` to the API entry point so the existing app host is discoverable by integration tests without changing runtime behavior.
   - Standardized backend verification on `dotnet restore`, `dotnet build`, and `dotnet test` for future units.
+- Unit 10 completed:
+  - Added `frontend/.env.example` with a documented `VITE_API_BASE_URL` example and kept frontend local environment usage secret-free.
+  - Added a shared frontend environment module that normalizes `VITE_API_BASE_URL` and throws a clear Bosnian Latin error only when backend calls are attempted without configuration.
+  - Added shared frontend API error types plus a generic `apiRequest<TResponse>()` wrapper with safe JSON parsing, empty-response handling, normalized non-2xx errors, and default `credentials: "include"` support.
+  - Added an app-level TanStack Query provider with conservative default query and mutation behavior and wired it into the existing app root without changing visible route behavior.
+  - Added `@tanstack/react-query` as the only new frontend dependency required for this unit.
+  - Moved frontend TypeScript incremental build info out of `node_modules/.tmp` into `frontend/.tmp/` and updated frontend Vite scripts/config so verification can build successfully in the current environment.
 
 ## In Progress
 
@@ -86,6 +93,7 @@ This file intentionally starts lightweight. It should become more detailed as bu
 ## Next Up
 
 - Start the next scoped feature spec on top of the shared UI primitive baseline.
+- Build the first real frontend feature or auth/session foundation on top of the new API client and TanStack Query provider.
 - Build the next backend foundation unit on top of the new configuration-ready, testable Clean Architecture baseline.
 
 ## Open Questions
@@ -181,3 +189,12 @@ This file intentionally starts lightweight. It should become more detailed as bu
   - `backend`: integration tests now verify `GET /health` returns a successful safe JSON response and that an unknown route returns a safe `404` ProblemDetails response with a `traceId`.
   - `backend`: an initial `dotnet test --no-build` attempt started too early while a parallel build was still producing outputs, so it was rerun sequentially.
   - `frontend`: no frontend files were changed for Unit 09, so no frontend verification commands were required.
+- Unit 10 verification results:
+  - `frontend`: `npm.cmd install @tanstack/react-query` passed after allowing network access for dependency installation.
+  - `frontend`: `npm.cmd run format` passed after an initial file-write race/permission issue was resolved by rerunning formatting sequentially.
+  - `frontend`: `npm.cmd run format:check` passed.
+  - `frontend`: `npm.cmd run lint` passed.
+  - `frontend`: `npm.cmd run build` passed.
+  - `frontend`: TypeScript incremental cache output was moved from `frontend/node_modules/.tmp` to `frontend/.tmp` because the current environment denied recreating build-info files under `node_modules`.
+  - `frontend`: Vite scripts were switched to `--configLoader runner`, `vite.config.ts` was made ESM-safe, and an old generated `frontend/dist` folder was removed so the build could complete cleanly in the current environment.
+  - `backend`: no backend files were changed for Unit 10, so no backend build or test command was required.
