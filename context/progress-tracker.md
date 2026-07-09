@@ -10,7 +10,7 @@ This file intentionally starts lightweight. It should become more detailed as bu
 
 ## Current Goal
 
-- Unit 07 completed; backend configuration baseline is in place and the solution remains buildable.
+- Unit 08 completed; backend API error-handling and endpoint-mapping foundations are in place and the solution remains buildable.
 
 ## Completed
 
@@ -65,6 +65,11 @@ This file intentionally starts lightweight. It should become more detailed as bu
   - Added typed `PlayerPerformanceOptions` with startup validation for required `ServiceName` and optional absolute HTTP/HTTPS `FrontendOrigin`.
   - Updated `backend/.env.example` with safe local-development guidance and non-secret example values for this unit only.
   - Updated `GET /health` to return the configured service name while keeping the response safe and free of machine details or secrets.
+- Unit 08 completed:
+  - Added API-owned ProblemDetails registration with a safe `traceId` extension for consistent error responses.
+  - Added centralized exception handling that returns a generic `500` ProblemDetails response without leaking internal exception details.
+  - Added status-code ProblemDetails handling for unknown routes and unsupported methods so `404` and `405` API responses are consistent and safe.
+  - Moved endpoint registration into API-owned endpoint extension methods and preserved the unauthenticated `GET /health` endpoint through the new structure.
 
 ## In Progress
 
@@ -151,3 +156,11 @@ This file intentionally starts lightweight. It should become more detailed as bu
   - `backend`: a temporary ignored `backend/.env` file was used to verify local `.env` loading, and `GET /health` returned the service name loaded from that file.
   - `backend`: startup validation failed as expected when `PlayerPerformance__ServiceName` was missing, with an `OptionsValidationException` stating that `PlayerPerformance:ServiceName` is required.
   - `frontend`: no frontend files were changed for Unit 07, so no frontend verification commands were required.
+- Unit 08 verification results:
+  - `backend`: `dotnet restore PlayerPerformance.sln` partially failed in the sandbox because the API project could not reach NuGet repository-signature metadata at `api.nuget.org`; no new package was added in this unit.
+  - `backend`: `dotnet build PlayerPerformance.sln --no-restore` passed.
+  - `backend`: `dotnet test PlayerPerformance.sln --no-build` completed successfully with no test projects present in the solution.
+  - `backend`: `dotnet run --project src/Api/PlayerPerformance.Api.csproj --no-build --urls http://127.0.0.1:5099` returned the expected safe `GET /health` response when `PlayerPerformance__ServiceName` was provided through environment variables.
+  - `backend`: requesting `http://127.0.0.1:5099/missing-route` returned a `404` ProblemDetails response with a safe `traceId` extension.
+  - `backend`: sending `POST http://127.0.0.1:5099/health` returned a `405` ProblemDetails response with a safe `traceId` extension.
+  - `frontend`: no frontend files were changed for Unit 08, so no frontend verification commands were required.

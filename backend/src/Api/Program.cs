@@ -1,7 +1,8 @@
 using PlayerPerformance.Application;
 using PlayerPerformance.Infrastructure;
 using PlayerPerformance.Api.Configuration;
-using Microsoft.Extensions.Options;
+using PlayerPerformance.Api.Endpoints;
+using PlayerPerformance.Api.ErrorHandling;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,18 +21,13 @@ builder.Services
 
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure();
+builder.Services.AddApiProblemDetails();
 
 var app = builder.Build();
 
-app.MapGet("/health", (IOptions<PlayerPerformanceOptions> options) =>
-    TypedResults.Ok(new HealthResponse(
-        "ok",
-        options.Value.ServiceName,
-        DateTimeOffset.UtcNow)));
+app.UseApiExceptionHandling();
+app.UseApiStatusCodeProblemDetails();
+
+app.MapApiEndpoints();
 
 app.Run();
-
-internal sealed record HealthResponse(
-    string Status,
-    string Service,
-    DateTimeOffset TimestampUtc);
