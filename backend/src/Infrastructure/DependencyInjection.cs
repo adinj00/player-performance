@@ -1,7 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using PlayerPerformance.Application.Abstractions.Time;
 using PlayerPerformance.Infrastructure.Persistence;
+using PlayerPerformance.Infrastructure.Time;
 
 namespace PlayerPerformance.Infrastructure;
 
@@ -12,6 +14,8 @@ public static class DependencyInjection
         IConfiguration configuration)
     {
         var connectionString = GetRequiredDefaultConnectionString(configuration);
+
+        services.AddSingleton<ISystemClock, SystemClock>();
 
         services.AddDbContext<AppDbContext>(options =>
         {

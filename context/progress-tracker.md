@@ -10,7 +10,7 @@ This file intentionally starts lightweight. It should become more detailed as bu
 
 ## Current Goal
 
-- Unit 12 completed; the backend now has an EF Core/PostgreSQL persistence foundation with a baseline `AppDbContext`, safe readiness health checks, and migration scaffolding for future backend modules.
+- Unit 13 completed; the backend now has shared domain/application primitives for entity identity, value objects, result/error handling, basic guard helpers, audit metadata contracts, and a testable UTC clock abstraction.
 
 ## Completed
 
@@ -99,6 +99,12 @@ This file intentionally starts lightweight. It should become more detailed as bu
   - Added an initial empty persistence baseline migration and model snapshot under `backend/src/Infrastructure/Persistence/` without introducing speculative business tables.
   - Updated backend startup logging to a safe explicit provider set so unhealthy database readiness checks do not crash on Windows Event Log permission issues in local environments.
   - Updated `backend/.env.example` with a placeholder `ConnectionStrings__DefaultConnection` value following the existing local configuration convention.
+- Unit 13 completed:
+  - Added shared backend primitives under `backend/src/Domain/Common/` for entity identity, value-based equality, developer-facing error objects, result wrappers, and universal guard helpers.
+  - Added framework-independent audit metadata contracts under `backend/src/Domain/Abstractions/Auditing/` without introducing audit entities, persistence hooks, or schema changes.
+  - Added an application-facing `ISystemClock` abstraction and an Infrastructure `SystemClock` UTC implementation registered through the existing Infrastructure dependency injection extension point.
+  - Added focused unit tests covering entity equality, value object equality, result invariants, guard helpers, and clock registration/UTC behavior.
+  - Kept the unit product-agnostic: no FK Velež entities, API routes, auth behavior, migrations, or frontend changes were introduced.
 
 ## In Progress
 
@@ -109,6 +115,7 @@ This file intentionally starts lightweight. It should become more detailed as bu
 - Start the next scoped feature spec on top of the shared UI primitive baseline.
 - Build the first real frontend feature or auth/session foundation on top of the new API client, TanStack Query provider, and shared form conventions.
 - Build the next backend foundation unit on top of the new configuration-ready, testable persistence baseline.
+- Build the next backend module on top of the new shared primitives and persistence baseline.
 
 ## Open Questions
 
@@ -230,6 +237,14 @@ This file intentionally starts lightweight. It should become more detailed as bu
   - `backend`: the baseline migration files were added manually in EF Core format because the local EF CLI metadata path was blocked by the same locked default build-output issue; the migration files compile successfully in the verified solution build.
   - `backend`: follow-up local verification succeeded after stopping the running API process, rebuilding normally, and running `dotnet ef database update --project src/Infrastructure/PlayerPerformance.Infrastructure.csproj --startup-project src/Api/PlayerPerformance.Api.csproj`.
   - `backend`: the EF update created the `player_performance` database, created `__EFMigrationsHistory`, and applied the `20260710120000_InitialPersistenceBaseline` migration.
+- Unit 13 verification results:
+  - `backend`: creating the new shared source/test folders required an escalated directory-creation step because the sandbox denied creating nested directories inside the workspace.
+  - `backend`: default restore/build paths under the repository `obj/bin` folders remained locked in this environment, so verification again used `--artifacts-path C:\Users\Jugo\AppData\Local\Temp\player-performance-artifacts-unit13`.
+  - `backend`: `dotnet restore PlayerPerformance.sln --artifacts-path C:\Users\Jugo\AppData\Local\Temp\player-performance-artifacts-unit13` passed after allowing temporary NuGet network access.
+  - `backend`: `dotnet build PlayerPerformance.sln --no-restore --artifacts-path C:\Users\Jugo\AppData\Local\Temp\player-performance-artifacts-unit13` passed.
+  - `backend`: an initial parallel `dotnet test --no-build` run failed because it raced the build outputs in the shared artifacts directory, so the test step was rerun sequentially.
+  - `backend`: `dotnet test PlayerPerformance.sln --no-restore --no-build --artifacts-path C:\Users\Jugo\AppData\Local\Temp\player-performance-artifacts-unit13` passed with 18 unit tests and 3 integration tests.
+  - `frontend`: no frontend files were changed for Unit 13, so no frontend verification commands were required.
 
 ## Confirmed Decisions
 
