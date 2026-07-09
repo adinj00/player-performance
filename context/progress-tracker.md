@@ -10,7 +10,7 @@ This file intentionally starts lightweight. It should become more detailed as bu
 
 ## Current Goal
 
-- Unit 10 completed; the frontend now has environment-backed API and TanStack Query foundations for future authenticated and data-driven features.
+- Unit 11 completed; the frontend now has a shared form and validation foundation for future data-entry workflows without introducing product-specific forms.
 
 ## Completed
 
@@ -85,6 +85,12 @@ This file intentionally starts lightweight. It should become more detailed as bu
   - Added an app-level TanStack Query provider with conservative default query and mutation behavior and wired it into the existing app root without changing visible route behavior.
   - Added `@tanstack/react-query` as the only new frontend dependency required for this unit.
   - Moved frontend TypeScript incremental build info out of `node_modules/.tmp` into `frontend/.tmp/` and updated frontend Vite scripts/config so verification can build successfully in the current environment.
+- Unit 11 completed:
+  - Added `react-hook-form`, `zod`, and `@hookform/resolvers` to the frontend project as the form and schema-validation foundation required by this unit.
+  - Added shared generic form helpers in `frontend/src/lib/form-errors.ts` for field error extraction, unknown error normalization, multi-error normalization, and a safe Bosnian Latin fallback message.
+  - Added reusable app-level form UI components in `frontend/src/components/common/` for form-level error summaries, field-level error messages, action layout, and required-field indication.
+  - Kept the implementation non-domain and non-routed: no real product form, auth flow, API mutation, backend change, or visible navigation change was introduced.
+  - Documented the form convention inline near the shared helpers so feature-owned schemas can stay close to future forms while shared helpers remain generic.
 
 ## In Progress
 
@@ -93,7 +99,7 @@ This file intentionally starts lightweight. It should become more detailed as bu
 ## Next Up
 
 - Start the next scoped feature spec on top of the shared UI primitive baseline.
-- Build the first real frontend feature or auth/session foundation on top of the new API client and TanStack Query provider.
+- Build the first real frontend feature or auth/session foundation on top of the new API client, TanStack Query provider, and shared form conventions.
 - Build the next backend foundation unit on top of the new configuration-ready, testable Clean Architecture baseline.
 
 ## Open Questions
@@ -198,3 +204,12 @@ This file intentionally starts lightweight. It should become more detailed as bu
   - `frontend`: TypeScript incremental cache output was moved from `frontend/node_modules/.tmp` to `frontend/.tmp` because the current environment denied recreating build-info files under `node_modules`.
   - `frontend`: Vite scripts were switched to `--configLoader runner`, `vite.config.ts` was made ESM-safe, and an old generated `frontend/dist` folder was removed so the build could complete cleanly in the current environment.
   - `backend`: no backend files were changed for Unit 10, so no backend build or test command was required.
+- Unit 11 verification results:
+  - `frontend`: `npm.cmd install react-hook-form zod @hookform/resolvers` passed after allowing network access for dependency installation.
+  - `frontend`: `npx.cmd shadcn@latest add form` completed the registry check, but did not materialize a new primitive file in this repository, so the unit was completed with shared generic helpers and components only.
+  - `frontend`: `npm.cmd run format` passed.
+  - `frontend`: an initial parallel `npm.cmd run format:check` run failed because it raced the formatter and reported temporary style drift in already-updating files.
+  - `frontend`: `npm.cmd run format:check` passed when rerun sequentially after formatting completed.
+  - `frontend`: `npm.cmd run lint` passed.
+  - `frontend`: `npm.cmd run build` passed.
+  - `backend`: no backend files were changed for Unit 11, so no backend build or test command was required.
