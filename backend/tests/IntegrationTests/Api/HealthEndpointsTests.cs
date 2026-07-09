@@ -45,4 +45,24 @@ public sealed class HealthEndpointsTests : IClassFixture<TestApplicationFactory>
         Assert.NotNull(problemDetails.Extensions);
         Assert.True(problemDetails.Extensions.ContainsKey("traceId"));
     }
+
+    [Fact]
+    public async Task GetReadiness_ShouldReturnSafeUnhealthyResponse_WhenDatabaseIsUnavailable()
+    {
+        using var response = await _client.GetAsync("/health/ready");
+
+        Assert.Equal(HttpStatusCode.ServiceUnavailable, response.StatusCode);
+        Assert.Equal("application/json; charset=utf-8", response.Content.Headers.ContentType?.ToString());
+
+        using var payload = await response.Content.ReadFromJsonAsync<JsonDocument>();
+
+        Assert.NotNull(payload);
+        Assert.Equal("unhealthy", payload.RootElement.GetProperty("status").GetString());
+        Assert.True(payload.RootElement.TryGetProperty("timestampUtc", out _));
+        Assert.True(payload.RootElement.TryGetProperty("checks", out var checks));
+        Assert.Equal("unhealthy", checks.GetProperty("database").GetProperty("status").GetString());
+        Assert.False(payload.RootElement.TryGetProperty("connectionString", out _));
+        Assert.False(payload.RootElement.TryGetProperty("exception", out _));
+        Assert.False(payload.RootElement.TryGetProperty("stackTrace", out _));
+    }
 }

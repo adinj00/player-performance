@@ -214,6 +214,7 @@ Backend verification:
 
 - Run `dotnet build` for affected backend projects.
 - Run relevant `dotnet test` commands when tests exist or when the task adds domain, workflow, permission, import, or validation logic.
+- When a unit introduces or changes EF Core persistence, prefer `dotnet ef` commands for migration creation and `dotnet ef database update` for applying schema changes during verification when the local environment supports it.
 - Verify Clean Architecture dependency rules were not violated.
 - Verify mutations enforce authorization and audit rules where applicable.
 - Verify state transitions use the approved workflow/state-machine approach.

@@ -10,7 +10,7 @@ This file intentionally starts lightweight. It should become more detailed as bu
 
 ## Current Goal
 
-- Unit 11 completed; the frontend now has a shared form and validation foundation for future data-entry workflows without introducing product-specific forms.
+- Unit 12 completed; the backend now has an EF Core/PostgreSQL persistence foundation with a baseline `AppDbContext`, safe readiness health checks, and migration scaffolding for future backend modules.
 
 ## Completed
 
@@ -91,6 +91,14 @@ This file intentionally starts lightweight. It should become more detailed as bu
   - Added reusable app-level form UI components in `frontend/src/components/common/` for form-level error summaries, field-level error messages, action layout, and required-field indication.
   - Kept the implementation non-domain and non-routed: no real product form, auth flow, API mutation, backend change, or visible navigation change was introduced.
   - Documented the form convention inline near the shared helpers so feature-owned schemas can stay close to future forms while shared helpers remain generic.
+- Unit 12 completed:
+  - Added EF Core, EF Core design-time, Npgsql, and EF Core DbContext health-check package references only to `backend/src/Infrastructure`.
+  - Added `Microsoft.EntityFrameworkCore.Design` to `backend/src/Api` as a design-time-only dependency so `dotnet ef` can use the API startup project reliably.
+  - Added Infrastructure-owned persistence setup with `AppDbContext`, PostgreSQL `DbContext` registration, and a required `ConnectionStrings:DefaultConnection` startup check.
+  - Added a database readiness health check exposed through `/health/ready` while preserving the existing safe `/health` endpoint behavior.
+  - Added an initial empty persistence baseline migration and model snapshot under `backend/src/Infrastructure/Persistence/` without introducing speculative business tables.
+  - Updated backend startup logging to a safe explicit provider set so unhealthy database readiness checks do not crash on Windows Event Log permission issues in local environments.
+  - Updated `backend/.env.example` with a placeholder `ConnectionStrings__DefaultConnection` value following the existing local configuration convention.
 
 ## In Progress
 
@@ -100,7 +108,7 @@ This file intentionally starts lightweight. It should become more detailed as bu
 
 - Start the next scoped feature spec on top of the shared UI primitive baseline.
 - Build the first real frontend feature or auth/session foundation on top of the new API client, TanStack Query provider, and shared form conventions.
-- Build the next backend foundation unit on top of the new configuration-ready, testable Clean Architecture baseline.
+- Build the next backend foundation unit on top of the new configuration-ready, testable persistence baseline.
 
 ## Open Questions
 
@@ -213,3 +221,16 @@ This file intentionally starts lightweight. It should become more detailed as bu
   - `frontend`: `npm.cmd run lint` passed.
   - `frontend`: `npm.cmd run build` passed.
   - `backend`: no backend files were changed for Unit 11, so no backend build or test command was required.
+- Unit 12 verification results:
+  - `backend`: `dotnet restore PlayerPerformance.sln --artifacts-path C:\Users\Jugo\AppData\Local\Temp\player-performance-artifacts` passed after allowing network access for the new EF Core/PostgreSQL packages.
+  - `backend`: `dotnet build PlayerPerformance.sln --no-restore --artifacts-path C:\Users\Jugo\AppData\Local\Temp\player-performance-artifacts` passed.
+  - `backend`: `dotnet test PlayerPerformance.sln --no-restore --no-build --artifacts-path C:\Users\Jugo\AppData\Local\Temp\player-performance-artifacts` passed.
+  - `backend`: integration tests now verify `/health` still returns the safe service response and `/health/ready` returns a safe unhealthy response when the configured database is unreachable.
+  - `backend`: the repository's default backend `obj/bin` paths were locally locked in this environment, so verification used the .NET SDK `--artifacts-path` option to keep restore/build/test isolated from those locked outputs.
+  - `backend`: the baseline migration files were added manually in EF Core format because the local EF CLI metadata path was blocked by the same locked default build-output issue; the migration files compile successfully in the verified solution build.
+  - `backend`: follow-up local verification succeeded after stopping the running API process, rebuilding normally, and running `dotnet ef database update --project src/Infrastructure/PlayerPerformance.Infrastructure.csproj --startup-project src/Api/PlayerPerformance.Api.csproj`.
+  - `backend`: the EF update created the `player_performance` database, created `__EFMigrationsHistory`, and applied the `20260710120000_InitialPersistenceBaseline` migration.
+
+## Confirmed Decisions
+
+- Future EF Core migration creation and database update work should use `dotnet ef` tooling by default instead of handwritten migration files whenever the local environment supports the CLI workflow.

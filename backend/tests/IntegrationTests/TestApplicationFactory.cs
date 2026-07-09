@@ -1,22 +1,35 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace PlayerPerformance.IntegrationTests;
 
 public sealed class TestApplicationFactory : WebApplicationFactory<Program>
 {
+    public TestApplicationFactory()
+    {
+        Environment.SetEnvironmentVariable("PlayerPerformance__ServiceName", "PlayerPerformance.Api.Tests");
+        Environment.SetEnvironmentVariable("PlayerPerformance__FrontendOrigin", "https://frontend.test");
+        Environment.SetEnvironmentVariable(
+            "ConnectionStrings__DefaultConnection",
+            "Host=127.0.0.1;Port=1;Database=player_performance_tests;Username=test_user;Password=test_password;Timeout=1;Command Timeout=1");
+    }
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment("Testing");
+        builder.ConfigureLogging(logging => logging.ClearProviders());
+    }
 
-        builder.ConfigureAppConfiguration((_, configurationBuilder) =>
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
         {
-            configurationBuilder.AddInMemoryCollection(new Dictionary<string, string?>
-            {
-                ["PlayerPerformance:ServiceName"] = "PlayerPerformance.Api.Tests",
-                ["PlayerPerformance:FrontendOrigin"] = "https://frontend.test"
-            });
-        });
+            Environment.SetEnvironmentVariable("PlayerPerformance__ServiceName", null);
+            Environment.SetEnvironmentVariable("PlayerPerformance__FrontendOrigin", null);
+            Environment.SetEnvironmentVariable("ConnectionStrings__DefaultConnection", null);
+        }
+
+        base.Dispose(disposing);
     }
 }

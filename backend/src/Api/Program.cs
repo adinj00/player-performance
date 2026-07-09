@@ -7,6 +7,10 @@ using PlayerPerformance.Api.ErrorHandling;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration.AddLocalDotEnvIfPresent(builder.Environment.ContentRootPath);
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.AddDebug();
+builder.Logging.AddEventSourceLogger();
 
 builder.Services
     .AddOptions<PlayerPerformanceOptions>()
@@ -20,7 +24,7 @@ builder.Services
     .ValidateOnStart();
 
 builder.Services.AddApplication();
-builder.Services.AddInfrastructure();
+builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApiProblemDetails();
 
 var app = builder.Build();

@@ -155,6 +155,8 @@
 - Use EF Core through Infrastructure.
 - Keep database queries out of Api endpoint handlers.
 - Keep persistence-specific mapping/configuration in Infrastructure.
+- Use `dotnet ef` tooling as the default workflow for creating EF Core migrations and applying database updates.
+- Do not handwrite or manually edit migration files unless a tooling failure or repo-environment issue makes the CLI path temporarily impossible, and document that exception in `context/progress-tracker.md`.
 - Use PostgreSQL relational modeling for metadata, relationships, users, players, teams, matches, reports, imports, availability, and audit logs.
 - Do not store large media files, import source files, or generated files directly in PostgreSQL.
 - Database records for files must store metadata and storage keys/references only.
