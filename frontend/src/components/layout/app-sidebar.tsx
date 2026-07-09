@@ -12,18 +12,18 @@ export function AppSidebar({ className, onNavigate }: AppSidebarProps) {
   return (
     <aside
       className={cn(
-        "flex h-full w-full max-w-80 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground",
+        "border-sidebar-border bg-sidebar text-sidebar-foreground flex h-full w-full max-w-80 flex-col border-r",
         className,
       )}
     >
-      <div className="border-b border-sidebar-border px-5 py-5">
-        <p className="font-mono text-xs uppercase tracking-[0.22em] text-club-red">
+      <div className="border-sidebar-border border-b px-5 py-5">
+        <p className="text-club-red font-mono text-xs tracking-[0.22em] uppercase">
           FK Velež Mostar
         </p>
-        <h1 className="mt-3 font-heading text-lg text-foreground">
+        <h1 className="font-heading text-foreground mt-3 text-lg">
           Performance Data System
         </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <p className="text-muted-foreground mt-1 text-sm">
           Operativni pregled kluba
         </p>
       </div>
@@ -34,7 +34,7 @@ export function AppSidebar({ className, onNavigate }: AppSidebarProps) {
       >
         {navigationGroups.map((group) => (
           <div key={group.label} className="mb-6 last:mb-0">
-            <p className="px-2 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+            <p className="text-muted-foreground px-2 text-xs font-semibold tracking-[0.18em] uppercase">
               {group.label}
             </p>
             <div className="mt-2 space-y-1">
@@ -48,9 +48,9 @@ export function AppSidebar({ className, onNavigate }: AppSidebarProps) {
                     onClick={onNavigate}
                     className={({ isActive }) =>
                       cn(
-                        "flex w-full items-center gap-3 rounded-lg border border-transparent px-3 py-2.5 text-left text-sm transition-colors outline-none focus-visible:ring-3 focus-visible:ring-sidebar-ring/50",
+                        "focus-visible:ring-sidebar-ring/50 flex w-full items-center gap-3 rounded-lg border border-transparent px-3 py-2.5 text-left text-sm transition-colors outline-none focus-visible:ring-3",
                         isActive
-                          ? "bg-sidebar-primary font-semibold text-sidebar-primary-foreground shadow-xs"
+                          ? "bg-sidebar-primary text-sidebar-primary-foreground font-semibold shadow-xs"
                           : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
                       )
                     }
@@ -65,9 +65,9 @@ export function AppSidebar({ className, onNavigate }: AppSidebarProps) {
         ))}
       </nav>
 
-      <div className="border-t border-sidebar-border px-5 py-4">
-        <p className="text-sm font-medium text-foreground">Korisnički meni</p>
-        <p className="mt-1 text-sm text-muted-foreground">
+      <div className="border-sidebar-border border-t px-5 py-4">
+        <p className="text-foreground text-sm font-medium">Korisnički meni</p>
+        <p className="text-muted-foreground mt-1 text-sm">
           Prostor za buduće korisničke akcije.
         </p>
       </div>

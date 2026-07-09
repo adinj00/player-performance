@@ -10,7 +10,7 @@ This file intentionally starts lightweight. It should become more detailed as bu
 
 ## Current Goal
 
-- Complete Unit 03 frontend routing foundation and keep the frontend buildable.
+- Complete Unit 04 code formatting foundation and keep the frontend and backend buildable.
 
 ## Completed
 
@@ -42,6 +42,13 @@ This file intentionally starts lightweight. It should become more detailed as bu
   - Converted sidebar navigation from inert buttons to active router links and kept mobile drawer close behavior after navigation.
   - Updated the top bar title to reflect the active route and added a routed Bosnian Latin not-found page with a return link to the dashboard.
   - Kept all route content as restrained placeholders without fake domain data, backend calls, auth behavior, or extra frontend state providers.
+- Unit 04 completed:
+  - Added Prettier as the frontend formatting source of truth with a single `frontend/.prettierrc` configuration.
+  - Enabled Tailwind utility sorting through `prettier-plugin-tailwindcss`.
+  - Added `frontend/.prettierignore` to exclude dependencies, build outputs, coverage output, and local environment files.
+  - Added `format` and `format:check` frontend package scripts without changing the build pipeline.
+  - Configured flat ESLint compatibility with `eslint-config-prettier` while preserving the existing project lint rules.
+  - Ran a full frontend formatting pass and accepted formatting-only file changes without altering product behavior.
 
 ## In Progress
 
@@ -99,3 +106,11 @@ This file intentionally starts lightweight. It should become more detailed as bu
   - `frontend`: `npm.cmd run lint` passed.
   - `frontend`: `npm.cmd run build` passed.
   - No backend files were changed for Unit 03.
+- Unit 04 verification results:
+  - `frontend`: `npm.cmd install -D prettier prettier-plugin-tailwindcss eslint-config-prettier` passed after allowing network access for dependency installation.
+  - `frontend`: `npm.cmd run format` passed.
+  - `frontend`: `npm.cmd run format:check` passed.
+  - `frontend`: `npm.cmd run lint` passed.
+  - `frontend`: `npm.cmd run build` passed.
+  - `backend`: initial `dotnet build PlayerPerformanceDataSystem.sln` attempt was blocked by NuGet network access in the sandbox.
+  - `backend`: `dotnet build PlayerPerformanceDataSystem.sln` passed after allowing network access for NuGet restore.

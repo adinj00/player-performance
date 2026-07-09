@@ -14,7 +14,7 @@ export function AppTopbar({ onOpenSidebar }: AppTopbarProps) {
   const pageTitle = routeDefinition?.title ?? "Nepoznata stranica";
 
   return (
-    <header className="sticky top-0 z-20 border-b border-border bg-background/95 backdrop-blur-sm">
+    <header className="border-border bg-background/95 sticky top-0 z-20 border-b backdrop-blur-sm">
       <div className="flex min-h-18 items-center justify-between gap-4 px-4 py-3 md:px-6">
         <div className="flex min-w-0 items-center gap-3">
           <Button
@@ -29,36 +29,36 @@ export function AppTopbar({ onOpenSidebar }: AppTopbarProps) {
           </Button>
 
           <div className="min-w-0">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+            <p className="text-muted-foreground text-xs font-semibold tracking-[0.18em] uppercase">
               Početni prikaz
             </p>
-            <h2 className="truncate font-heading text-2xl text-foreground">
+            <h2 className="font-heading text-foreground truncate text-2xl">
               {pageTitle}
             </h2>
           </div>
         </div>
 
         <div className="hidden items-center gap-2 lg:flex">
-          <div className="rounded-lg border border-border bg-surface px-3 py-2 text-right">
-            <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
+          <div className="border-border bg-surface rounded-lg border px-3 py-2 text-right">
+            <p className="text-muted-foreground text-xs tracking-[0.14em] uppercase">
               Sezona
             </p>
-            <p className="text-sm font-medium text-foreground">
+            <p className="text-foreground text-sm font-medium">
               Sezona nije odabrana
             </p>
           </div>
 
-          <div className="rounded-lg border border-border bg-surface px-3 py-2 text-right">
-            <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
+          <div className="border-border bg-surface rounded-lg border px-3 py-2 text-right">
+            <p className="text-muted-foreground text-xs tracking-[0.14em] uppercase">
               Selekcija
             </p>
-            <p className="text-sm font-medium text-foreground">
+            <p className="text-foreground text-sm font-medium">
               Selekcija nije odabrana
             </p>
           </div>
         </div>
 
-        <div className="rounded-lg border border-border bg-card px-3 py-2 text-sm text-muted-foreground">
+        <div className="border-border bg-card text-muted-foreground rounded-lg border px-3 py-2 text-sm">
           Korisničke akcije uskoro
         </div>
       </div>

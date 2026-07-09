@@ -9,14 +9,14 @@ export function ModulePlaceholder({
 }: ModulePlaceholderProps) {
   return (
     <section className="flex min-h-[calc(100vh-10rem)] items-center justify-center">
-      <div className="w-full max-w-3xl rounded-xl border border-border bg-card p-8 shadow-sm">
-        <p className="font-mono text-sm uppercase tracking-[0.18em] text-club-red">
+      <div className="border-border bg-card w-full max-w-3xl rounded-xl border p-8 shadow-sm">
+        <p className="text-club-red font-mono text-sm tracking-[0.18em] uppercase">
           {title}
         </p>
-        <h1 className="mt-4 font-heading text-3xl text-foreground">
+        <h1 className="font-heading text-foreground mt-4 text-3xl">
           Modul je pripremljen za narednu fazu.
         </h1>
-        <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
+        <p className="text-muted-foreground mt-3 max-w-2xl text-sm leading-6">
           {description}
         </p>
       </div>

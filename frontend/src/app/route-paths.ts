@@ -66,7 +66,8 @@ export const appRouteDefinitions: AppRouteDefinition[] = [
   {
     path: routePaths.imports,
     title: "Importi",
-    description: "Modul za import podataka će biti dodan u kasnijem feature specu.",
+    description:
+      "Modul za import podataka će biti dodan u kasnijem feature specu.",
   },
   {
     path: routePaths.teams,
@@ -95,7 +96,8 @@ export const appRouteDefinitions: AppRouteDefinition[] = [
   {
     path: routePaths.settings,
     title: "Postavke",
-    description: "Modul za sistemske postavke će biti dodan u kasnijem feature specu.",
+    description:
+      "Modul za sistemske postavke će biti dodan u kasnijem feature specu.",
   },
 ];
 
@@ -123,7 +125,11 @@ export const navigationGroups: NavigationGroupDefinition[] = [
     label: "Klub",
     items: [
       { label: "Timovi / Selekcije", path: routePaths.teams, icon: Users },
-      { label: "Medicinski status", path: routePaths.medical, icon: HeartPulse },
+      {
+        label: "Medicinski status",
+        path: routePaths.medical,
+        icon: HeartPulse,
+      },
       { label: "Medijska biblioteka", path: routePaths.media, icon: Film },
     ],
   },
