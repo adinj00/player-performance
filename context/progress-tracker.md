@@ -10,7 +10,7 @@ This file intentionally starts lightweight. It should become more detailed as bu
 
 ## Current Goal
 
-- Complete Unit 01 project boilerplate cleanup and leave a minimal buildable baseline.
+- Complete Unit 02 frontend app shell baseline and keep the frontend buildable.
 
 ## Completed
 
@@ -30,6 +30,12 @@ This file intentionally starts lightweight. It should become more detailed as bu
   - Removed backend WeatherForecast template code and cleaned the sample `.http` request file.
   - Removed stale missing-project references from `backend/PlayerPerformanceDataSystem.sln` so the existing backend baseline can build.
   - Adjusted frontend ESLint configuration so generated shadcn/ui primitives are not blocked by the React Fast Refresh export rule.
+- Unit 02 completed:
+  - Added a reusable frontend app composition in `frontend/src/app/app.tsx` and kept `frontend/src/App.tsx` as a thin root entry.
+  - Implemented a responsive light-only app shell with a persistent desktop sidebar, mobile drawer behavior, top bar, and main content region.
+  - Added grouped Bosnian Latin navigation placeholders for dashboard, performance, club, and administration areas without introducing routing or feature behavior.
+  - Added a minimal empty main-content state so the shell remains static and ready for future feature specs.
+  - Reused the existing `lucide-react` dependency for shell icons; no new frontend package was required.
 
 ## In Progress
 
@@ -37,7 +43,7 @@ This file intentionally starts lightweight. It should become more detailed as bu
 
 ## Next Up
 
-- Start the next scoped feature spec on top of the cleaned frontend/backend baseline.
+- Start the next scoped feature spec on top of the reusable frontend shell baseline.
 - Introduce the real backend solution structure defined in the architecture context when the next backend foundation unit is implemented.
 
 ## Open Questions
@@ -78,3 +84,7 @@ This file intentionally starts lightweight. It should become more detailed as bu
 - Follow-up correction applied after Unit 01:
   - Updated the frontend placeholder copy to use proper Bosnian Latin characters.
   - Added an explicit context rule requiring proper Bosnian Latin characters like `č`, `ć`, `š`, `ž`, and `đ` in user-facing Bosnian copy.
+- Unit 02 verification results:
+  - `frontend`: `npm.cmd run lint` passed.
+  - `frontend`: `npm.cmd run build` passed.
+  - No backend files were changed for Unit 02.
