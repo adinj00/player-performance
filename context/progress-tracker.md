@@ -10,7 +10,7 @@ This file intentionally starts lightweight. It should become more detailed as bu
 
 ## Current Goal
 
-- Complete Unit 06 backend solution baseline and keep the backend buildable.
+- Unit 07 completed; backend configuration baseline is in place and the solution remains buildable.
 
 ## Completed
 
@@ -60,6 +60,11 @@ This file intentionally starts lightweight. It should become more detailed as bu
   - Added minimal `AddApplication()` and `AddInfrastructure()` composition extension points without registering speculative services.
   - Replaced the stock controller/swagger host with a minimal ASP.NET Core 8 API that exposes only `GET /health`.
   - Added a placeholder `backend/.env.example` and removed obsolete root-level backend template artifacts that conflicted with the new structure.
+- Unit 07 completed:
+  - Added API-owned backend configuration loading that reads `backend/.env` when present and refreshes ASP.NET Core environment-variable configuration without overriding already-set process environment variables.
+  - Added typed `PlayerPerformanceOptions` with startup validation for required `ServiceName` and optional absolute HTTP/HTTPS `FrontendOrigin`.
+  - Updated `backend/.env.example` with safe local-development guidance and non-secret example values for this unit only.
+  - Updated `GET /health` to return the configured service name while keeping the response safe and free of machine details or secrets.
 
 ## In Progress
 
@@ -68,7 +73,7 @@ This file intentionally starts lightweight. It should become more detailed as bu
 ## Next Up
 
 - Start the next scoped feature spec on top of the shared UI primitive baseline.
-- Build the next backend foundation unit on top of the new Clean Architecture solution baseline.
+- Build the next backend foundation unit on top of the new configuration-ready Clean Architecture baseline.
 
 ## Open Questions
 
@@ -138,3 +143,11 @@ This file intentionally starts lightweight. It should become more detailed as bu
   - `backend`: `dotnet test PlayerPerformance.sln --no-build` completed successfully with no test projects present in the solution.
   - `backend`: `dotnet run --project src/Api/PlayerPerformance.Api.csproj --no-build --urls http://127.0.0.1:5099` served `GET /health` successfully and returned the expected safe JSON response.
   - `frontend`: no frontend files were changed for Unit 06, so no frontend verification commands were required.
+- Unit 07 verification results:
+  - `backend`: `dotnet restore PlayerPerformance.sln` passed after allowing NuGet network access for the new `DotNetEnv` package restore.
+  - `backend`: `dotnet build PlayerPerformance.sln --no-restore` passed.
+  - `backend`: `dotnet test PlayerPerformance.sln --no-build` completed successfully with no test projects present in the solution.
+  - `backend`: `dotnet run --project src/Api/PlayerPerformance.Api.csproj --no-build --urls http://127.0.0.1:5099` returned a healthy response when `PlayerPerformance__ServiceName` and `PlayerPerformance__FrontendOrigin` were provided through environment variables.
+  - `backend`: a temporary ignored `backend/.env` file was used to verify local `.env` loading, and `GET /health` returned the service name loaded from that file.
+  - `backend`: startup validation failed as expected when `PlayerPerformance__ServiceName` was missing, with an `OptionsValidationException` stating that `PlayerPerformance:ServiceName` is required.
+  - `frontend`: no frontend files were changed for Unit 07, so no frontend verification commands were required.
