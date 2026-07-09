@@ -25,6 +25,7 @@ The default application language is Bosnian Latin (`bs`). English (`en`) may be 
 Rules:
 
 - Bosnian Latin is the default language for navigation, page titles, actions, form labels, validation messages, status labels, empty states, and operational UI copy.
+- User-facing Bosnian Latin copy must use proper Bosnian Latin characters such as `č`, `ć`, `š`, `ž`, and `đ` instead of ASCII fallbacks like `c`, `s`, `z`, or `dj`.
 - English can be added as a secondary UI language through the localization system.
 - Do not mix Bosnian and English in the same visible UI screen unless the English text is a domain term, imported value, code, acronym, or user-entered content.
 - Internal code, API contracts, enum names, route names, filenames, and translation keys remain in English.

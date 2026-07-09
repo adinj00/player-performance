@@ -6,11 +6,11 @@ This file intentionally starts lightweight. It should become more detailed as bu
 
 ## Current Phase
 
-- Foundation context setup
+- Feature implementation kickoff
 
 ## Current Goal
 
-- Finalize the project context files before creating the first build plan and feature specs.
+- Complete Unit 01 project boilerplate cleanup and leave a minimal buildable baseline.
 
 ## Completed
 
@@ -23,15 +23,22 @@ This file intentionally starts lightweight. It should become more detailed as bu
   - `context/code-standards.md`
   - `context/ai-workflow-rules.md`
 - Root `AGENTS.md` reviewed and kept as the universal context entry point.
+- Unit 01 completed:
+  - Removed default Vite/React demo UI and starter assets from `frontend/`.
+  - Replaced the frontend root screen with a minimal Bosnian baseline placeholder using semantic theme utilities.
+  - Preserved the existing Tailwind CSS v4, shadcn/ui, theme token, and `@/` alias foundation.
+  - Removed backend WeatherForecast template code and cleaned the sample `.http` request file.
+  - Removed stale missing-project references from `backend/PlayerPerformanceDataSystem.sln` so the existing backend baseline can build.
+  - Adjusted frontend ESLint configuration so generated shadcn/ui primitives are not blocked by the React Fast Refresh export rule.
 
 ## In Progress
 
-- `context/progress-tracker.md` initial setup.
+- No active implementation unit.
 
 ## Next Up
 
-- Create the build plan under `/feature-specs`, starting with a numbered implementation sequence.
-- Then create the first scoped feature spec before any implementation begins.
+- Start the next scoped feature spec on top of the cleaned frontend/backend baseline.
+- Introduce the real backend solution structure defined in the architecture context when the next backend foundation unit is implemented.
 
 ## Open Questions
 
@@ -61,7 +68,13 @@ This file intentionally starts lightweight. It should become more detailed as bu
 
 ## Session Notes
 
-- No implementation work has started yet.
-- `/feature-specs` should be used for build plans and scoped feature specs.
-- `context/progress-tracker.md` should be updated when a feature spec is started, completed, or when a meaningful implementation change occurs.
-- If implementation changes product scope, architecture, UI rules, code standards, or workflow rules, update the relevant context file before continuing implementation.
+- Unit 01 verification results:
+  - `frontend`: `npm.cmd run lint` passed.
+  - `frontend`: `npm.cmd run build` passed.
+  - `backend`: `dotnet build PlayerPerformanceDataSystem.sln` passed after allowing NuGet network access for restore.
+- No backend tests exist yet, so no `dotnet test` command was run.
+- The frontend `@/` alias was already configured correctly in both TypeScript and Vite, so no alias changes were required.
+- The documented target architecture remains unchanged; Unit 01 only cleaned the current starter baseline.
+- Follow-up correction applied after Unit 01:
+  - Updated the frontend placeholder copy to use proper Bosnian Latin characters.
+  - Added an explicit context rule requiring proper Bosnian Latin characters like `č`, `ć`, `š`, `ž`, and `đ` in user-facing Bosnian copy.

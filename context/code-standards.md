@@ -163,6 +163,7 @@
 ### Localization and UI Copy
 
 - Bosnian Latin is the default UI language.
+- When writing visible Bosnian Latin UI copy, use proper Bosnian Latin characters such as `č`, `ć`, `š`, `ž`, and `đ`; do not replace them with ASCII fallbacks.
 - English may be supported as an optional selectable UI language.
 - Keep source code, identifiers, file names, route names, API contracts, enum values, and translation keys in English.
 - User-facing labels, navigation, page titles, button text, validation messages, empty states, and error messages should be localized once localization infrastructure exists.
