@@ -10,7 +10,7 @@ This file intentionally starts lightweight. It should become more detailed as bu
 
 ## Current Goal
 
-- Complete Unit 04 code formatting foundation and keep the frontend and backend buildable.
+- Complete Unit 05 common UI primitives foundation and keep the frontend buildable.
 
 ## Completed
 
@@ -49,6 +49,11 @@ This file intentionally starts lightweight. It should become more detailed as bu
   - Added `format` and `format:check` frontend package scripts without changing the build pipeline.
   - Configured flat ESLint compatibility with `eslint-config-prettier` while preserving the existing project lint rules.
   - Ran a full frontend formatting pass and accepted formatting-only file changes without altering product behavior.
+- Unit 05 completed:
+  - Added reusable common UI primitives for page headers, empty states, loading states, error states, and bordered content sections in `frontend/src/components/common/`.
+  - Refactored the dashboard placeholder, generic module placeholder, and not-found page to compose the new shared primitives instead of repeating bespoke markup.
+  - Preserved the routed shell structure and kept placeholder content generic, Bosnian Latin, and free of fake domain datasets or backend integration.
+  - Kept the work frontend-only with no backend changes.
 
 ## In Progress
 
@@ -56,7 +61,7 @@ This file intentionally starts lightweight. It should become more detailed as bu
 
 ## Next Up
 
-- Start the next scoped feature spec on top of the routed frontend shell baseline.
+- Start the next scoped feature spec on top of the shared UI primitive baseline.
 - Introduce the real backend solution structure defined in the architecture context when the next backend foundation unit is implemented.
 
 ## Open Questions
@@ -114,3 +119,10 @@ This file intentionally starts lightweight. It should become more detailed as bu
   - `frontend`: `npm.cmd run build` passed.
   - `backend`: initial `dotnet build PlayerPerformanceDataSystem.sln` attempt was blocked by NuGet network access in the sandbox.
   - `backend`: `dotnet build PlayerPerformanceDataSystem.sln` passed after allowing network access for NuGet restore.
+- Unit 05 verification results:
+  - `frontend`: `npm.cmd run format` passed.
+  - `frontend`: `npm.cmd run format:check` passed after rerunning sequentially because an earlier parallel run raced the formatter.
+  - `frontend`: `npm.cmd run lint` passed.
+  - `frontend`: `npm.cmd run build` passed.
+  - `backend`: no backend files were changed, so no backend build was required for Unit 05.
+  - `frontend`: the formatter also updated pre-existing frontend files outside the new primitives so the repository now satisfies the configured Prettier checks.

@@ -1,10 +1,5 @@
-import { ModulePlaceholder } from "@/components/common/module-placeholder";
+import { AppEmptyState } from "@/components/common/app-empty-state";
 
 export function DashboardPage() {
-  return (
-    <ModulePlaceholder
-      title="Kontrolna ploča"
-      description="Pregled sistema će biti dodan u kasnijem feature specu."
-    />
-  );
+  return <AppEmptyState />;
 }

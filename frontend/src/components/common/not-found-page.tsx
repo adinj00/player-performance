@@ -1,27 +1,33 @@
+import { CircleAlert } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import { routePaths } from "@/app/route-paths";
+import { ContentSection } from "@/components/common/content-section";
+import { EmptyState } from "@/components/common/empty-state";
+import { PageHeader } from "@/components/common/page-header";
+import { Button } from "@/components/ui/button";
 
 export function NotFoundPage() {
   return (
-    <section className="flex min-h-[calc(100vh-10rem)] items-center justify-center">
-      <div className="border-border bg-card w-full max-w-3xl rounded-xl border p-8 shadow-sm">
-        <p className="text-club-red font-mono text-sm tracking-[0.18em] uppercase">
-          Nepoznata stranica
-        </p>
-        <h1 className="font-heading text-foreground mt-4 text-3xl">
-          Tražena ruta nije pronađena.
-        </h1>
-        <p className="text-muted-foreground mt-3 max-w-2xl text-sm leading-6">
-          Stranica koju pokušavate otvoriti trenutno nije dostupna u aplikaciji.
-        </p>
-        <Link
-          to={routePaths.dashboard}
-          className="border-border bg-background text-foreground hover:bg-muted focus-visible:ring-ring/50 mt-6 inline-flex rounded-lg border px-4 py-2 text-sm font-medium transition-colors focus-visible:ring-3 focus-visible:outline-none"
-        >
-          Nazad na kontrolnu ploču
-        </Link>
-      </div>
-    </section>
+    <div className="space-y-6">
+      <PageHeader
+        eyebrow="Nepoznata stranica"
+        title="Tražena ruta nije pronađena"
+        description="Stranica koju pokušavate otvoriti trenutno nije dostupna u aplikaciji."
+      />
+
+      <ContentSection>
+        <EmptyState
+          icon={<CircleAlert className="mx-auto h-10 w-10" />}
+          title="Nije moguće otvoriti traženu stranicu"
+          description="Vratite se na kontrolnu ploču i nastavite iz dostupne navigacije."
+          action={
+            <Button render={<Link to={routePaths.dashboard} />}>
+              Nazad na kontrolnu ploču
+            </Button>
+          }
+        />
+      </ContentSection>
+    </div>
   );
 }

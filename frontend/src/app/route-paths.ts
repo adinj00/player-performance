@@ -85,7 +85,7 @@ export const appRouteDefinitions: AppRouteDefinition[] = [
     path: routePaths.media,
     title: "Medijska biblioteka",
     description:
-      "Modul za mediju i vanjske reference će biti dodan u kasnijem feature specu.",
+      "Modul za medije i vanjske reference će biti dodan u kasnijem feature specu.",
   },
   {
     path: routePaths.users,
