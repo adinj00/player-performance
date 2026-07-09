@@ -11,6 +11,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlayerPerformance.Domain", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlayerPerformance.Infrastructure", "src\Infrastructure\PlayerPerformance.Infrastructure.csproj", "{D780D3F8-D2E8-49F3-A9A4-F18002A7710C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlayerPerformance.UnitTests", "tests\UnitTests\PlayerPerformance.UnitTests.csproj", "{9A6809FB-2338-49B5-B181-77CE42929AF4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlayerPerformance.IntegrationTests", "tests\IntegrationTests\PlayerPerformance.IntegrationTests.csproj", "{A1C1E2B4-EE34-4A8E-B93B-7526FCF72D13}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +37,14 @@ Global
 		{D780D3F8-D2E8-49F3-A9A4-F18002A7710C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D780D3F8-D2E8-49F3-A9A4-F18002A7710C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D780D3F8-D2E8-49F3-A9A4-F18002A7710C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9A6809FB-2338-49B5-B181-77CE42929AF4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9A6809FB-2338-49B5-B181-77CE42929AF4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9A6809FB-2338-49B5-B181-77CE42929AF4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9A6809FB-2338-49B5-B181-77CE42929AF4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A1C1E2B4-EE34-4A8E-B93B-7526FCF72D13}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A1C1E2B4-EE34-4A8E-B93B-7526FCF72D13}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A1C1E2B4-EE34-4A8E-B93B-7526FCF72D13}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A1C1E2B4-EE34-4A8E-B93B-7526FCF72D13}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

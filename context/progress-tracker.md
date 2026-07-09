@@ -10,7 +10,7 @@ This file intentionally starts lightweight. It should become more detailed as bu
 
 ## Current Goal
 
-- Unit 08 completed; backend API error-handling and endpoint-mapping foundations are in place and the solution remains buildable.
+- Unit 09 completed; backend testing foundations are in place with unit and integration test projects, and `dotnet test` is now part of standard backend verification.
 
 ## Completed
 
@@ -70,6 +70,14 @@ This file intentionally starts lightweight. It should become more detailed as bu
   - Added centralized exception handling that returns a generic `500` ProblemDetails response without leaking internal exception details.
   - Added status-code ProblemDetails handling for unknown routes and unsupported methods so `404` and `405` API responses are consistent and safe.
   - Moved endpoint registration into API-owned endpoint extension methods and preserved the unauthenticated `GET /health` endpoint through the new structure.
+- Unit 09 completed:
+  - Added `backend/tests/UnitTests/PlayerPerformance.UnitTests.csproj` and `backend/tests/IntegrationTests/PlayerPerformance.IntegrationTests.csproj`.
+  - Added both test projects to `backend/PlayerPerformance.sln` using the documented backend test structure.
+  - Added architecture dependency unit tests that verify the current Clean Architecture reference direction stays intact.
+  - Added an ASP.NET Core `WebApplicationFactory`-based integration test foundation with safe in-memory configuration for startup validation.
+  - Added integration tests covering `GET /health` and the safe unknown-route ProblemDetails behavior already implemented in Unit 08.
+  - Added `public partial class Program;` to the API entry point so the existing app host is discoverable by integration tests without changing runtime behavior.
+  - Standardized backend verification on `dotnet restore`, `dotnet build`, and `dotnet test` for future units.
 
 ## In Progress
 
@@ -78,7 +86,7 @@ This file intentionally starts lightweight. It should become more detailed as bu
 ## Next Up
 
 - Start the next scoped feature spec on top of the shared UI primitive baseline.
-- Build the next backend foundation unit on top of the new configuration-ready Clean Architecture baseline.
+- Build the next backend foundation unit on top of the new configuration-ready, testable Clean Architecture baseline.
 
 ## Open Questions
 
@@ -164,3 +172,12 @@ This file intentionally starts lightweight. It should become more detailed as bu
   - `backend`: requesting `http://127.0.0.1:5099/missing-route` returned a `404` ProblemDetails response with a safe `traceId` extension.
   - `backend`: sending `POST http://127.0.0.1:5099/health` returned a `405` ProblemDetails response with a safe `traceId` extension.
   - `frontend`: no frontend files were changed for Unit 08, so no frontend verification commands were required.
+- Unit 09 verification results:
+  - `backend`: `dotnet restore` passed after allowing NuGet network access for the new test packages.
+  - `backend`: a lingering `PlayerPerformance.Api` process from earlier verification was stopped so the API project could rebuild without locked output files.
+  - `backend`: `dotnet build --no-restore` passed.
+  - `backend`: `dotnet test --no-build --no-restore` passed.
+  - `backend`: unit tests now verify the documented Domain/Application/Infrastructure/API reference direction.
+  - `backend`: integration tests now verify `GET /health` returns a successful safe JSON response and that an unknown route returns a safe `404` ProblemDetails response with a `traceId`.
+  - `backend`: an initial `dotnet test --no-build` attempt started too early while a parallel build was still producing outputs, so it was rerun sequentially.
+  - `frontend`: no frontend files were changed for Unit 09, so no frontend verification commands were required.

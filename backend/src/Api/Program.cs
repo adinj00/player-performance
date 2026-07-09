@@ -31,3 +31,5 @@ app.UseApiStatusCodeProblemDetails();
 app.MapApiEndpoints();
 
 app.Run();
+
+public partial class Program;
