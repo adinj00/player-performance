@@ -1,5 +1,7 @@
 import { Menu } from "lucide-react";
+import { useLocation } from "react-router-dom";
 
+import { getRouteDefinition } from "@/app/route-paths";
 import { Button } from "@/components/ui/button";
 
 interface AppTopbarProps {
@@ -7,6 +9,10 @@ interface AppTopbarProps {
 }
 
 export function AppTopbar({ onOpenSidebar }: AppTopbarProps) {
+  const location = useLocation();
+  const routeDefinition = getRouteDefinition(location.pathname);
+  const pageTitle = routeDefinition?.title ?? "Nepoznata stranica";
+
   return (
     <header className="sticky top-0 z-20 border-b border-border bg-background/95 backdrop-blur-sm">
       <div className="flex min-h-18 items-center justify-between gap-4 px-4 py-3 md:px-6">
@@ -27,7 +33,7 @@ export function AppTopbar({ onOpenSidebar }: AppTopbarProps) {
               Početni prikaz
             </p>
             <h2 className="truncate font-heading text-2xl text-foreground">
-              Kontrolna ploča
+              {pageTitle}
             </h2>
           </div>
         </div>

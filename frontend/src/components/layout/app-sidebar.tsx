@@ -1,66 +1,12 @@
-import type { ComponentType } from "react";
-import {
-  Activity,
-  Film,
-  HeartPulse,
-  LayoutDashboard,
-  Settings,
-  ShieldCheck,
-  Trophy,
-  Upload,
-  Users,
-} from "lucide-react";
+import { NavLink } from "react-router-dom";
 
+import { navigationGroups } from "@/app/route-paths";
 import { cn } from "@/lib/utils";
-
-interface NavigationItem {
-  label: string;
-  icon: ComponentType<{ className?: string }>;
-  isActive?: boolean;
-}
-
-interface NavigationGroup {
-  label: string;
-  items: NavigationItem[];
-}
 
 interface AppSidebarProps {
   className?: string;
   onNavigate?: () => void;
 }
-
-const navigationGroups: NavigationGroup[] = [
-  {
-    label: "Pregled",
-    items: [
-      { label: "Kontrolna ploča", icon: LayoutDashboard, isActive: true },
-    ],
-  },
-  {
-    label: "Performanse",
-    items: [
-      { label: "Utakmice", icon: Trophy },
-      { label: "Igrači", icon: Users },
-      { label: "Trening GPS", icon: Activity },
-      { label: "Importi", icon: Upload },
-    ],
-  },
-  {
-    label: "Klub",
-    items: [
-      { label: "Timovi / Selekcije", icon: Users },
-      { label: "Medicinski status", icon: HeartPulse },
-      { label: "Medijska biblioteka", icon: Film },
-    ],
-  },
-  {
-    label: "Administracija",
-    items: [
-      { label: "Korisnici i uloge", icon: ShieldCheck },
-      { label: "Postavke", icon: Settings },
-    ],
-  },
-];
 
 export function AppSidebar({ className, onNavigate }: AppSidebarProps) {
   return (
@@ -96,21 +42,22 @@ export function AppSidebar({ className, onNavigate }: AppSidebarProps) {
                 const Icon = item.icon;
 
                 return (
-                  <button
+                  <NavLink
                     key={item.label}
-                    type="button"
+                    to={item.path}
                     onClick={onNavigate}
-                    className={cn(
-                      "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm transition-colors outline-none focus-visible:ring-3 focus-visible:ring-sidebar-ring/50",
-                      item.isActive
-                        ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-xs"
-                        : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                    )}
-                    aria-current={item.isActive ? "page" : undefined}
+                    className={({ isActive }) =>
+                      cn(
+                        "flex w-full items-center gap-3 rounded-lg border border-transparent px-3 py-2.5 text-left text-sm transition-colors outline-none focus-visible:ring-3 focus-visible:ring-sidebar-ring/50",
+                        isActive
+                          ? "bg-sidebar-primary font-semibold text-sidebar-primary-foreground shadow-xs"
+                          : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                      )
+                    }
                   >
                     <Icon className="h-5 w-5 shrink-0" />
                     <span>{item.label}</span>
-                  </button>
+                  </NavLink>
                 );
               })}
             </div>

@@ -10,7 +10,7 @@ This file intentionally starts lightweight. It should become more detailed as bu
 
 ## Current Goal
 
-- Complete Unit 02 frontend app shell baseline and keep the frontend buildable.
+- Complete Unit 03 frontend routing foundation and keep the frontend buildable.
 
 ## Completed
 
@@ -36,6 +36,12 @@ This file intentionally starts lightweight. It should become more detailed as bu
   - Added grouped Bosnian Latin navigation placeholders for dashboard, performance, club, and administration areas without introducing routing or feature behavior.
   - Added a minimal empty main-content state so the shell remains static and ready for future feature specs.
   - Reused the existing `lucide-react` dependency for shell icons; no new frontend package was required.
+- Unit 03 completed:
+  - Added `react-router-dom` and introduced a frontend route foundation with `BrowserRouter`, route constants, and centralized route metadata.
+  - Wired the existing app shell to render routed placeholder pages for dashboard, matches, players, training GPS, imports, teams, medical, media, users, and settings.
+  - Converted sidebar navigation from inert buttons to active router links and kept mobile drawer close behavior after navigation.
+  - Updated the top bar title to reflect the active route and added a routed Bosnian Latin not-found page with a return link to the dashboard.
+  - Kept all route content as restrained placeholders without fake domain data, backend calls, auth behavior, or extra frontend state providers.
 
 ## In Progress
 
@@ -43,7 +49,7 @@ This file intentionally starts lightweight. It should become more detailed as bu
 
 ## Next Up
 
-- Start the next scoped feature spec on top of the reusable frontend shell baseline.
+- Start the next scoped feature spec on top of the routed frontend shell baseline.
 - Introduce the real backend solution structure defined in the architecture context when the next backend foundation unit is implemented.
 
 ## Open Questions
@@ -88,3 +94,8 @@ This file intentionally starts lightweight. It should become more detailed as bu
   - `frontend`: `npm.cmd run lint` passed.
   - `frontend`: `npm.cmd run build` passed.
   - No backend files were changed for Unit 02.
+- Unit 03 verification results:
+  - `frontend`: `npm.cmd install react-router-dom` passed after allowing network access for dependency installation.
+  - `frontend`: `npm.cmd run lint` passed.
+  - `frontend`: `npm.cmd run build` passed.
+  - No backend files were changed for Unit 03.

@@ -1,10 +1,5 @@
-import { AppEmptyState } from "@/components/common/app-empty-state";
-import { AppShell } from "@/components/layout/app-shell";
+import { AppRoutes } from "@/app/app-routes";
 
 export function App() {
-  return (
-    <AppShell>
-      <AppEmptyState />
-    </AppShell>
-  );
+  return <AppRoutes />;
 }
