@@ -10,7 +10,7 @@ This file intentionally starts lightweight. It should become more detailed as bu
 
 ## Current Goal
 
-- Unit 13 completed; the backend now has shared domain/application primitives for entity identity, value objects, result/error handling, basic guard helpers, audit metadata contracts, and a testable UTC clock abstraction.
+- Unit 14 completed; the backend now has the Identity/auth persistence foundation with staff account status storage, secure cookie-auth wiring, user-only Identity EF Core integration, and a generated initial Identity migration without introducing auth workflows or frontend changes.
 
 ## Completed
 
@@ -106,6 +106,16 @@ This file intentionally starts lightweight. It should become more detailed as bu
   - Added focused unit tests covering entity equality, value object equality, result invariants, guard helpers, and clock registration/UTC behavior.
   - Kept the unit product-agnostic: no FK Velež entities, API routes, auth behavior, migrations, or frontend changes were introduced.
 
+- Unit 14 completed:
+  - Added a framework-independent `UserAccountStatus` enum in `backend/src/Domain/Users/` with `INVITED`, `ACTIVE`, `DISABLED`, and `LOCKED`.
+  - Added an Infrastructure-owned `ApplicationUser` Identity model with account status, password-change requirement, and created/updated timestamps using Guid identifiers.
+  - Integrated the existing `AppDbContext` with user-only ASP.NET Core Identity persistence and stable staff-only table names: `staff_users`, `staff_user_claims`, `staff_user_logins`, and `staff_user_tokens`.
+  - Registered IdentityCore, EF stores, token providers, and a custom sign-in manager hook that blocks future sign-in for disabled or locked accounts.
+  - Added API-owned cookie authentication and authorization wiring with explicit password/lockout options, `RequireUniqueEmail`, `HttpOnly` cookies, explicit `SameSite=Lax`, environment-sensitive secure-cookie policy, and non-redirecting `401`/`403` behavior for API callers.
+  - Generated the `AddIdentityFoundation` EF Core migration without adding roles, user-management tables, seed users, or any auth/session endpoints.
+  - Added focused tests for the new account-status enum, Identity service resolution, and cookie-auth security behavior while preserving the existing health endpoint and architecture coverage.
+  - Follow-up cleanup: moved EF Core migration artifacts and the model snapshot into `backend/src/Infrastructure/Persistence/Migrations/` so the `Persistence` area separates the DbContext from generated migration files more clearly.
+
 ## In Progress
 
 - No active implementation unit.
@@ -116,6 +126,7 @@ This file intentionally starts lightweight. It should become more detailed as bu
 - Build the first real frontend feature or auth/session foundation on top of the new API client, TanStack Query provider, and shared form conventions.
 - Build the next backend foundation unit on top of the new configuration-ready, testable persistence baseline.
 - Build the next backend module on top of the new shared primitives and persistence baseline.
+- Build the next auth-focused backend unit on top of the new Identity persistence and cookie foundation.
 
 ## Open Questions
 
@@ -136,12 +147,14 @@ This file intentionally starts lightweight. It should become more detailed as bu
 - The access model uses one primary role per user, team scopes, and limited explicit permission flags.
 - Analysts can review match reports by default and can verify reports only when granted verification permission.
 - Backend uses ASP.NET Core 8, PostgreSQL, Clean Architecture, Vertical Slice organization in the Application layer, and Minimal APIs endpoint groups.
+- Backend Identity persistence uses a user-only ASP.NET Core Identity setup on the shared `AppDbContext`, with staff-only table naming and no role tables in the foundation unit.
 - Frontend uses React, Vite, TypeScript, Tailwind CSS v4, shadcn/ui, TanStack Query, nuqs, Zustand for limited global UI state, Zod, React Hook Form, TanStack Table, and shadcn/Recharts charts.
 - The UI is light-only and follows FK Velež red, white, and gold identity.
 - Bosnian Latin is the default UI language; English may be supported as an optional selectable UI language.
 - Local development uses `backend/.env` and `frontend/.env.local`; production uses real environment variables or a managed secret store.
 - Docker is out of scope for the initial local development setup and may be introduced later.
 - Exact Gpexe and Zone14 import mappings must not be guessed before real export samples are reviewed.
+- Backend cookie authentication uses the Identity application scheme, `HttpOnly` cookies, `SameSite=Lax`, production `SecurePolicy=Always`, development `SecurePolicy=SameAsRequest`, and API-friendly non-redirecting unauthorized/forbidden responses.
 
 ## Session Notes
 
@@ -245,7 +258,21 @@ This file intentionally starts lightweight. It should become more detailed as bu
   - `backend`: an initial parallel `dotnet test --no-build` run failed because it raced the build outputs in the shared artifacts directory, so the test step was rerun sequentially.
   - `backend`: `dotnet test PlayerPerformance.sln --no-restore --no-build --artifacts-path C:\Users\Jugo\AppData\Local\Temp\player-performance-artifacts-unit13` passed with 18 unit tests and 3 integration tests.
   - `frontend`: no frontend files were changed for Unit 13, so no frontend verification commands were required.
+- Unit 14 verification results:
+  - `backend`: creating the new Domain/Infrastructure/test folders for the Identity foundation required an escalated directory-creation step because the sandbox denied nested folder creation inside the workspace.
+  - `backend`: `dotnet restore PlayerPerformance.sln --artifacts-path C:\Users\Jugo\AppData\Local\Temp\player-performance-artifacts-unit14` passed after allowing temporary NuGet network access for the added Identity EF Core package.
+  - `backend`: `dotnet build PlayerPerformance.sln --no-restore --artifacts-path C:\Users\Jugo\AppData\Local\Temp\player-performance-artifacts-unit14` passed.
+  - `backend`: `dotnet test PlayerPerformance.sln --no-restore --no-build --artifacts-path C:\Users\Jugo\AppData\Local\Temp\player-performance-artifacts-unit14` passed with 19 unit tests and 6 integration tests.
+  - `backend`: `dotnet ef migrations add AddIdentityFoundation --project src/Infrastructure/PlayerPerformance.Infrastructure.csproj --startup-project src/Api/PlayerPerformance.Api.csproj --context PlayerPerformance.Infrastructure.Persistence.AppDbContext --output-dir Persistence` succeeded after allowing normal workspace build-output access for EF tooling.
+  - `backend`: `dotnet ef database update --project src/Infrastructure/PlayerPerformance.Infrastructure.csproj --startup-project src/Api/PlayerPerformance.Api.csproj` succeeded after allowing normal workspace build-output access for EF tooling and applied the `20260709232300_AddIdentityFoundation` migration to the local database.
+  - `backend`: an intermediate generated migration was removed and recreated so the final schema also enforces unique normalized email at the database level.
+  - `backend`: the local EF tools reported that version `8.0.0` is older than the runtime `8.0.10`, but migration generation still completed successfully and the warning did not block verification.
+  - `backend`: default repository `obj` paths remain sensitive in this environment, so normal solution verification continued to use `--artifacts-path` even though `dotnet ef` needed temporary unrestricted workspace output access.
+  - `backend`: follow-up cleanup created `backend/src/Infrastructure/Persistence/Migrations/` and moved the generated migration files plus `AppDbContextModelSnapshot` there; solution verification still passed afterward.
+  - `frontend`: no frontend files were changed for Unit 14, so no frontend verification commands were required.
 
 ## Confirmed Decisions
 
 - Future EF Core migration creation and database update work should use `dotnet ef` tooling by default instead of handwritten migration files whenever the local environment supports the CLI workflow.
+- Future EF Core migrations should be generated into `backend/src/Infrastructure/Persistence/Migrations/` using `--output-dir Persistence/Migrations` so the `AppDbContext` remains separated from generated migration artifacts.
+- When a backend task requires a new EF Core migration, the preferred verification flow is to run both `dotnet ef migrations add ... --output-dir Persistence/Migrations` and `dotnet ef database update` unless the environment prevents it or the task explicitly says otherwise.

@@ -3,10 +3,11 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
+using PlayerPerformance.Infrastructure.Persistence;
 
 #nullable disable
 
-namespace PlayerPerformance.Infrastructure.Persistence;
+namespace PlayerPerformance.Infrastructure.Persistence.Migrations;
 
 [DbContext(typeof(AppDbContext))]
 [Migration("20260710120000_InitialPersistenceBaseline")]

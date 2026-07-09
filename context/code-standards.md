@@ -156,6 +156,9 @@
 - Keep database queries out of Api endpoint handlers.
 - Keep persistence-specific mapping/configuration in Infrastructure.
 - Use `dotnet ef` tooling as the default workflow for creating EF Core migrations and applying database updates.
+- Keep EF Core migration files and the model snapshot under `backend/src/Infrastructure/Persistence/Migrations/`.
+- When creating new migrations, explicitly target the migrations folder with `--output-dir Persistence/Migrations` so generated files stay in the documented location.
+- When a task changes the EF Core model and a migration is needed, run both `dotnet ef migrations add ... --output-dir Persistence/Migrations` and `dotnet ef database update` during verification whenever the local environment supports it.
 - Do not handwrite or manually edit migration files unless a tooling failure or repo-environment issue makes the CLI path temporarily impossible, and document that exception in `context/progress-tracker.md`.
 - Use PostgreSQL relational modeling for metadata, relationships, users, players, teams, matches, reports, imports, availability, and audit logs.
 - Do not store large media files, import source files, or generated files directly in PostgreSQL.

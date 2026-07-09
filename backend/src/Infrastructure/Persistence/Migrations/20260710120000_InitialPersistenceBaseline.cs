@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace PlayerPerformance.Infrastructure.Persistence;
+namespace PlayerPerformance.Infrastructure.Persistence.Migrations;
 
 public partial class InitialPersistenceBaseline : Migration
 {
