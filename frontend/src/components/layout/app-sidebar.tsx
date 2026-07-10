@@ -1,6 +1,7 @@
 import { NavLink } from "react-router-dom";
 
 import { navigationGroups } from "@/app/route-paths";
+import { useSession } from "@/features/auth/hooks/use-session";
 import { cn } from "@/lib/utils";
 
 interface AppSidebarProps {
@@ -9,6 +10,17 @@ interface AppSidebarProps {
 }
 
 export function AppSidebar({ className, onNavigate }: AppSidebarProps) {
+  const { user, isLoading } = useSession();
+  const groups = navigationGroups
+    .map((group) => ({
+      ...group,
+      items: group.items.filter(
+        (item) =>
+          item.path !== "/users" ||
+          (!isLoading && user?.primaryRole === "ADMIN"),
+      ),
+    }))
+    .filter((group) => group.items.length > 0);
   return (
     <aside
       className={cn(
@@ -32,7 +44,7 @@ export function AppSidebar({ className, onNavigate }: AppSidebarProps) {
         aria-label="Glavna navigacija"
         className="flex-1 overflow-y-auto px-3 py-4"
       >
-        {navigationGroups.map((group) => (
+        {groups.map((group) => (
           <div key={group.label} className="mb-6 last:mb-0">
             <p className="text-muted-foreground px-2 text-xs font-semibold tracking-[0.18em] uppercase">
               {group.label}

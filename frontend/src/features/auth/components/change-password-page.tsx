@@ -130,7 +130,6 @@ export function ChangePasswordPage() {
                   type="button"
                   variant="ghost"
                   size="icon"
-                  pressMotion={false}
                   className="absolute top-1/2 right-1 -translate-y-1/2"
                   aria-label={
                     isPasswordVisible ? "Sakrij lozinku" : "Prikaži lozinku"

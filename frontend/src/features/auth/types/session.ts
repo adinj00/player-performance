@@ -3,6 +3,13 @@ export interface SessionUser {
   email: string;
   accountStatus: string;
   mustChangePassword: boolean;
+  primaryRole: string | null;
+  permissions: {
+    canVerifyReports: boolean;
+    canImportData: boolean;
+    canViewMedicalDetails: boolean;
+  };
+  teamScope: { type: string; selectedTeamIds: string[] };
 }
 
 export interface SessionResponse {

@@ -17,6 +17,7 @@ export const routePaths = {
   forgotPassword: "/forgot-password",
   resetPassword: "/reset-password",
   changePassword: "/change-password",
+  acceptInvitation: "/accept-invitation",
   matches: "/matches",
   players: "/players",
   trainingGps: "/training-gps",

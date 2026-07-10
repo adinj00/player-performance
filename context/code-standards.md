@@ -248,6 +248,8 @@ frontend/src/
 ### TypeScript
 
 - TypeScript strict mode is required.
+- Separate adjacent top-level function declarations with one blank line for readable module structure. This is a readability convention and does not change the repository `.editorconfig` baseline.
+- Debounce free-text filters by approximately 300 ms when each change triggers a server query and URL-state update. Do not debounce discrete filters such as role, status, or scope selections.
 - Avoid `any`. Use explicit interfaces, discriminated unions, or narrow types.
 - Use `unknown` for untrusted values and validate before use.
 - Prefer `interface` for object contracts and public component props.
@@ -293,6 +295,7 @@ import { Button } from "../../../components/ui/button";
 - Use `@hookform/resolvers` when integrating Zod schemas with React Hook Form.
 - Define schemas close to the feature that owns the form.
 - Keep form sections readable and grouped by user task.
+- Compose application forms with shadcn `FieldGroup`, `FieldSet`, `Field`, `FieldLabel`, and `FieldDescription` where applicable; use raw layout elements only when no matching primitive expresses the structure.
 - Display clear validation messages.
 - Frontend validation improves UX but does not replace backend validation.
 - Avoid building custom form frameworks unless explicitly required.

@@ -422,6 +422,17 @@ This file intentionally starts lightweight. It should become more detailed as bu
 
 ## Confirmed Decisions
 
+## Unit 24: Staff Users and Roles UI
+
+- Status: complete.
+- Added protected `/users` and public `/accept-invitation` routes. The users page is gated by resolved `ADMIN` session role and the sidebar hides the navigation item until an administrator session is known.
+- Staff filters are URL-backed with `nuqs`: `q`, `role`, `status`, `scope`, and `team`.
+- Added real staff/team API wrappers, TanStack Query mutations, role/scope/permission mappings, invitation/reissue one-time setup links built from `window.location.origin`, and transient invitation credential state. Setup query values are captured in component memory and removed from the public invitation URL.
+- Self-disable clears session and returns to sign-in; self-access replacement invalidates the session before route re-evaluation.
+- Added `@tanstack/react-table`, `nuqs`, and generated shadcn primitives: table, badge, select, checkbox, dropdown-menu, input, and label. The dialog generator could not add dialog/alert-dialog without overwriting the existing generated Button, so accessible feature-level modal semantics are used instead.
+- Verification: frontend formatting, build, format check passed. Lint passed except its known TanStack Table React Compiler compatibility warning; manual end-to-end verification requires local API, PostgreSQL, and a cookie-capable browser session.
+- Deferred: email delivery, user deletion, login-email recovery, manual unlock, audit UI, localization infrastructure, and unrelated modules.
+
 - Backend formatting baseline: the root `.editorconfig` defines four-space C# indentation, multiline braces/statements, and whitespace conventions. Backend implementation work must run `dotnet format PlayerPerformance.sln whitespace --no-restore` followed by its `--verify-no-changes` check before final build/test verification. A repository-wide backend whitespace formatting pass was completed; it introduced no behavioral changes.
 - Future EF Core migration creation and database update work should use `dotnet ef` tooling by default instead of handwritten migration files whenever the local environment supports the CLI workflow.
 - Future EF Core migrations should be generated into `backend/src/Infrastructure/Persistence/Migrations/` using `--output-dir Persistence/Migrations` so the `AppDbContext` remains separated from generated migration artifacts.
