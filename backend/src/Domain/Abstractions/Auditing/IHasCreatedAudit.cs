@@ -2,7 +2,13 @@ namespace PlayerPerformance.Domain.Abstractions.Auditing;
 
 public interface IHasCreatedAudit
 {
-    DateTime CreatedAtUtc { get; }
+    DateTime CreatedAtUtc
+    {
+        get;
+    }
 
-    string? CreatedBy { get; }
+    string? CreatedBy
+    {
+        get;
+    }
 }

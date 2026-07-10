@@ -99,6 +99,12 @@
 
 ### Backend Naming and Structure
 
+### Backend Formatting
+
+- C# source uses four spaces, braces on their own lines, and one statement per line. Do not compress control flow, endpoint handlers, validators, or service operations into single-line declarations merely because they compile.
+- The repository `.editorconfig` is the backend formatting baseline. Run `dotnet format PlayerPerformance.sln whitespace --no-restore` after meaningful backend changes, then run it with `--verify-no-changes` as part of verification.
+- Formatting is not a substitute for readability: split long methods into focused private methods and use descriptive local variables when that makes control flow clearer.
+
 - Name files after the responsibility they contain, not the pattern alone.
 - Keep endpoint groups organized by module, such as Auth, Users, Teams, Players, Matches, MatchReports, TrainingSessions, Imports, Media, Medical, Dashboard, Audit, and Settings.
 - Keep commands and queries scoped to one use case.

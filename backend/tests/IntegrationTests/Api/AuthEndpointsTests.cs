@@ -64,7 +64,7 @@ public sealed class AuthEndpointsTests : IClassFixture<IdentityTestApplicationFa
         var problemDetails = await response.Content.ReadFromJsonAsync<ProblemDetails>();
 
         Assert.NotNull(problemDetails);
-        Assert.Equal((int)HttpStatusCode.Unauthorized, problemDetails!.Status);
+        Assert.Equal((int) HttpStatusCode.Unauthorized, problemDetails!.Status);
         Assert.Equal("Unauthorized", problemDetails.Title);
     }
 
@@ -133,7 +133,11 @@ public sealed class AuthEndpointsTests : IClassFixture<IdentityTestApplicationFa
         const string email = "required-change@example.com";
         await _factory.CreateUserAsync(email, "Temporary!Pass123", requiresPasswordChange: true);
         var csrfToken = await GetCsrfTokenAsync();
-        using var login = await PostJsonAsync("/api/auth/login", csrfToken, new { email, password = "Temporary!Pass123" });
+        using var login = await PostJsonAsync("/api/auth/login", csrfToken, new
+        {
+            email,
+            password = "Temporary!Pass123"
+        });
         Assert.Equal(HttpStatusCode.OK, login.StatusCode);
 
         using var blocked = await _client.GetAsync("/_test/protected");
@@ -160,7 +164,9 @@ public sealed class AuthEndpointsTests : IClassFixture<IdentityTestApplicationFa
         Assert.Equal(HttpStatusCode.NoContent, allowed.StatusCode);
 
         csrfToken = await GetCsrfTokenAsync();
-        using var logout = await PostJsonAsync("/api/auth/logout", csrfToken, new { });
+        using var logout = await PostJsonAsync("/api/auth/logout", csrfToken, new
+        {
+        });
         Assert.Equal(HttpStatusCode.NoContent, logout.StatusCode);
 
         csrfToken = await GetCsrfTokenAsync();
@@ -186,7 +192,11 @@ public sealed class AuthEndpointsTests : IClassFixture<IdentityTestApplicationFa
         const string email = "failed-change@example.com";
         await _factory.CreateUserAsync(email, "Temporary!Pass123", requiresPasswordChange: true);
         var csrfToken = await GetCsrfTokenAsync();
-        using var login = await PostJsonAsync("/api/auth/login", csrfToken, new { email, password = "Temporary!Pass123" });
+        using var login = await PostJsonAsync("/api/auth/login", csrfToken, new
+        {
+            email,
+            password = "Temporary!Pass123"
+        });
         Assert.Equal(HttpStatusCode.OK, login.StatusCode);
 
         csrfToken = await GetCsrfTokenAsync();

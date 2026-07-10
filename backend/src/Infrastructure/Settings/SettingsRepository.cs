@@ -18,7 +18,10 @@ internal sealed class SettingsRepository(AppDbContext dbContext) : ISettingsRepo
     public void Add(Competition competition) => dbContext.Competitions.Add(competition);
     public async Task SaveChangesAsync(CancellationToken ct)
     {
-        try { await dbContext.SaveChangesAsync(ct); }
+        try
+        {
+            await dbContext.SaveChangesAsync(ct);
+        }
         catch (DbUpdateException exception) when (exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation }) { throw new SettingsDuplicateNameException(); }
     }
 }

@@ -26,14 +26,54 @@ internal static class TeamEndpoints
     }
 
     private static async Task<IResult> GetAsync(Guid teamId, ITeamsService service, CancellationToken ct) => (await service.GetAsync(teamId, ct)) is { } response ? TypedResults.Ok(response) : TypedResults.NotFound();
-    private static async Task<IResult> CreateAsync(HttpContext context, IAntiforgery antiforgery, CreateTeamRequest request, ITeamsService service, CancellationToken ct) { var failure = await AntiforgeryValidation.ValidateRequestAsync(context, antiforgery); if (failure is not null) return failure; var result = await service.CreateAsync(request, ct); return result.IsSuccess ? TypedResults.Created($"/api/settings/teams/{result.Value.Id}", result.Value) : ToProblem(result.Error, context); }
-    private static async Task<IResult> UpdateAsync(Guid teamId, HttpContext context, IAntiforgery antiforgery, UpdateTeamRequest request, ITeamsService service, CancellationToken ct) { var failure = await AntiforgeryValidation.ValidateRequestAsync(context, antiforgery); return failure ?? ToResult(await service.UpdateAsync(teamId, request, ct), context); }
-    private static async Task<IResult> ReorderAsync(HttpContext context, IAntiforgery antiforgery, ReorderTeamsRequest request, ITeamsService service, CancellationToken ct) { var failure = await AntiforgeryValidation.ValidateRequestAsync(context, antiforgery); return failure ?? ToResult(await service.ReorderAsync(request, ct), context); }
-    private static async Task<IResult> ActivateAsync(Guid teamId, HttpContext context, IAntiforgery antiforgery, ITeamsService service, CancellationToken ct) { var failure = await AntiforgeryValidation.ValidateRequestAsync(context, antiforgery); return failure ?? ToResult(await service.ActivateAsync(teamId, ct), context); }
-    private static async Task<IResult> DeactivateAsync(Guid teamId, HttpContext context, IAntiforgery antiforgery, ITeamsService service, CancellationToken ct) { var failure = await AntiforgeryValidation.ValidateRequestAsync(context, antiforgery); return failure ?? ToResult(await service.DeactivateAsync(teamId, ct), context); }
-    private static async Task<IResult> ArchiveAsync(Guid teamId, HttpContext context, IAntiforgery antiforgery, ITeamsService service, CancellationToken ct) { var failure = await AntiforgeryValidation.ValidateRequestAsync(context, antiforgery); return failure ?? ToResult(await service.ArchiveAsync(teamId, ct), context); }
-    private static async Task<IResult> RestoreAsync(Guid teamId, HttpContext context, IAntiforgery antiforgery, ITeamsService service, CancellationToken ct) { var failure = await AntiforgeryValidation.ValidateRequestAsync(context, antiforgery); return failure ?? ToResult(await service.RestoreAsync(teamId, ct), context); }
+    private static async Task<IResult> CreateAsync(HttpContext context, IAntiforgery antiforgery, CreateTeamRequest request, ITeamsService service, CancellationToken ct)
+    {
+        var failure = await AntiforgeryValidation.ValidateRequestAsync(context, antiforgery);
+        if (failure is not null)
+            return failure;
+        var result = await service.CreateAsync(request, ct);
+        return result.IsSuccess ? TypedResults.Created($"/api/settings/teams/{result.Value.Id}", result.Value) : ToProblem(result.Error, context);
+    }
+    private static async Task<IResult> UpdateAsync(Guid teamId, HttpContext context, IAntiforgery antiforgery, UpdateTeamRequest request, ITeamsService service, CancellationToken ct)
+    {
+        var failure = await AntiforgeryValidation.ValidateRequestAsync(context, antiforgery);
+        return failure ?? ToResult(await service.UpdateAsync(teamId, request, ct), context);
+    }
+    private static async Task<IResult> ReorderAsync(HttpContext context, IAntiforgery antiforgery, ReorderTeamsRequest request, ITeamsService service, CancellationToken ct)
+    {
+        var failure = await AntiforgeryValidation.ValidateRequestAsync(context, antiforgery);
+        return failure ?? ToResult(await service.ReorderAsync(request, ct), context);
+    }
+    private static async Task<IResult> ActivateAsync(Guid teamId, HttpContext context, IAntiforgery antiforgery, ITeamsService service, CancellationToken ct)
+    {
+        var failure = await AntiforgeryValidation.ValidateRequestAsync(context, antiforgery);
+        return failure ?? ToResult(await service.ActivateAsync(teamId, ct), context);
+    }
+    private static async Task<IResult> DeactivateAsync(Guid teamId, HttpContext context, IAntiforgery antiforgery, ITeamsService service, CancellationToken ct)
+    {
+        var failure = await AntiforgeryValidation.ValidateRequestAsync(context, antiforgery);
+        return failure ?? ToResult(await service.DeactivateAsync(teamId, ct), context);
+    }
+    private static async Task<IResult> ArchiveAsync(Guid teamId, HttpContext context, IAntiforgery antiforgery, ITeamsService service, CancellationToken ct)
+    {
+        var failure = await AntiforgeryValidation.ValidateRequestAsync(context, antiforgery);
+        return failure ?? ToResult(await service.ArchiveAsync(teamId, ct), context);
+    }
+    private static async Task<IResult> RestoreAsync(Guid teamId, HttpContext context, IAntiforgery antiforgery, ITeamsService service, CancellationToken ct)
+    {
+        var failure = await AntiforgeryValidation.ValidateRequestAsync(context, antiforgery);
+        return failure ?? ToResult(await service.RestoreAsync(teamId, ct), context);
+    }
     private static IResult ToResult<T>(Result<T> result, HttpContext context) => result.IsSuccess ? TypedResults.Ok(result.Value) : ToProblem(result.Error, context);
     private static IResult ToProblem(Error error, HttpContext context)
-    { var status = error.Code switch { "not_found" => StatusCodes.Status404NotFound, "duplicate_name" or "archived_record" or "invalid_team_order" => StatusCodes.Status409Conflict, "validation_failed" => StatusCodes.Status422UnprocessableEntity, _ => StatusCodes.Status400BadRequest }; return TypedResults.Problem(new ProblemDetails { Status = status, Title = "Request could not be completed", Detail = error.Message, Extensions = { ["code"] = error.Code, ["traceId"] = context.TraceIdentifier } }); }
+    {
+        var status = error.Code switch
+        {
+            "not_found" => StatusCodes.Status404NotFound,
+            "duplicate_name" or "archived_record" or "invalid_team_order" => StatusCodes.Status409Conflict,
+            "validation_failed" => StatusCodes.Status422UnprocessableEntity,
+            _ => StatusCodes.Status400BadRequest
+        };
+        return TypedResults.Problem(new ProblemDetails { Status = status, Title = "Request could not be completed", Detail = error.Message, Extensions = { ["code"] = error.Code, ["traceId"] = context.TraceIdentifier } });
+    }
 }

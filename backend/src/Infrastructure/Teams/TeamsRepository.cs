@@ -13,5 +13,12 @@ internal sealed class TeamsRepository(AppDbContext dbContext) : ITeamsRepository
     public Task<Team?> GetAsync(Guid id, CancellationToken ct) => dbContext.Teams.SingleOrDefaultAsync(x => x.Id == id, ct);
     public Task<bool> NameExistsAsync(string normalizedName, Guid? excludingId, CancellationToken ct) => dbContext.Teams.AnyAsync(x => x.NormalizedName == normalizedName && (!excludingId.HasValue || x.Id != excludingId.Value), ct);
     public void Add(Team team) => dbContext.Teams.Add(team);
-    public async Task SaveChangesAsync(CancellationToken ct) { try { await dbContext.SaveChangesAsync(ct); } catch (DbUpdateException exception) when (exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation }) { throw new TeamDuplicateNameException(); } }
+    public async Task SaveChangesAsync(CancellationToken ct)
+    {
+        try
+        {
+            await dbContext.SaveChangesAsync(ct);
+        }
+        catch (DbUpdateException exception) when (exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation }) { throw new TeamDuplicateNameException(); }
+    }
 }

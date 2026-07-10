@@ -61,6 +61,8 @@ Additional details are allowed inside these five headings, but do not replace th
 
 ### Implementation Mode
 
+For backend work, format C# with `dotnet format PlayerPerformance.sln whitespace --no-restore` before the final build/test pass. Do not deliver newly introduced compressed one-line C# logic; refactor it into readable blocks when automatic formatting cannot do so.
+
 Use implementation mode only when a feature spec exists or the project owner explicitly asks for a small direct change.
 
 - Read the active feature spec before editing code.

@@ -12,7 +12,7 @@ public static class DependencyInjection
         services.AddValidatorsFromAssemblyContaining<SettingsService>();
         services.AddScoped<ISettingsService, SettingsService>();
         services.AddScoped<ITeamsService, TeamsService>();
-        
+
         return services;
     }
 }

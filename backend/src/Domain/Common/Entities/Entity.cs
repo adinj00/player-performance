@@ -8,7 +8,10 @@ public abstract class Entity<TId> : IEquatable<Entity<TId>>
         Id = id;
     }
 
-    public TId Id { get; }
+    public TId Id
+    {
+        get;
+    }
 
     public bool Equals(Entity<TId>? other)
     {

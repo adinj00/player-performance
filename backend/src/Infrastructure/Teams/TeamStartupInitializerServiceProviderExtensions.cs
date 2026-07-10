@@ -7,7 +7,8 @@ public static class TeamStartupInitializerServiceProviderExtensions
 {
     public static async Task InitializeTeamsAsync(this IServiceProvider services, IWebHostEnvironment environment, CancellationToken ct = default)
     {
-        if (string.Equals(environment.EnvironmentName, "Testing", StringComparison.OrdinalIgnoreCase)) return;
+        if (string.Equals(environment.EnvironmentName, "Testing", StringComparison.OrdinalIgnoreCase))
+            return;
         await using var scope = services.CreateAsyncScope();
         await scope.ServiceProvider.GetRequiredService<TeamStartupInitializer>().InitializeAsync(ct);
     }

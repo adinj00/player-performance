@@ -57,5 +57,11 @@ public interface ISettingsRepository
     Task<IReadOnlyList<Season>> ListSeasonsAsync(bool includeArchived, CancellationToken ct); Task<Season?> GetSeasonAsync(Guid id, CancellationToken ct); Task<bool> SeasonNameExistsAsync(string normalizedName, Guid? excludingId, CancellationToken ct); void Add(Season season);
     Task<IReadOnlyList<Competition>> ListCompetitionsAsync(bool includeArchived, CancellationToken ct); Task<Competition?> GetCompetitionAsync(Guid id, CancellationToken ct); Task<bool> CompetitionNameExistsAsync(string normalizedName, Guid? excludingId, CancellationToken ct); void Add(Competition competition); Task SaveChangesAsync(CancellationToken ct);
 }
-public sealed class SettingsDuplicateNameException : Exception { public SettingsDuplicateNameException() : base("A settings record with that name already exists.") { } }
-internal static class SettingsErrors { public static readonly Error NotFound = new("not_found", "The requested settings record was not found."); public static readonly Error DuplicateName = new("duplicate_name", "A settings record with that name already exists."); public static readonly Error Archived = new("archived_record", "Archived records must be restored before they can be updated."); public static readonly Error Validation = new("validation_failed", "One or more fields are invalid."); }
+public sealed class SettingsDuplicateNameException : Exception
+{
+    public SettingsDuplicateNameException() : base("A settings record with that name already exists.") { }
+}
+internal static class SettingsErrors
+{
+    public static readonly Error NotFound = new("not_found", "The requested settings record was not found."); public static readonly Error DuplicateName = new("duplicate_name", "A settings record with that name already exists."); public static readonly Error Archived = new("archived_record", "Archived records must be restored before they can be updated."); public static readonly Error Validation = new("validation_failed", "One or more fields are invalid.");
+}

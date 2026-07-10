@@ -20,11 +20,17 @@ public class Result
         Error = error;
     }
 
-    public bool IsSuccess { get; }
+    public bool IsSuccess
+    {
+        get;
+    }
 
     public bool IsFailure => !IsSuccess;
 
-    public Error Error { get; }
+    public Error Error
+    {
+        get;
+    }
 
     public static Result Success()
     {

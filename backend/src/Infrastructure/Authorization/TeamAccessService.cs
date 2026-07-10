@@ -7,7 +7,8 @@ internal sealed class TeamAccessService(ICurrentUserAccess currentUserAccess) : 
 {
     public async Task<bool> CanAccessAsync(Guid teamId, CancellationToken cancellationToken = default)
     {
-        if (teamId == Guid.Empty) return false;
+        if (teamId == Guid.Empty)
+            return false;
         var access = await currentUserAccess.GetAsync(cancellationToken);
         return access.IsActive && access.HasAccessProfile && (access.IsAdmin || access.TeamScopeType == TeamScopeType.ALL_TEAMS || access.SelectedTeamIds.Contains(teamId));
     }

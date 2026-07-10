@@ -6,7 +6,10 @@ public sealed class PlayerPerformanceOptions
 
     public string ServiceName { get; init; } = string.Empty;
 
-    public string? FrontendOrigin { get; init; }
+    public string? FrontendOrigin
+    {
+        get; init;
+    }
 
     public static bool IsValidFrontendOrigin(string? frontendOrigin)
     {

@@ -422,6 +422,7 @@ This file intentionally starts lightweight. It should become more detailed as bu
 
 ## Confirmed Decisions
 
+- Backend formatting baseline: the root `.editorconfig` defines four-space C# indentation, multiline braces/statements, and whitespace conventions. Backend implementation work must run `dotnet format PlayerPerformance.sln whitespace --no-restore` followed by its `--verify-no-changes` check before final build/test verification. A repository-wide backend whitespace formatting pass was completed; it introduced no behavioral changes.
 - Future EF Core migration creation and database update work should use `dotnet ef` tooling by default instead of handwritten migration files whenever the local environment supports the CLI workflow.
 - Future EF Core migrations should be generated into `backend/src/Infrastructure/Persistence/Migrations/` using `--output-dir Persistence/Migrations` so the `AppDbContext` remains separated from generated migration artifacts.
 - When a backend task requires a new EF Core migration, the preferred verification flow is to run both `dotnet ef migrations add ... --output-dir Persistence/Migrations` and `dotnet ef database update` unless the environment prevents it or the task explicitly says otherwise.

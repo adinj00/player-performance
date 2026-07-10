@@ -40,7 +40,7 @@ public sealed class HealthEndpointsTests : IClassFixture<TestApplicationFactory>
         var problemDetails = await response.Content.ReadFromJsonAsync<ProblemDetails>();
 
         Assert.NotNull(problemDetails);
-        Assert.Equal((int)HttpStatusCode.NotFound, problemDetails.Status);
+        Assert.Equal((int) HttpStatusCode.NotFound, problemDetails.Status);
         Assert.Equal("Resource not found", problemDetails.Title);
         Assert.NotNull(problemDetails.Extensions);
         Assert.True(problemDetails.Extensions.ContainsKey("traceId"));

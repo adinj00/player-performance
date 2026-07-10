@@ -1,3 +1,6 @@
 namespace PlayerPerformance.Domain.Teams;
 
-public enum TeamTrackingLevel { BASIC, STANDARD, FULL }
+public enum TeamTrackingLevel
+{
+    BASIC, STANDARD, FULL
+}
