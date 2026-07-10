@@ -381,8 +381,8 @@ Dependencies: Unit 40, Unit 53.
 
 ## Next Immediate Unit
 
-The next implementation unit after Unit 22 should be:
+The next implementation unit after Unit 23 should be:
 
-**Unit 23: Staff Users, Team Scope, and Account Lifecycle Backend**
+**Unit 24: Staff Users and Roles UI**
 
-Reason: configurable team records now exist, so staff accounts can receive relational all-team or selected-team scope, complete their invitation/setup lifecycle, and expose reusable server-side team authorization before the staff administration UI and later player/match modules are introduced.
+Reason: the backend now exposes the complete staff invitation, role, permission, team-scope, lifecycle, session, and authorization contracts required for an administrator-facing UI. Completing this frontend workflow makes staff access operational before later settings, player, match, and report modules depend on role- and team-aware users.
