@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace PlayerPerformance.IntegrationTests;
@@ -19,6 +21,10 @@ public sealed class TestApplicationFactory : WebApplicationFactory<Program>
     {
         builder.UseEnvironment("Testing");
         builder.ConfigureLogging(logging => logging.ClearProviders());
+        builder.ConfigureServices(services =>
+        {
+            services.AddDataProtection().UseEphemeralDataProtectionProvider();
+        });
     }
 
     protected override void Dispose(bool disposing)

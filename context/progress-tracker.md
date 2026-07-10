@@ -10,7 +10,7 @@ This file intentionally starts lightweight. It should become more detailed as bu
 
 ## Current Goal
 
-- Unit 14 completed; the backend now has the Identity/auth persistence foundation with staff account status storage, secure cookie-auth wiring, user-only Identity EF Core integration, and a generated initial Identity migration without introducing auth workflows or frontend changes.
+- Unit 15 completed; the backend now has an API-owned CSRF/session/logout foundation on top of the existing Identity cookie-auth baseline, with explicit antiforgery header/cookie behavior, API-friendly auth ProblemDetails responses, and auth utility endpoint coverage for unauthenticated/session bootstrap paths.
 
 ## Completed
 
@@ -116,6 +116,15 @@ This file intentionally starts lightweight. It should become more detailed as bu
   - Added focused tests for the new account-status enum, Identity service resolution, and cookie-auth security behavior while preserving the existing health endpoint and architecture coverage.
   - Follow-up cleanup: moved EF Core migration artifacts and the model snapshot into `backend/src/Infrastructure/Persistence/Migrations/` so the `Persistence` area separates the DbContext from generated migration files more clearly.
 
+- Unit 15 completed:
+  - Added API-owned antiforgery configuration with a stable `X-CSRF-TOKEN` request header and explicit cookie behavior for the staff cookie-auth flow.
+  - Added `GET /api/auth/csrf` to mint antiforgery tokens for browser clients and return the stable CSRF header name in a minimal safe response.
+  - Added `GET /api/auth/session` with a stable `200 OK` unauthenticated payload and a minimal authenticated-session payload that excludes Identity internals, roles, team scopes, and permission data.
+  - Added `POST /api/auth/logout` as an authenticated API endpoint that validates CSRF before clearing the auth cookie and returns no HTML redirects.
+  - Upgraded cookie-auth challenge/forbid behavior from bare status codes to API-friendly ProblemDetails responses for `401` and `403`.
+  - Added a reusable API helper pattern for future unsafe cookie-authenticated endpoints to validate CSRF without enabling global CSRF checks on safe endpoints.
+  - Added integration coverage for the unauthenticated session path, CSRF bootstrap endpoint, logout unauthorized behavior, antiforgery option wiring, and the new auth ProblemDetails responses.
+
 ## In Progress
 
 - No active implementation unit.
@@ -126,7 +135,7 @@ This file intentionally starts lightweight. It should become more detailed as bu
 - Build the first real frontend feature or auth/session foundation on top of the new API client, TanStack Query provider, and shared form conventions.
 - Build the next backend foundation unit on top of the new configuration-ready, testable persistence baseline.
 - Build the next backend module on top of the new shared primitives and persistence baseline.
-- Build the next auth-focused backend unit on top of the new Identity persistence and cookie foundation.
+- Build the next auth-focused backend unit on top of the new Identity persistence, CSRF/session foundation, and auth utility endpoints.
 
 ## Open Questions
 
@@ -155,6 +164,8 @@ This file intentionally starts lightweight. It should become more detailed as bu
 - Docker is out of scope for the initial local development setup and may be introduced later.
 - Exact Gpexe and Zone14 import mappings must not be guessed before real export samples are reviewed.
 - Backend cookie authentication uses the Identity application scheme, `HttpOnly` cookies, `SameSite=Lax`, production `SecurePolicy=Always`, development `SecurePolicy=SameAsRequest`, and API-friendly non-redirecting unauthorized/forbidden responses.
+- Backend auth utility endpoints use `GET /api/auth/csrf`, `GET /api/auth/session`, and `POST /api/auth/logout` as the stable initial cookie-auth API surface.
+- The frontend-facing CSRF request header name is `X-CSRF-TOKEN`; the browser-readable CSRF token cookie currently uses `XSRF-TOKEN`.
 
 ## Session Notes
 
@@ -270,6 +281,14 @@ This file intentionally starts lightweight. It should become more detailed as bu
   - `backend`: default repository `obj` paths remain sensitive in this environment, so normal solution verification continued to use `--artifacts-path` even though `dotnet ef` needed temporary unrestricted workspace output access.
   - `backend`: follow-up cleanup created `backend/src/Infrastructure/Persistence/Migrations/` and moved the generated migration files plus `AppDbContextModelSnapshot` there; solution verification still passed afterward.
   - `frontend`: no frontend files were changed for Unit 14, so no frontend verification commands were required.
+- Unit 15 verification results:
+  - `backend`: `dotnet restore PlayerPerformance.sln --artifacts-path C:\Users\Jugo\AppData\Local\Temp\player-performance-artifacts-unit15` initially failed in the sandbox because NuGet network access was blocked, then passed after allowing temporary network access.
+  - `backend`: `dotnet build PlayerPerformance.sln --no-restore --artifacts-path C:\Users\Jugo\AppData\Local\Temp\player-performance-artifacts-unit15` passed.
+  - `backend`: `dotnet test PlayerPerformance.sln --no-restore --no-build --artifacts-path C:\Users\Jugo\AppData\Local\Temp\player-performance-artifacts-unit15` passed with 19 unit tests and 10 integration tests.
+  - `backend`: antiforgery token generation in the integration host required explicit ephemeral data-protection registration in `TestApplicationFactory` so CSRF issuance tests remain stable without changing runtime behavior.
+  - `backend`: the test environment now uses `CookieSecurePolicy.SameAsRequest` for auth and antiforgery cookies so the integration host can exercise cookie behavior safely while production remains `SecurePolicy=Always`.
+  - `backend`: authenticated logout with a missing or invalid CSRF token is implemented through the shared validation helper, but full end-to-end integration coverage for that path is still deferred because the repository does not yet have a test-auth sign-in helper that can establish a real cookie-authenticated session.
+  - `frontend`: no frontend files were changed for Unit 15, so no frontend verification commands were required.
 
 ## Confirmed Decisions
 
