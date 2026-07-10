@@ -10,9 +10,16 @@ This file intentionally starts lightweight. It should become more detailed as bu
 
 ## Current Goal
 
-- Unit 21 next: Seasons and Competitions Backend.
+- Unit 22 next: Teams and Selections Backend.
 
 ## Completed
+
+- Unit 21 completed:
+  - Added `Season` (`Id`, display/normalized name, `DateOnly` start/end dates, archive flag, and UTC created/updated timestamps) and `Competition` (the same fields except dates) as EF-free Domain entities with explicit update, archive, and restore behavior.
+  - Added focused Application settings use cases and FluentValidation contracts for list, get, create, update, archive, and restore. Names are trimmed and normalized with `Trim().ToUpperInvariant()`; unique normalized-name indexes remain the final concurrency authority while provider unique violations return a safe `409 duplicate_name` response.
+  - Added admin-only, password-change-gated routes: `GET/POST /api/settings/seasons`, `GET/PATCH /api/settings/seasons/{id}`, `POST /api/settings/seasons/{id}/archive`, `POST /api/settings/seasons/{id}/restore`, plus the equivalent `/api/settings/competitions` routes. Lists exclude archived records by default and accept `includeArchived=true`; archive/restore are idempotent and archived records cannot be normally updated.
+  - Added Infrastructure mappings, settings repository, and the `20260710131639_AddSettingsSeasonsAndCompetitions` migration. It creates only `seasons` and `competitions`, with `date` season columns, archive defaults, server-owned timestamps, and unique normalized-name indexes; no seed data or unrelated settings entities were added.
+  - Added `FluentValidation.DependencyInjectionExtensions` 11.11.0 and focused domain/validator tests for date range, lifecycle idempotency, normalization, blank values, and maximum length.
 
 - Unit 20 completed:
   - Added the canonical `StaffRole` model with `ADMIN`, `DATA_OPERATOR`, `ANALYST`, `COACH`, `MEDICAL_STAFF`, and `VIEWER`, plus explicit `CanVerifyReports`, `CanImportData`, and `CanViewMedicalDetails` permissions.
@@ -396,6 +403,11 @@ This file intentionally starts lightweight. It should become more detailed as bu
   - `backend`: `dotnet test PlayerPerformance.sln --no-restore --no-build --artifacts-path C:\Users\Jugo\AppData\Local\Temp\player-performance-artifacts-unit20` passed with 25 unit tests and 22 integration tests.
   - `backend`: generated `20260710124807_AddStaffAccessProfiles` and `20260710125149_AddStaffAccessProfileUserForeignKey` with EF Core tooling and applied them successfully using `dotnet ef database update`; the local development database now contains `staff_access_profiles` with its Identity-user foreign key.
   - `backend`: test-host-only policy probes verify unauthenticated `401`, missing-profile/non-admin `403`, matching permission access, all `ADMIN` overrides, safe session enrichment, and first-admin handoff idempotency/ambiguity behavior. No production demonstration endpoint was added.
+
+- Unit 21 verification results:
+  - `backend`: `dotnet restore PlayerPerformance.sln` passed after NuGet access was allowed; `dotnet build PlayerPerformance.sln --no-restore --artifacts-path C:\Users\Jugo\AppData\Local\Temp\player-performance-artifacts-unit21` passed with zero warnings and errors.
+  - `backend`: `dotnet test PlayerPerformance.sln --no-restore --artifacts-path C:\Users\Jugo\AppData\Local\Temp\player-performance-artifacts-unit21` passed with 30 unit tests and 22 integration tests.
+  - `backend`: generated and applied `20260710131639_AddSettingsSeasonsAndCompetitions` with EF Core tooling against the configured local PostgreSQL database. The migration was generated after a stale no-build attempt; the local development migration history also contains the harmless empty `20260710131358_AddSeasonsAndCompetitions` record from that attempt, while the source-controlled migration set contains only the intended Unit 21 migration.
 
 ## Confirmed Decisions
 

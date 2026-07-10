@@ -9,6 +9,8 @@ using PlayerPerformance.Infrastructure.Authorization;
 using PlayerPerformance.Infrastructure.Identity;
 using PlayerPerformance.Infrastructure.Persistence;
 using PlayerPerformance.Infrastructure.Time;
+using PlayerPerformance.Application.Settings;
+using PlayerPerformance.Infrastructure.Settings;
 
 namespace PlayerPerformance.Infrastructure;
 
@@ -31,6 +33,7 @@ public static class DependencyInjection
         services.AddScoped<FirstAdminRoleHandoff>();
         services.AddScoped<ICurrentUserAccess, CurrentUserAccessResolver>();
         services.AddScoped<IAuthenticationService, IdentityAuthenticationService>();
+        services.AddScoped<ISettingsRepository, SettingsRepository>();
 
         services.AddDbContext<AppDbContext>(options =>
         {

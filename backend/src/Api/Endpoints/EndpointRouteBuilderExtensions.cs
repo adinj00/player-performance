@@ -1,6 +1,7 @@
 namespace PlayerPerformance.Api.Endpoints;
 
 using PlayerPerformance.Api.Authorization;
+using PlayerPerformance.Api.Endpoints.Settings;
 
 internal static class EndpointRouteBuilderExtensions
 {
@@ -8,6 +9,7 @@ internal static class EndpointRouteBuilderExtensions
     {
         endpoints.MapHealthEndpoints();
         endpoints.MapAuthEndpoints();
+        endpoints.MapSettingsEndpoints();
 
         if (environment.IsEnvironment("Testing"))
         {
