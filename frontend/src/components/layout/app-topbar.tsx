@@ -2,6 +2,7 @@ import { Menu } from "lucide-react";
 import { useLocation } from "react-router-dom";
 
 import { getRouteDefinition } from "@/app/route-paths";
+import { UserMenu } from "@/features/auth";
 import { Button } from "@/components/ui/button";
 
 interface AppTopbarProps {
@@ -58,9 +59,7 @@ export function AppTopbar({ onOpenSidebar }: AppTopbarProps) {
           </div>
         </div>
 
-        <div className="border-border bg-card text-muted-foreground rounded-lg border px-3 py-2 text-sm">
-          Korisničke akcije uskoro
-        </div>
+        <UserMenu />
       </div>
     </header>
   );

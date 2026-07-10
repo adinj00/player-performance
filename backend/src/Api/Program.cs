@@ -2,6 +2,7 @@ using PlayerPerformance.Application;
 using PlayerPerformance.Api.Authentication;
 using PlayerPerformance.Infrastructure;
 using PlayerPerformance.Api.Configuration;
+using PlayerPerformance.Api.Cors;
 using PlayerPerformance.Api.Endpoints;
 using PlayerPerformance.Api.ErrorHandling;
 
@@ -27,6 +28,7 @@ builder.Services
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApiAuthentication(builder.Environment);
+builder.Services.AddApiCors(builder.Configuration);
 builder.Services.AddAuthorization();
 builder.Services.AddApiProblemDetails();
 
@@ -34,6 +36,7 @@ var app = builder.Build();
 
 app.UseApiExceptionHandling();
 app.UseApiStatusCodeProblemDetails();
+app.UseCors(ApiCorsConstants.FrontendPolicyName);
 app.UseAuthentication();
 app.UseAuthorization();
 

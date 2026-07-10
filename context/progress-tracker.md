@@ -10,7 +10,7 @@ This file intentionally starts lightweight. It should become more detailed as bu
 
 ## Current Goal
 
-- Unit 15 completed; the backend now has an API-owned CSRF/session/logout foundation on top of the existing Identity cookie-auth baseline, with explicit antiforgery header/cookie behavior, API-friendly auth ProblemDetails responses, and auth utility endpoint coverage for unauthenticated/session bootstrap paths.
+- Unit 16 completed; the frontend now has an auth feature area with a query-owned session hook, public auth route shells, protected app routing, and a CSRF-backed logout flow wired to the existing backend auth utility endpoints.
 
 ## Completed
 
@@ -125,6 +125,13 @@ This file intentionally starts lightweight. It should become more detailed as bu
   - Added a reusable API helper pattern for future unsafe cookie-authenticated endpoints to validate CSRF without enabling global CSRF checks on safe endpoints.
   - Added integration coverage for the unauthenticated session path, CSRF bootstrap endpoint, logout unauthorized behavior, antiforgery option wiring, and the new auth ProblemDetails responses.
 
+- Unit 16 completed:
+  - Added a frontend `auth` feature area with session types, auth API helpers, a query-owned `useSession()` hook, and a logout mutation built on the existing shared API client.
+  - Added public auth route shells for `sign-in`, `forgot-password`, and `reset-password`, keeping all visible copy in Bosnian Latin and clearly marking login/password-reset actions as unavailable until backend endpoints exist.
+  - Split routing into public auth routes and protected app-shell routes so existing dashboard/module placeholders now require a valid backend session.
+  - Added protected-route loading, unauthenticated redirect, and safe session-error handling without introducing fake users, local token storage, role logic, or permission logic.
+  - Replaced the topbar placeholder with a session-aware user menu that shows the authenticated email when present and performs CSRF-protected logout.
+
 ## In Progress
 
 - No active implementation unit.
@@ -132,10 +139,10 @@ This file intentionally starts lightweight. It should become more detailed as bu
 ## Next Up
 
 - Start the next scoped feature spec on top of the shared UI primitive baseline.
-- Build the first real frontend feature or auth/session foundation on top of the new API client, TanStack Query provider, and shared form conventions.
+- Build the first real frontend feature or backend login flow on top of the new auth/session foundation.
 - Build the next backend foundation unit on top of the new configuration-ready, testable persistence baseline.
 - Build the next backend module on top of the new shared primitives and persistence baseline.
-- Build the next auth-focused backend unit on top of the new Identity persistence, CSRF/session foundation, and auth utility endpoints.
+- Build the next auth-focused backend unit on top of the new Identity persistence, CSRF/session foundation, auth utility endpoints, and frontend auth shell.
 
 ## Open Questions
 
@@ -166,6 +173,8 @@ This file intentionally starts lightweight. It should become more detailed as bu
 - Backend cookie authentication uses the Identity application scheme, `HttpOnly` cookies, `SameSite=Lax`, production `SecurePolicy=Always`, development `SecurePolicy=SameAsRequest`, and API-friendly non-redirecting unauthorized/forbidden responses.
 - Backend auth utility endpoints use `GET /api/auth/csrf`, `GET /api/auth/session`, and `POST /api/auth/logout` as the stable initial cookie-auth API surface.
 - The frontend-facing CSRF request header name is `X-CSRF-TOKEN`; the browser-readable CSRF token cookie currently uses `XSRF-TOKEN`.
+- Frontend auth routing now treats `/sign-in`, `/forgot-password`, and `/reset-password` as public routes, while the existing app-shell routes require a successful session query before rendering.
+- Frontend session state is owned by TanStack Query through the auth feature hook and is not duplicated in Zustand or browser storage.
 
 ## Session Notes
 
@@ -289,6 +298,42 @@ This file intentionally starts lightweight. It should become more detailed as bu
   - `backend`: the test environment now uses `CookieSecurePolicy.SameAsRequest` for auth and antiforgery cookies so the integration host can exercise cookie behavior safely while production remains `SecurePolicy=Always`.
   - `backend`: authenticated logout with a missing or invalid CSRF token is implemented through the shared validation helper, but full end-to-end integration coverage for that path is still deferred because the repository does not yet have a test-auth sign-in helper that can establish a real cookie-authenticated session.
   - `frontend`: no frontend files were changed for Unit 15, so no frontend verification commands were required.
+- Unit 16 verification results:
+  - `frontend`: `npm.cmd run format` passed.
+  - `frontend`: `npm.cmd run format:check` passed.
+  - `frontend`: `npm.cmd run lint` passed.
+  - `frontend`: `npm.cmd run build` passed.
+  - `frontend`: protected routing now depends on the backend session endpoint and redirects unauthenticated requests toward `/sign-in` without introducing fake auth state or browser token storage.
+  - `frontend`: the sign-in, forgot-password, and reset-password pages are intentionally honest shells only; they do not submit credentials or call non-existent backend endpoints.
+  - `frontend`: browser-level manual verification of a successful authenticated session and logout round-trip is still limited because the repository does not yet expose a real login/first-admin bootstrap flow for creating a staff session interactively.
+- Local CORS bugfix verification results:
+  - `backend`: the browser session error was traced to missing API CORS middleware even though `GET http://localhost:5051/api/auth/session` returned a healthy unauthenticated payload directly.
+  - `backend`: added a configured-frontend CORS policy that allows the documented frontend origin and credentials for the cookie-auth API surface.
+  - `backend`: added an integration test that verifies a preflight request for `/api/auth/session` returns `204 No Content` with `Access-Control-Allow-Origin` and `Access-Control-Allow-Credentials`.
+  - `backend`: `dotnet build PlayerPerformance.sln --artifacts-path C:\Users\Jugo\AppData\Local\Temp\player-performance-artifacts-cors-fix` passed after allowing temporary NuGet network access.
+  - `backend`: `dotnet test PlayerPerformance.sln --no-build --artifacts-path C:\Users\Jugo\AppData\Local\Temp\player-performance-artifacts-cors-fix` passed with 19 unit tests and 11 integration tests.
+- Local auth-page scrollbar bugfix verification results:
+  - `frontend`: the public auth routes were producing unnecessary page scroll because the auth shell combined viewport-height sizing with vertical padding.
+  - `frontend`: fixed the auth shell sizing so the public auth layout no longer adds height beyond the viewport.
+  - `frontend`: `npm.cmd run format` passed.
+  - `frontend`: `npm.cmd run lint` passed.
+  - `frontend`: `npm.cmd run build` passed.
+- Local auth sign-in layout bugfix verification results:
+  - `frontend`: the sign-in shell originally rendered the email and password placeholders side by side, which was not an appropriate default layout for this auth page.
+  - `frontend`: updated the sign-in shell to use a standard vertical field stack.
+  - `frontend`: corrected the progress note for the earlier scrollbar fix so it no longer attributes the issue to a body-margin change that was not part of the final fix.
+  - `frontend`: `npm.cmd run format` passed.
+  - `frontend`: `npm.cmd run lint` passed.
+  - `frontend`: `npm.cmd run build` passed.
+  - `frontend`: `npm.cmd run format` passed.
+  - `frontend`: `npm.cmd run lint` passed.
+  - `frontend`: `npm.cmd run build` passed.
+- Local auth shared-shell width refinement verification results:
+  - `frontend`: finalized the shared auth shell at `max-w-xl`, keeping the header and auth card at a focused single-column width without a sign-in-specific override.
+  - `frontend`: retained the standard vertical sign-in field stack.
+  - `frontend`: `npm.cmd run format:check` passed.
+  - `frontend`: `npm.cmd run lint` passed.
+  - `frontend`: `npm.cmd run build` passed.
 
 ## Confirmed Decisions
 

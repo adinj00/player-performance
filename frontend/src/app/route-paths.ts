@@ -13,6 +13,9 @@ import {
 
 export const routePaths = {
   dashboard: "/",
+  signIn: "/sign-in",
+  forgotPassword: "/forgot-password",
+  resetPassword: "/reset-password",
   matches: "/matches",
   players: "/players",
   trainingGps: "/training-gps",
