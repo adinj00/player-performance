@@ -6,6 +6,8 @@ export interface ProblemDetailsError {
   instance?: string;
   traceId?: string;
   errors?: Record<string, string[]>;
+  code?: string;
+  extensions?: Record<string, unknown>;
 }
 
 export interface ApiValidationErrors {
@@ -18,6 +20,7 @@ export interface NormalizedApiError {
   detail: string | null;
   traceId: string | null;
   validationErrors: ApiValidationErrors | null;
+  code: string | null;
   responseBody?: unknown;
 }
 
@@ -27,6 +30,7 @@ export class ApiError extends Error implements NormalizedApiError {
   readonly detail: string | null;
   readonly traceId: string | null;
   readonly validationErrors: ApiValidationErrors | null;
+  readonly code: string | null;
   readonly responseBody?: unknown;
 
   constructor(error: NormalizedApiError) {
@@ -37,6 +41,7 @@ export class ApiError extends Error implements NormalizedApiError {
     this.detail = error.detail;
     this.traceId = error.traceId;
     this.validationErrors = error.validationErrors;
+    this.code = error.code;
     this.responseBody = error.responseBody;
   }
 }
@@ -88,6 +93,9 @@ export function normalizeApiError(
       readString(body?.requestId) ??
       readString(body?.traceIdentifier),
     validationErrors: errors,
+    code:
+      readString(body?.code) ??
+      readString(isRecord(body?.extensions) ? body.extensions.code : null),
     responseBody,
   });
 }

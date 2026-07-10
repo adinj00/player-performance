@@ -13,7 +13,8 @@ interface ProtectedRouteProps {
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const location = useLocation();
-  const { isLoading, isAuthenticated, isError, refetchSession } = useSession();
+  const { isLoading, isAuthenticated, isError, refetchSession, user } =
+    useSession();
 
   if (isLoading) {
     return <LoadingState label="Provjera korisničke sesije..." />;
@@ -45,6 +46,10 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
         state={{ from: location.pathname + location.search + location.hash }}
       />
     );
+  }
+
+  if (user?.mustChangePassword) {
+    return <Navigate to={routePaths.changePassword} replace />;
   }
 
   return <>{children}</>;

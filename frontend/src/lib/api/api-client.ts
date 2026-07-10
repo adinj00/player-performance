@@ -83,7 +83,16 @@ export async function apiRequest<TResponse>(
   const responseBody = await parseResponseBody(response);
 
   if (!response.ok) {
-    throw normalizeApiError(response.status, responseBody);
+    const error = normalizeApiError(response.status, responseBody);
+
+    if (
+      error.code === "password_change_required" &&
+      typeof window !== "undefined"
+    ) {
+      window.dispatchEvent(new Event("auth:password-change-required"));
+    }
+
+    throw error;
   }
 
   return responseBody as TResponse;

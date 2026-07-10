@@ -1,29 +1,12 @@
 import { apiRequest } from "@/lib/api/api-client";
 
 import type {
+  ChangePasswordRequest,
   CsrfResponse,
   CsrfToken,
+  LoginRequest,
   SessionResponse,
 } from "../types/session";
-
-const csrfCookieName = "XSRF-TOKEN";
-
-function readCookieValue(cookieName: string): string | null {
-  if (typeof document === "undefined") {
-    return null;
-  }
-
-  const cookieEntries = document.cookie.split(";").map((entry) => entry.trim());
-  const matchingEntry = cookieEntries.find((entry) =>
-    entry.startsWith(`${cookieName}=`),
-  );
-
-  if (!matchingEntry) {
-    return null;
-  }
-
-  return decodeURIComponent(matchingEntry.slice(cookieName.length + 1));
-}
 
 export function getSession() {
   return apiRequest<SessionResponse>("/api/auth/session", {
@@ -36,17 +19,13 @@ export async function getCsrf(): Promise<CsrfToken> {
     method: "GET",
   });
 
-  const token = readCookieValue(csrfCookieName);
-
-  if (!token) {
-    throw new Error(
-      "CSRF token nije dostupan nakon pripreme zahtjeva za odjavu.",
-    );
+  if (!response.requestToken) {
+    throw new Error("CSRF token nije dostupan nakon pripreme zahtjeva.");
   }
 
   return {
     headerName: response.csrfTokenHeaderName,
-    token,
+    token: response.requestToken,
   };
 }
 
@@ -58,5 +37,31 @@ export async function logout(): Promise<void> {
     headers: {
       [csrfToken.headerName]: csrfToken.token,
     },
+  });
+}
+
+export async function login(request: LoginRequest): Promise<SessionResponse> {
+  const csrfToken = await getCsrf();
+
+  return apiRequest<SessionResponse>("/api/auth/login", {
+    method: "POST",
+    headers: {
+      [csrfToken.headerName]: csrfToken.token,
+    },
+    json: request,
+  });
+}
+
+export async function changePassword(
+  request: ChangePasswordRequest,
+): Promise<SessionResponse> {
+  const csrfToken = await getCsrf();
+
+  return apiRequest<SessionResponse>("/api/auth/change-password", {
+    method: "POST",
+    headers: {
+      [csrfToken.headerName]: csrfToken.token,
+    },
+    json: request,
   });
 }

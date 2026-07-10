@@ -1,100 +1,158 @@
-import { Link } from "react-router-dom";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Eye, EyeOff } from "lucide-react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { z } from "zod";
 
 import { routePaths } from "@/app/route-paths";
-import { ErrorState } from "@/components/common/error-state";
+import { FormErrorSummary } from "@/components/common/form-error-summary";
+import { FormFieldMessage } from "@/components/common/form-field-message";
 import { Button } from "@/components/ui/button";
-import { useSession } from "@/features/auth/hooks/use-session";
+import { getSignInErrorMessage } from "@/features/auth/auth-error-messages";
+import { AuthPageShell } from "@/features/auth/components/auth-page-shell";
+import { useLogin } from "@/features/auth/hooks/use-auth-mutations";
+import { resolveSafeReturnPath } from "@/features/auth/route-decisions";
 
-import { AuthPageShell } from "./auth-page-shell";
+const signInSchema = z.object({
+  email: z
+    .string()
+    .trim()
+    .min(1, "Unesite e-mail adresu.")
+    .email("Unesite ispravnu e-mail adresu."),
+  password: z.string().min(1, "Unesite lozinku."),
+});
+
+type SignInValues = z.infer<typeof signInSchema>;
 
 export function SignInPage() {
-  const { isError, refetchSession } = useSession();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const loginMutation = useLogin();
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const form = useForm<SignInValues>({
+    resolver: zodResolver(signInSchema),
+    defaultValues: { email: "", password: "" },
+  });
+
+  async function onSubmit(values: SignInValues) {
+    setSubmitError(null);
+
+    try {
+      const session = await loginMutation.mutateAsync({
+        email: values.email.trim(),
+        password: values.password,
+      });
+
+      form.reset({ email: values.email.trim(), password: "" });
+      navigate(
+        session.user?.mustChangePassword
+          ? routePaths.changePassword
+          : resolveSafeReturnPath(location.state?.from),
+        { replace: true },
+      );
+    } catch (error) {
+      form.setValue("password", "");
+      setSubmitError(getSignInErrorMessage(error));
+    }
+  }
 
   return (
     <AuthPageShell
       title="Prijava za osoblje"
-      description="Player Performance Data System koristi zatvoreni pristup za klupsko osoblje. Ova stranica je spremna za povezivanje sa budućim backend login endpointom."
+      description="Prijavite se svojim službenim korisničkim podacima."
     >
-      <div className="space-y-6">
-        {isError ? (
-          <ErrorState
-            title="Provjera sesije nije uspjela"
-            description="Aplikacija trenutno ne može potvrditi postojeću prijavu. Možete osvježiti provjeru dok login endpoint ne bude dostupan."
-            action={
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => void refetchSession()}
-              >
-                Pokušaj ponovo
-              </Button>
+      <form
+        className="flex flex-col gap-5"
+        onSubmit={form.handleSubmit(onSubmit)}
+        noValidate
+      >
+        <FormErrorSummary errors={submitError} />
+
+        <div className="flex flex-col gap-2">
+          <label
+            className="text-foreground text-sm font-medium"
+            htmlFor="sign-in-email"
+          >
+            E-mail adresa
+          </label>
+          <input
+            id="sign-in-email"
+            type="email"
+            autoComplete="username"
+            className="border-input bg-background text-foreground focus-visible:border-ring focus-visible:ring-ring/50 h-11 rounded-lg border px-3 text-sm outline-none focus-visible:ring-2"
+            aria-invalid={Boolean(form.formState.errors.email)}
+            aria-describedby={
+              form.formState.errors.email ? "sign-in-email-error" : undefined
             }
+            disabled={loginMutation.isPending}
+            {...form.register("email")}
           />
-        ) : null}
-
-        <div className="space-y-5">
-          <div className="space-y-2">
-            <label
-              className="text-foreground text-sm font-medium"
-              htmlFor="sign-in-email"
-            >
-              Email adresa
-            </label>
-            <input
-              id="sign-in-email"
-              type="email"
-              disabled
-              placeholder="ime.prezime@velez.ba"
-              className="border-input bg-surface-muted text-muted-foreground placeholder:text-muted-foreground/80 flex h-11 w-full rounded-lg border px-3 text-sm"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label
-              className="text-foreground text-sm font-medium"
-              htmlFor="sign-in-password"
-            >
-              Lozinka
-            </label>
-            <input
-              id="sign-in-password"
-              type="password"
-              disabled
-              placeholder="Privremeno nedostupno"
-              className="border-input bg-surface-muted text-muted-foreground placeholder:text-muted-foreground/80 flex h-11 w-full rounded-lg border px-3 text-sm"
-            />
+          <div id="sign-in-email-error">
+            <FormFieldMessage error={form.formState.errors.email} />
           </div>
         </div>
 
-        <div className="border-border bg-surface-muted rounded-xl border p-4">
-          <p className="text-foreground text-sm font-medium">
-            Prijava će biti omogućena nakon povezivanja backend login endpointa.
-          </p>
-          <p className="text-muted-foreground mt-2 text-sm leading-6">
-            Ovaj frontend prikaz već koristi stvarnu provjeru sesije, zaštitu
-            ruta i odjavu, ali još ne šalje podatke za prijavu jer backend login
-            API nije implementiran.
-          </p>
+        <div className="flex flex-col gap-2">
+          <label
+            className="text-foreground text-sm font-medium"
+            htmlFor="sign-in-password"
+          >
+            Lozinka
+          </label>
+          <div className="relative">
+            <input
+              id="sign-in-password"
+              type={isPasswordVisible ? "text" : "password"}
+              autoComplete="current-password"
+              className="border-input bg-background text-foreground focus-visible:border-ring focus-visible:ring-ring/50 h-11 w-full rounded-lg border px-3 pr-11 text-sm outline-none focus-visible:ring-2"
+              aria-invalid={Boolean(form.formState.errors.password)}
+              aria-describedby={
+                form.formState.errors.password
+                  ? "sign-in-password-error"
+                  : undefined
+              }
+              disabled={loginMutation.isPending}
+              {...form.register("password")}
+            />
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              pressMotion={false}
+              className="absolute top-1/2 right-1 -translate-y-1/2"
+              aria-label={
+                isPasswordVisible ? "Sakrij lozinku" : "Prikaži lozinku"
+              }
+              aria-pressed={isPasswordVisible}
+              disabled={loginMutation.isPending}
+              onClick={() => setIsPasswordVisible((visible) => !visible)}
+            >
+              {isPasswordVisible ? (
+                <EyeOff aria-hidden="true" />
+              ) : (
+                <Eye aria-hidden="true" />
+              )}
+            </Button>
+          </div>
+          <div id="sign-in-password-error">
+            <FormFieldMessage error={form.formState.errors.password} />
+          </div>
         </div>
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <Button type="button" disabled className="sm:min-w-40">
-            Prijava uskoro
+          <Button type="submit" disabled={loginMutation.isPending}>
+            {loginMutation.isPending ? "Prijava..." : "Prijavi se"}
           </Button>
-
-          <div className="flex flex-col gap-2 text-sm sm:items-end">
-            <Link
-              to={routePaths.forgotPassword}
-              className="text-primary hover:text-primary/80 underline-offset-4 hover:underline"
-            >
-              Zaboravljena lozinka
-            </Link>
-            <p className="text-muted-foreground">
-              Javna registracija nije dostupna.
-            </p>
-          </div>
+          <Link
+            to={routePaths.forgotPassword}
+            className="text-primary text-sm underline-offset-4 hover:underline"
+          >
+            Zaboravljena lozinka
+          </Link>
         </div>
-      </div>
+      </form>
     </AuthPageShell>
   );
 }

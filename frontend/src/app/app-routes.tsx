@@ -1,14 +1,25 @@
-import { BrowserRouter, Outlet, Route, Routes } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
+import {
+  BrowserRouter,
+  Outlet,
+  Route,
+  Routes,
+  useNavigate,
+} from "react-router-dom";
 
 import { routePaths } from "@/app/route-paths";
 import { NotFoundPage } from "@/components/common/not-found-page";
 import { AppShell } from "@/components/layout/app-shell";
 import {
   AuthUnavailablePage,
+  ChangePasswordPage,
+  ChangePasswordRoute,
   ProtectedRoute,
   PublicAuthRoute,
   SignInPage,
 } from "@/features/auth";
+import { sessionQueryKey } from "@/features/auth/hooks/use-session";
 import { DashboardPage } from "@/pages/dashboard-page";
 import { ImportsPage } from "@/pages/imports-page";
 import { MatchesPage } from "@/pages/matches-page";
@@ -30,9 +41,34 @@ function ProtectedAppShell() {
   );
 }
 
+function PasswordChangeRequiredSignalHandler() {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    function handlePasswordChangeRequired() {
+      void queryClient.invalidateQueries({ queryKey: sessionQueryKey });
+      navigate(routePaths.changePassword, { replace: true });
+    }
+
+    window.addEventListener(
+      "auth:password-change-required",
+      handlePasswordChangeRequired,
+    );
+    return () =>
+      window.removeEventListener(
+        "auth:password-change-required",
+        handlePasswordChangeRequired,
+      );
+  }, [navigate, queryClient]);
+
+  return null;
+}
+
 export function AppRoutes() {
   return (
     <BrowserRouter>
+      <PasswordChangeRequiredSignalHandler />
       <Routes>
         <Route
           path={routePaths.signIn}
@@ -62,6 +98,14 @@ export function AppRoutes() {
                 description="Forma za postavljanje nove lozinke bit će dostupna nakon što backend uvede sigurni reset tok."
               />
             </PublicAuthRoute>
+          }
+        />
+        <Route
+          path={routePaths.changePassword}
+          element={
+            <ChangePasswordRoute>
+              <ChangePasswordPage />
+            </ChangePasswordRoute>
           }
         />
         <Route element={<ProtectedAppShell />}>

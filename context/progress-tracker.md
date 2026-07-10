@@ -10,9 +10,19 @@ This file intentionally starts lightweight. It should become more detailed as bu
 
 ## Current Goal
 
-- Unit 18 completed; the backend now supports secure staff login, required-password-change enforcement, and self-service password change for the first-admin flow.
+- Unit 20 next: Staff Users, Roles, and Team Scope Backend.
 
 ## Completed
+
+- Unit 19 completed:
+  - Connected the React Hook Form and Zod sign-in form to `POST /api/auth/login` and added the protected `/change-password` form for `POST /api/auth/change-password`.
+  - Confirmed the frontend auth contract: login and password change return `SessionResponse`; session is read from `GET /api/auth/session`; unsafe requests first acquire `GET /api/auth/csrf` and send its returned request token in the `X-CSRF-TOKEN` header while the API-issued `XSRF-TOKEN` cookie is included automatically; logout remains `POST /api/auth/logout` with the same CSRF convention.
+  - Kept session server state in TanStack Query. Login and password-change mutations replace the cache with the direct response, invalidate it, then refetch the session before navigation. Logout replaces the cache with the unauthenticated shape only after backend success.
+  - Added explicit route decisions for loading, session error, unauthenticated, required-password-change, and completed-password-change states. Safe return paths are internal-only, reject protocol-relative/backslash paths, and reject authentication-loop routes.
+  - Added a central `password_change_required` ProblemDetails signal that invalidates session state and routes to `/change-password` without retrying the rejected request.
+  - Kept error messages safe and Bosnian Latin, avoided browser storage for session/CSRF/credentials, and retained honest unavailable forgot/reset-password surfaces.
+  - Added accessible show/hide controls for every password input, using an icon button with Bosnian Latin accessible labels and no change to password storage or submission behavior.
+  - Corrected CSRF wiring to use the backend-issued antiforgery request token rather than the companion cookie value, preventing the `400 Invalid CSRF token` login failure. Added an opt-out for shared-button press translation and applied it only to password visibility controls, then corrected the unavailable-password-flow link to render as a native link rather than a Base UI button.
 
 - Product discovery completed for the initial V1 scope.
 - Core V1 product direction defined: internal FK Velež Mostar player performance and match analysis system.
@@ -365,6 +375,11 @@ This file intentionally starts lightweight. It should become more detailed as bu
   - `backend`: `dotnet restore PlayerPerformance.sln --artifacts-path C:\Users\Jugo\AppData\Local\Temp\player-performance-artifacts-unit18` passed after temporary NuGet network access was allowed.
   - `backend`: `dotnet build PlayerPerformance.sln --no-restore --artifacts-path C:\Users\Jugo\AppData\Local\Temp\player-performance-artifacts-unit18` passed with zero warnings and zero errors.
   - `backend`: `dotnet test PlayerPerformance.sln --no-restore --no-build --artifacts-path C:\Users\Jugo\AppData\Local\Temp\player-performance-artifacts-unit18` passed with 25 unit tests and 17 integration tests.
+
+- Unit 19 verification results:
+  - `frontend`: `npm.cmd run format`, `npm.cmd run format:check`, `npm.cmd run lint`, and `npm.cmd run build` passed.
+  - `backend`: `dotnet test PlayerPerformance.sln --artifacts-path C:\Users\Jugo\AppData\Local\Temp\player-performance-artifacts-unit19` passed with 25 unit tests and 17 integration tests.
+  - Manual browser end-to-end verification was not run in this environment because it requires a configured local API, PostgreSQL database, bootstrap admin credentials, and cookie-capable browser session. The backend integration suite verifies the login, CSRF, required-password-change, password-change, session, and logout contracts used by the frontend.
 
 ## Confirmed Decisions
 

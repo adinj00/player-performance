@@ -5,20 +5,6 @@ import { routePaths } from "@/app/route-paths";
 import { Button } from "@/components/ui/button";
 import { useLogout } from "@/features/auth/hooks/use-logout";
 import { useSession } from "@/features/auth/hooks/use-session";
-import { isApiError } from "@/lib/api/api-client";
-
-function getLogoutErrorMessage(error: unknown): string {
-  if (isApiError(error)) {
-    return error.detail ?? error.title;
-  }
-
-  if (error instanceof Error && error.message.trim().length > 0) {
-    return error.message;
-  }
-
-  return "Odjava trenutno nije uspjela. Pokušajte ponovo.";
-}
-
 export function UserMenu() {
   const navigate = useNavigate();
   const { user, isAuthenticated } = useSession();
@@ -63,7 +49,7 @@ export function UserMenu() {
 
       {logoutMutation.isError ? (
         <p className="text-destructive text-sm sm:basis-full">
-          {getLogoutErrorMessage(logoutMutation.error)}
+          Odjava trenutno nije uspjela. Pokušajte ponovo.
         </p>
       ) : null}
     </div>

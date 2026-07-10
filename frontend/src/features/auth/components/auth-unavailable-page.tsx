@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 
 import { routePaths } from "@/app/route-paths";
 import { EmptyState } from "@/components/common/empty-state";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 
 import { AuthPageShell } from "./auth-page-shell";
 
@@ -21,9 +21,9 @@ export function AuthUnavailablePage({
         title="Ovaj tok još nije dostupan"
         description="Reset lozinke će biti omogućen tek nakon implementacije odgovarajućih backend endpointa i sigurnosnih pravila."
         action={
-          <Button render={<Link to={routePaths.signIn} />}>
+          <Link to={routePaths.signIn} className={buttonVariants()}>
             Nazad na prijavu
-          </Button>
+          </Link>
         }
       />
     </AuthPageShell>
