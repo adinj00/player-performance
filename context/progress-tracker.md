@@ -10,7 +10,7 @@ This file intentionally starts lightweight. It should become more detailed as bu
 
 ## Current Goal
 
-- Unit 16 completed; the frontend now has an auth feature area with a query-owned session hook, public auth route shells, protected app routing, and a CSRF-backed logout flow wired to the existing backend auth utility endpoints.
+- Unit 17 completed; the backend can safely bootstrap the first active staff account from environment configuration when the persisted user store is empty.
 
 ## Completed
 
@@ -132,6 +132,15 @@ This file intentionally starts lightweight. It should become more detailed as bu
   - Added protected-route loading, unauthenticated redirect, and safe session-error handling without introducing fake users, local token storage, role logic, or permission logic.
   - Replaced the topbar placeholder with a session-aware user menu that shows the authenticated email when present and performs CSRF-protected logout.
 
+- Unit 17 completed:
+  - Added typed Infrastructure-owned `Bootstrap:FirstAdmin` configuration for first-admin bootstrap, with placeholder-only values in `backend/.env.example`.
+  - Added startup bootstrap wiring that checks the persisted Identity user store first, exits without side effects when any user exists, and otherwise fails safely when bootstrap is disabled or incomplete.
+  - Added first-user creation through `UserManager`, which applies the configured Identity normalization and password policy; the created account is `ACTIVE`, requires a password change, and receives clock-based audit timestamps.
+  - Kept the flow backend-only: no public setup route, login/reset/invitation endpoints, frontend changes, roles, team scopes, permissions, or sample data were added.
+  - Bootstrap configuration is skipped explicitly in the automated `Testing` environment so existing API integration tests remain isolated from persistence requirements.
+  - Added focused tests for empty-store bootstrap configuration validation and safe validation messages. Full database-backed bootstrap behavior requires manual empty-database verification with a real configured PostgreSQL instance.
+  - The temporary password is never committed, logged, returned, or displayed; it must be supplied by local or production environment configuration.
+
 ## In Progress
 
 - No active implementation unit.
@@ -172,6 +181,8 @@ This file intentionally starts lightweight. It should become more detailed as bu
 - Exact Gpexe and Zone14 import mappings must not be guessed before real export samples are reviewed.
 - Backend cookie authentication uses the Identity application scheme, `HttpOnly` cookies, `SameSite=Lax`, production `SecurePolicy=Always`, development `SecurePolicy=SameAsRequest`, and API-friendly non-redirecting unauthorized/forbidden responses.
 - Backend auth utility endpoints use `GET /api/auth/csrf`, `GET /api/auth/session`, and `POST /api/auth/logout` as the stable initial cookie-auth API surface.
+- First-admin bootstrap is a single-instance startup operation that only creates an account when the persisted user store is empty. A multi-instance deployment will need a distributed lock or equivalent database-safe coordination if concurrent initial startup becomes a supported deployment mode.
+- Unit 18 must assign or migrate the bootstrap-created account into the official `ADMIN` role when the staff role and team-scope model is introduced.
 - The frontend-facing CSRF request header name is `X-CSRF-TOKEN`; the browser-readable CSRF token cookie currently uses `XSRF-TOKEN`.
 - Frontend auth routing now treats `/sign-in`, `/forgot-password`, and `/reset-password` as public routes, while the existing app-shell routes require a successful session query before rendering.
 - Frontend session state is owned by TanStack Query through the auth feature hook and is not duplicated in Zustand or browser storage.
@@ -334,6 +345,12 @@ This file intentionally starts lightweight. It should become more detailed as bu
   - `frontend`: `npm.cmd run format:check` passed.
   - `frontend`: `npm.cmd run lint` passed.
   - `frontend`: `npm.cmd run build` passed.
+
+- Unit 17 verification results:
+  - `backend`: `dotnet restore PlayerPerformance.sln --artifacts-path C:\Users\Jugo\AppData\Local\Temp\player-performance-artifacts-unit17` initially failed because sandbox network access to NuGet was blocked, then passed after temporary NuGet network access was allowed.
+  - `backend`: `dotnet build PlayerPerformance.sln --no-restore --artifacts-path C:\Users\Jugo\AppData\Local\Temp\player-performance-artifacts-unit17` passed.
+  - `backend`: `dotnet test PlayerPerformance.sln --no-restore --no-build --artifacts-path C:\Users\Jugo\AppData\Local\Temp\player-performance-artifacts-unit17` passed with 25 unit tests and 11 integration tests.
+  - Manual follow-up: start the API against an empty local PostgreSQL database with `Bootstrap__FirstAdmin__Enabled=true`, a real email, and a password that meets the configured Identity requirements; confirm exactly one active user is created with `RequiresPasswordChange=true`, then restart with changed bootstrap values and confirm the user is untouched.
 
 ## Confirmed Decisions
 

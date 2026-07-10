@@ -5,6 +5,7 @@ using PlayerPerformance.Api.Configuration;
 using PlayerPerformance.Api.Cors;
 using PlayerPerformance.Api.Endpoints;
 using PlayerPerformance.Api.ErrorHandling;
+using PlayerPerformance.Infrastructure.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,6 +34,8 @@ builder.Services.AddAuthorization();
 builder.Services.AddApiProblemDetails();
 
 var app = builder.Build();
+
+await app.Services.BootstrapFirstAdminAsync(app.Environment);
 
 app.UseApiExceptionHandling();
 app.UseApiStatusCodeProblemDetails();

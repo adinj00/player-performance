@@ -19,6 +19,13 @@ public static class DependencyInjection
 
         services.AddSingleton<ISystemClock, SystemClock>();
 
+        services
+            .AddOptions<FirstAdminBootstrapOptions>()
+            .Bind(configuration.GetSection(FirstAdminBootstrapOptions.SectionName))
+            .ValidateOnStart();
+
+        services.AddScoped<FirstAdminBootstrapper>();
+
         services.AddDbContext<AppDbContext>(options =>
         {
             options.UseNpgsql(connectionString);
