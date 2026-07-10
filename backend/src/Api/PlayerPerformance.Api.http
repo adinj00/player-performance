@@ -2,3 +2,36 @@
 
 GET {{PlayerPerformance_Api_HostAddress}}/health
 Accept: application/json
+
+### Get a CSRF token before an unsafe auth request
+GET {{PlayerPerformance_Api_HostAddress}}/api/auth/csrf
+Accept: application/json
+
+### Sign in (send the requestToken returned above in X-CSRF-TOKEN)
+POST {{PlayerPerformance_Api_HostAddress}}/api/auth/login
+Content-Type: application/json
+X-CSRF-TOKEN: {{csrfToken}}
+
+{
+  "email": "staff@example.com",
+  "password": "temporary-password"
+}
+
+### Read the current safe session
+GET {{PlayerPerformance_Api_HostAddress}}/api/auth/session
+Accept: application/json
+
+### Change the currently authenticated user's password
+POST {{PlayerPerformance_Api_HostAddress}}/api/auth/change-password
+Content-Type: application/json
+X-CSRF-TOKEN: {{csrfToken}}
+
+{
+  "currentPassword": "temporary-password",
+  "newPassword": "Replacement!Pass123",
+  "confirmPassword": "Replacement!Pass123"
+}
+
+### Sign out
+POST {{PlayerPerformance_Api_HostAddress}}/api/auth/logout
+X-CSRF-TOKEN: {{csrfToken}}

@@ -41,9 +41,10 @@ app.UseApiExceptionHandling();
 app.UseApiStatusCodeProblemDetails();
 app.UseCors(ApiCorsConstants.FrontendPolicyName);
 app.UseAuthentication();
+app.UseMiddleware<PasswordChangeRequiredMiddleware>();
 app.UseAuthorization();
 
-app.MapApiEndpoints();
+app.MapApiEndpoints(app.Environment);
 
 app.Run();
 

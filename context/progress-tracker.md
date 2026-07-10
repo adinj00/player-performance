@@ -10,7 +10,7 @@ This file intentionally starts lightweight. It should become more detailed as bu
 
 ## Current Goal
 
-- Unit 17 completed; the backend can safely bootstrap the first active staff account from environment configuration when the persisted user store is empty.
+- Unit 18 completed; the backend now supports secure staff login, required-password-change enforcement, and self-service password change for the first-admin flow.
 
 ## Completed
 
@@ -141,6 +141,14 @@ This file intentionally starts lightweight. It should become more detailed as bu
   - Added focused tests for empty-store bootstrap configuration validation and safe validation messages. Full database-backed bootstrap behavior requires manual empty-database verification with a real configured PostgreSQL instance.
   - The temporary password is never committed, logged, returned, or displayed; it must be supplied by local or production environment configuration.
 
+- Unit 18 completed:
+  - Added Application-layer login, current-session, logout, and current-user password-change contracts, implemented by the Infrastructure Identity adapter without exposing Identity types outside Infrastructure.
+  - Added `POST /api/auth/login` and `POST /api/auth/change-password`. Successful login and password change return the safe session contract: `isAuthenticated` and `user` with `id`, `email`, `accountStatus`, and `mustChangePassword`.
+  - Extended `GET /api/auth/csrf` to return the request token alongside the stable `X-CSRF-TOKEN` header name, enabling validated unsafe requests.
+  - Added centralized middleware that returns `403` ProblemDetails with code `password_change_required` for authenticated users whose `RequiresPasswordChange` flag is set, while allowing session, CSRF, change-password, logout, and anonymous health endpoints.
+  - Login uses Identity normalization and lockout-on-failure. Invited, disabled, explicitly locked, and Identity-locked accounts cannot receive an auth cookie. Successful password changes use `UserManager.ChangePasswordAsync`, clear `RequiresPasswordChange` only after success, and refresh the sign-in cookie.
+  - Added focused integration coverage using an isolated EF Core in-memory test host and a test-environment-only protected route; no production demo endpoint was added. The official first-admin role handoff remains Unit 20.
+
 ## In Progress
 
 - No active implementation unit.
@@ -182,7 +190,7 @@ This file intentionally starts lightweight. It should become more detailed as bu
 - Backend cookie authentication uses the Identity application scheme, `HttpOnly` cookies, `SameSite=Lax`, production `SecurePolicy=Always`, development `SecurePolicy=SameAsRequest`, and API-friendly non-redirecting unauthorized/forbidden responses.
 - Backend auth utility endpoints use `GET /api/auth/csrf`, `GET /api/auth/session`, and `POST /api/auth/logout` as the stable initial cookie-auth API surface.
 - First-admin bootstrap is a single-instance startup operation that only creates an account when the persisted user store is empty. A multi-instance deployment will need a distributed lock or equivalent database-safe coordination if concurrent initial startup becomes a supported deployment mode.
-- Unit 18 must assign or migrate the bootstrap-created account into the official `ADMIN` role when the staff role and team-scope model is introduced.
+- Unit 20 will assign or migrate the bootstrap-created account into the official `ADMIN` role when the staff role and team-scope model is introduced.
 - The frontend-facing CSRF request header name is `X-CSRF-TOKEN`; the browser-readable CSRF token cookie currently uses `XSRF-TOKEN`.
 - Frontend auth routing now treats `/sign-in`, `/forgot-password`, and `/reset-password` as public routes, while the existing app-shell routes require a successful session query before rendering.
 - Frontend session state is owned by TanStack Query through the auth feature hook and is not duplicated in Zustand or browser storage.
@@ -351,6 +359,12 @@ This file intentionally starts lightweight. It should become more detailed as bu
   - `backend`: `dotnet build PlayerPerformance.sln --no-restore --artifacts-path C:\Users\Jugo\AppData\Local\Temp\player-performance-artifacts-unit17` passed.
   - `backend`: `dotnet test PlayerPerformance.sln --no-restore --no-build --artifacts-path C:\Users\Jugo\AppData\Local\Temp\player-performance-artifacts-unit17` passed with 25 unit tests and 11 integration tests.
   - Manual follow-up: start the API against an empty local PostgreSQL database with `Bootstrap__FirstAdmin__Enabled=true`, a real email, and a password that meets the configured Identity requirements; confirm exactly one active user is created with `RequiresPasswordChange=true`, then restart with changed bootstrap values and confirm the user is untouched.
+
+- Unit 18 verification results:
+  - `backend`: added `Microsoft.EntityFrameworkCore.InMemory` to the integration-test project only so cookie/Identity flows can be verified without developer-specific PostgreSQL credentials or Testcontainers.
+  - `backend`: `dotnet restore PlayerPerformance.sln --artifacts-path C:\Users\Jugo\AppData\Local\Temp\player-performance-artifacts-unit18` passed after temporary NuGet network access was allowed.
+  - `backend`: `dotnet build PlayerPerformance.sln --no-restore --artifacts-path C:\Users\Jugo\AppData\Local\Temp\player-performance-artifacts-unit18` passed with zero warnings and zero errors.
+  - `backend`: `dotnet test PlayerPerformance.sln --no-restore --no-build --artifacts-path C:\Users\Jugo\AppData\Local\Temp\player-performance-artifacts-unit18` passed with 25 unit tests and 17 integration tests.
 
 ## Confirmed Decisions
 
