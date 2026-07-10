@@ -16,7 +16,9 @@ public sealed record CurrentUserAccess(
     bool IsAuthenticated,
     bool IsActive,
     StaffRole? PrimaryRole,
-    StaffPermissions Permissions)
+    StaffPermissions Permissions,
+    TeamScopeType TeamScopeType,
+    IReadOnlyList<Guid> SelectedTeamIds)
 {
     public bool HasAccessProfile => PrimaryRole is not null;
 
@@ -24,5 +26,5 @@ public sealed record CurrentUserAccess(
 
     public StaffPermissions EffectivePermissions => IsAdmin ? StaffPermissions.All : Permissions;
 
-    public static CurrentUserAccess Unauthenticated() => new(null, false, false, null, StaffPermissions.None);
+    public static CurrentUserAccess Unauthenticated() => new(null, false, false, null, StaffPermissions.None, TeamScopeType.ALL_TEAMS, []);
 }

@@ -135,6 +135,9 @@ public sealed class IdentityAuthenticationService(
             new SessionPermissions(
                 permissions.CanVerifyReports,
                 permissions.CanImportData,
-                permissions.CanViewMedicalDetails)));
+                permissions.CanViewMedicalDetails),
+            new SessionTeamScope(
+                access.IsAdmin ? "ALL_TEAMS" : access.TeamScopeType.ToString(),
+                access.IsAdmin || access.TeamScopeType == Domain.Staff.TeamScopeType.ALL_TEAMS ? [] : access.SelectedTeamIds.Select(id => id.ToString()).ToList())));
     }
 }

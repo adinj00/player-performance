@@ -13,6 +13,8 @@ using PlayerPerformance.Application.Settings;
 using PlayerPerformance.Infrastructure.Settings;
 using PlayerPerformance.Application.Teams;
 using PlayerPerformance.Infrastructure.Teams;
+using PlayerPerformance.Application.Users;
+using PlayerPerformance.Infrastructure.Staff;
 
 namespace PlayerPerformance.Infrastructure;
 
@@ -34,9 +36,11 @@ public static class DependencyInjection
         services.AddScoped<FirstAdminBootstrapper>();
         services.AddScoped<FirstAdminRoleHandoff>();
         services.AddScoped<ICurrentUserAccess, CurrentUserAccessResolver>();
+        services.AddScoped<ITeamAccessService, TeamAccessService>();
         services.AddScoped<IAuthenticationService, IdentityAuthenticationService>();
         services.AddScoped<ISettingsRepository, SettingsRepository>();
         services.AddScoped<ITeamsRepository, TeamsRepository>();
+        services.AddScoped<IStaffUsersService, IdentityStaffUsersService>();
         services.AddScoped<TeamStartupInitializer>();
 
         services.AddDbContext<AppDbContext>(options =>

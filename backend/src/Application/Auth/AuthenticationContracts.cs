@@ -16,7 +16,8 @@ public sealed record SessionUser(
     string AccountStatus,
     bool MustChangePassword,
     string? PrimaryRole,
-    SessionPermissions Permissions);
+    SessionPermissions Permissions,
+    SessionTeamScope TeamScope);
 
 /// <summary>Safe effective permissions exposed for authorization-aware UI rendering.</summary>
 public sealed record SessionPermissions(
@@ -26,6 +27,9 @@ public sealed record SessionPermissions(
 {
     public static SessionPermissions None { get; } = new(false, false, false);
 }
+
+/// <summary>Safe effective team scope exposed for frontend rendering only.</summary>
+public sealed record SessionTeamScope(string Type, IReadOnlyList<string> SelectedTeamIds);
 
 /// <summary>Safe representation of the current authentication session.</summary>
 public sealed record SessionResponse(bool IsAuthenticated, SessionUser? User)

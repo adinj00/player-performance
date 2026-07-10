@@ -184,7 +184,11 @@ This file intentionally starts lightweight. It should become more detailed as bu
 
 ## In Progress
 
-- No active implementation unit.
+- Unit 23: Staff Users, Team Scope, and Account Lifecycle Backend is in progress. `TeamScopeType` contains `ALL_TEAMS` and `SELECTED_TEAMS`; the authoritative staff profile now stores display name and scope type, while `staff_team_scopes` uses a composite user/team key with restricted foreign keys and a team lookup index. Migration `20260710152754_AddStaffUsersTeamScopeLifecycle` was generated and applied locally.
+  - Initial staff endpoints are mapped at `/api/users` (list, detail, invitation creation/reissue, profile/access update, disable, reactivate) and anonymous setup acceptance is mapped at `/api/auth/invitations/accept`. Staff responses expose only safe profile/access/scope/lifecycle fields; setup credentials are URL-safe and returned only from create/reissue.
+  - The current session response now includes effective `teamScope`; administrators report `ALL_TEAMS` with no selected IDs. A reusable server-side team-access service fails closed for unavailable or malformed current access.
+  - Invitation acceptance uses the Identity token provider, one-time security-stamp invalidation on reissue/acceptance, and does not sign users in. Disable invalidates the security stamp; reactivation preserves profile/scope and selects `ACTIVE` or `INVITED` from password presence. The final-active-admin safeguard is applied to demotion and disable.
+  - Verification: isolated `dotnet build PlayerPerformance.sln --no-restore` passed with zero warnings/errors; isolated `dotnet test PlayerPerformance.sln --no-build --no-restore` passed (34 unit, 24 integration). The migration was applied to the configured local PostgreSQL development database. Focused Unit 23 integration and lifecycle/team-scope test coverage is still pending before this unit can be marked complete.
 
 ## Next Up
 

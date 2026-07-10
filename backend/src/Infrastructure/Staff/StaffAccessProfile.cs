@@ -7,6 +7,8 @@ public sealed class StaffAccessProfile
     public Guid UserId { get; set; }
 
     public StaffRole PrimaryRole { get; set; }
+    public string DisplayName { get; set; } = string.Empty;
+    public TeamScopeType TeamScopeType { get; set; } = TeamScopeType.ALL_TEAMS;
 
     public bool CanVerifyReports { get; set; }
 

@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using PlayerPerformance.Infrastructure.Identity;
+using PlayerPerformance.Domain.Staff;
 
 namespace PlayerPerformance.Infrastructure.Staff;
 
@@ -15,6 +16,9 @@ internal sealed class StaffAccessProfileConfiguration : IEntityTypeConfiguration
             .HasConversion<string>()
             .HasMaxLength(32)
             .IsRequired();
+
+        builder.Property(profile => profile.DisplayName).HasColumnName("display_name").HasMaxLength(120).IsRequired();
+        builder.Property(profile => profile.TeamScopeType).HasColumnName("team_scope_type").HasConversion<string>().HasMaxLength(32).HasDefaultValue(TeamScopeType.ALL_TEAMS).IsRequired();
 
         builder.Property(profile => profile.CanVerifyReports).HasDefaultValue(false);
         builder.Property(profile => profile.CanImportData).HasDefaultValue(false);

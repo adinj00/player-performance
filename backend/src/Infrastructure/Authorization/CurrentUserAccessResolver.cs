@@ -55,7 +55,7 @@ public sealed class CurrentUserAccessResolver(
         if (!isActive)
         {
             logger.LogWarning("Authenticated staff user is unavailable or no longer exists.");
-            return new CurrentUserAccess(userId, true, false, null, StaffPermissions.None);
+            return new CurrentUserAccess(userId, true, false, null, StaffPermissions.None, TeamScopeType.ALL_TEAMS, []);
         }
 
         var profile = await dbContext.StaffAccessProfiles.AsNoTracking()
@@ -63,14 +63,19 @@ public sealed class CurrentUserAccessResolver(
         if (profile is null)
         {
             logger.LogWarning("Authenticated active staff user has no access profile.");
-            return new CurrentUserAccess(userId, true, true, null, StaffPermissions.None);
+            return new CurrentUserAccess(userId, true, true, null, StaffPermissions.None, TeamScopeType.ALL_TEAMS, []);
         }
 
+        var selectedTeamIds = profile.TeamScopeType == TeamScopeType.SELECTED_TEAMS
+            ? await dbContext.StaffTeamScopes.AsNoTracking().Where(x => x.UserId == userId).Select(x => x.TeamId).Distinct().OrderBy(x => x).ToListAsync(cancellationToken)
+            : [];
         return new CurrentUserAccess(
             userId,
             true,
             true,
             profile.PrimaryRole,
-            new StaffPermissions(profile.CanVerifyReports, profile.CanImportData, profile.CanViewMedicalDetails));
+            new StaffPermissions(profile.CanVerifyReports, profile.CanImportData, profile.CanViewMedicalDetails),
+            profile.PrimaryRole == StaffRole.ADMIN ? TeamScopeType.ALL_TEAMS : profile.TeamScopeType,
+            selectedTeamIds);
     }
 }

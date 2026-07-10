@@ -53,6 +53,7 @@ public sealed class FirstAdminRoleHandoff(
         dbContext.StaffAccessProfiles.Add(new StaffAccessProfile
         {
             UserId = user.Id,
+            DisplayName = user.Email ?? "Administrator",
             PrimaryRole = StaffRole.ADMIN,
             CreatedUtc = clock.UtcNow,
             UpdatedUtc = clock.UtcNow
