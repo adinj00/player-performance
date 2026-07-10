@@ -10,7 +10,22 @@ public sealed record LoginRequest(string Email, string Password);
 public sealed record ChangePasswordRequest(string CurrentPassword, string NewPassword, string ConfirmPassword);
 
 /// <summary>Safe authenticated-user information exposed to the client session.</summary>
-public sealed record SessionUser(string Id, string Email, string AccountStatus, bool MustChangePassword);
+public sealed record SessionUser(
+    string Id,
+    string Email,
+    string AccountStatus,
+    bool MustChangePassword,
+    string? PrimaryRole,
+    SessionPermissions Permissions);
+
+/// <summary>Safe effective permissions exposed for authorization-aware UI rendering.</summary>
+public sealed record SessionPermissions(
+    bool CanVerifyReports,
+    bool CanImportData,
+    bool CanViewMedicalDetails)
+{
+    public static SessionPermissions None { get; } = new(false, false, false);
+}
 
 /// <summary>Safe representation of the current authentication session.</summary>
 public sealed record SessionResponse(bool IsAuthenticated, SessionUser? User)

@@ -18,5 +18,7 @@ public static class FirstAdminBootstrapServiceProviderExtensions
         await using var scope = services.CreateAsyncScope();
         var bootstrapper = scope.ServiceProvider.GetRequiredService<FirstAdminBootstrapper>();
         await bootstrapper.BootstrapAsync(cancellationToken);
+        var handoff = scope.ServiceProvider.GetRequiredService<FirstAdminRoleHandoff>();
+        await handoff.ApplyAsync(cancellationToken);
     }
 }

@@ -10,9 +10,18 @@ This file intentionally starts lightweight. It should become more detailed as bu
 
 ## Current Goal
 
-- Unit 20 next: Staff Users, Roles, and Team Scope Backend.
+- Unit 21 next: Seasons and Competitions Backend.
 
 ## Completed
+
+- Unit 20 completed:
+  - Added the canonical `StaffRole` model with `ADMIN`, `DATA_OPERATOR`, `ANALYST`, `COACH`, `MEDICAL_STAFF`, and `VIEWER`, plus explicit `CanVerifyReports`, `CanImportData`, and `CanViewMedicalDetails` permissions.
+  - Added the authoritative one-to-one `staff_access_profiles` persistence model keyed by the existing Identity user ID. Roles persist as their stable uppercase string values and non-admin permission flags default to `false`.
+  - Added the Application-safe `ICurrentUserAccess` abstraction and a scoped, request-cached Infrastructure resolver. It reads current persisted account/profile data, treats unavailable or profile-less users as non-authorized, and leaves an extension point for Unit 23 team scope.
+  - Registered centralized `AdminOnly`, `CanVerifyReports`, `CanImportData`, and `CanViewMedicalDetails` policies. `ADMIN` satisfies all policies; non-admin users require the matching persisted flag; unauthenticated callers remain `401` and insufficient/profile-less callers receive `403`.
+  - Added the idempotent first-admin role handoff after the existing bootstrap operation. It uses the configured bootstrap email when available, otherwise permits the documented single-user/no-profile fallback, and fails safely on ambiguous fallback state. It does not alter credentials, account status, lockout state, or password-change state.
+  - Enriched authenticated `GET /api/auth/session` users with `primaryRole` and effective `permissions` (`canVerifyReports`, `canImportData`, `canViewMedicalDetails`). No team IDs, persistence identifiers beyond the existing compatible user ID, or Identity security metadata are exposed.
+  - Added the `AddStaffAccessProfiles` and `AddStaffAccessProfileUserForeignKey` EF Core migrations and verified them against the configured local PostgreSQL database. The access profile has a unique one-to-one foreign-key reference to the Identity user. Selected-team scope remains intentionally deferred to Unit 23.
 
 - Unit 19 completed:
   - Connected the React Hook Form and Zod sign-in form to `POST /api/auth/login` and added the protected `/change-password` form for `POST /api/auth/change-password`.
@@ -380,6 +389,13 @@ This file intentionally starts lightweight. It should become more detailed as bu
   - `frontend`: `npm.cmd run format`, `npm.cmd run format:check`, `npm.cmd run lint`, and `npm.cmd run build` passed.
   - `backend`: `dotnet test PlayerPerformance.sln --artifacts-path C:\Users\Jugo\AppData\Local\Temp\player-performance-artifacts-unit19` passed with 25 unit tests and 17 integration tests.
   - Manual browser end-to-end verification was not run in this environment because it requires a configured local API, PostgreSQL database, bootstrap admin credentials, and cookie-capable browser session. The backend integration suite verifies the login, CSRF, required-password-change, password-change, session, and logout contracts used by the frontend.
+
+- Unit 20 verification results:
+  - `backend`: `dotnet restore PlayerPerformance.sln --artifacts-path C:\Users\Jugo\AppData\Local\Temp\player-performance-artifacts-unit20` passed after temporary NuGet network access was allowed.
+  - `backend`: `dotnet build PlayerPerformance.sln --no-restore --artifacts-path C:\Users\Jugo\AppData\Local\Temp\player-performance-artifacts-unit20` passed with zero warnings and zero errors.
+  - `backend`: `dotnet test PlayerPerformance.sln --no-restore --no-build --artifacts-path C:\Users\Jugo\AppData\Local\Temp\player-performance-artifacts-unit20` passed with 25 unit tests and 22 integration tests.
+  - `backend`: generated `20260710124807_AddStaffAccessProfiles` and `20260710125149_AddStaffAccessProfileUserForeignKey` with EF Core tooling and applied them successfully using `dotnet ef database update`; the local development database now contains `staff_access_profiles` with its Identity-user foreign key.
+  - `backend`: test-host-only policy probes verify unauthenticated `401`, missing-profile/non-admin `403`, matching permission access, all `ADMIN` overrides, safe session enrichment, and first-admin handoff idempotency/ambiguity behavior. No production demonstration endpoint was added.
 
 ## Confirmed Decisions
 

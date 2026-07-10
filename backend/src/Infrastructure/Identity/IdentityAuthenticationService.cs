@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using PlayerPerformance.Application.Auth;
+using PlayerPerformance.Application.Authorization;
 using PlayerPerformance.Domain.Common.Results;
 using PlayerPerformance.Domain.Users;
 
@@ -9,7 +10,8 @@ namespace PlayerPerformance.Infrastructure.Identity;
 public sealed class IdentityAuthenticationService(
     IHttpContextAccessor httpContextAccessor,
     ApplicationSignInManager signInManager,
-    UserManager<ApplicationUser> userManager) : IAuthenticationService
+    UserManager<ApplicationUser> userManager,
+    ICurrentUserAccess currentUserAccess) : IAuthenticationService
 {
     public async Task<Result<SessionResponse>> LoginAsync(LoginRequest request, CancellationToken cancellationToken = default)
     {
@@ -34,7 +36,7 @@ public sealed class IdentityAuthenticationService(
 
         if (signInResult.Succeeded)
         {
-            return Result<SessionResponse>.Success(ToSession(user));
+            return Result<SessionResponse>.Success(await ToSessionAsync(user, cancellationToken));
         }
 
         if (signInResult.IsLockedOut || await userManager.IsLockedOutAsync(user))
@@ -85,7 +87,7 @@ public sealed class IdentityAuthenticationService(
         }
 
         await signInManager.RefreshSignInAsync(user);
-        return Result<SessionResponse>.Success(ToSession(user));
+        return Result<SessionResponse>.Success(await ToSessionAsync(user, cancellationToken));
     }
 
     public async Task<SessionResponse> GetCurrentSessionAsync(CancellationToken cancellationToken = default)
@@ -102,7 +104,7 @@ public sealed class IdentityAuthenticationService(
             return SessionResponse.Unauthenticated();
         }
 
-        return ToSession(user);
+        return await ToSessionAsync(user, cancellationToken);
     }
 
     public Task LogoutAsync(CancellationToken cancellationToken = default) => signInManager.SignOutAsync();
@@ -120,9 +122,19 @@ public sealed class IdentityAuthenticationService(
         return user.AccountStatus is not UserAccountStatus.ACTIVE || await userManager.IsLockedOutAsync(user);
     }
 
-    private static SessionResponse ToSession(ApplicationUser user) => SessionResponse.Authenticated(new SessionUser(
-        user.Id.ToString(),
-        user.Email ?? string.Empty,
-        user.AccountStatus.ToString(),
-        user.RequiresPasswordChange));
+    private async Task<SessionResponse> ToSessionAsync(ApplicationUser user, CancellationToken cancellationToken)
+    {
+        var access = await currentUserAccess.GetForUserAsync(user.Id, cancellationToken);
+        var permissions = access.EffectivePermissions;
+        return SessionResponse.Authenticated(new SessionUser(
+            user.Id.ToString(),
+            user.Email ?? string.Empty,
+            user.AccountStatus.ToString(),
+            user.RequiresPasswordChange,
+            access.PrimaryRole?.ToString(),
+            new SessionPermissions(
+                permissions.CanVerifyReports,
+                permissions.CanImportData,
+                permissions.CanViewMedicalDetails)));
+    }
 }

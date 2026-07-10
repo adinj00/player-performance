@@ -9,6 +9,8 @@ using Microsoft.Extensions.Logging;
 using PlayerPerformance.Domain.Users;
 using PlayerPerformance.Infrastructure.Identity;
 using PlayerPerformance.Infrastructure.Persistence;
+using PlayerPerformance.Infrastructure.Staff;
+using PlayerPerformance.Domain.Staff;
 
 namespace PlayerPerformance.IntegrationTests;
 
@@ -65,6 +67,27 @@ public class TestApplicationFactory : WebApplicationFactory<Program>
         var result = await userManager.CreateAsync(user, password);
         Assert.True(result.Succeeded, string.Join("; ", result.Errors.Select(error => error.Description)));
         return user;
+    }
+
+    public async Task CreateAccessProfileAsync(
+        Guid userId,
+        StaffRole role,
+        bool canVerifyReports = false,
+        bool canImportData = false,
+        bool canViewMedicalDetails = false)
+    {
+        await using var scope = Services.CreateAsyncScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        dbContext.StaffAccessProfiles.Add(new StaffAccessProfile
+        {
+            UserId = userId,
+            PrimaryRole = role,
+            CanVerifyReports = canVerifyReports,
+            CanImportData = canImportData,
+            CanViewMedicalDetails = canViewMedicalDetails,
+            CreatedUtc = DateTimeOffset.UtcNow
+        });
+        await dbContext.SaveChangesAsync();
     }
 
     protected override void Dispose(bool disposing)

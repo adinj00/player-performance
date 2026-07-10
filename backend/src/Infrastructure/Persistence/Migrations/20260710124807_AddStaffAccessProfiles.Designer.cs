@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PlayerPerformance.Infrastructure.Persistence;
@@ -11,9 +12,11 @@ using PlayerPerformance.Infrastructure.Persistence;
 namespace PlayerPerformance.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260710124807_AddStaffAccessProfiles")]
+    partial class AddStaffAccessProfiles
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -173,6 +176,7 @@ namespace PlayerPerformance.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("PlayerPerformance.Infrastructure.Staff.StaffAccessProfile", b =>
                 {
                     b.Property<Guid>("UserId")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<bool>("CanImportData")
@@ -232,15 +236,6 @@ namespace PlayerPerformance.Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("PlayerPerformance.Infrastructure.Staff.StaffAccessProfile", b =>
-                {
-                    b.HasOne("PlayerPerformance.Infrastructure.Identity.ApplicationUser", null)
-                        .WithOne()
-                        .HasForeignKey("PlayerPerformance.Infrastructure.Staff.StaffAccessProfile", "UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 #pragma warning restore 612, 618

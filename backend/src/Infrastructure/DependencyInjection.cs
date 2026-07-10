@@ -4,6 +4,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using PlayerPerformance.Application.Abstractions.Time;
 using PlayerPerformance.Application.Auth;
+using PlayerPerformance.Application.Authorization;
+using PlayerPerformance.Infrastructure.Authorization;
 using PlayerPerformance.Infrastructure.Identity;
 using PlayerPerformance.Infrastructure.Persistence;
 using PlayerPerformance.Infrastructure.Time;
@@ -26,6 +28,8 @@ public static class DependencyInjection
             .ValidateOnStart();
 
         services.AddScoped<FirstAdminBootstrapper>();
+        services.AddScoped<FirstAdminRoleHandoff>();
+        services.AddScoped<ICurrentUserAccess, CurrentUserAccessResolver>();
         services.AddScoped<IAuthenticationService, IdentityAuthenticationService>();
 
         services.AddDbContext<AppDbContext>(options =>
