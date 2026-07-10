@@ -7,6 +7,8 @@ using PlayerPerformance.Api.Endpoints;
 using PlayerPerformance.Api.ErrorHandling;
 using PlayerPerformance.Infrastructure.Identity;
 using PlayerPerformance.Api.Authorization;
+using PlayerPerformance.Infrastructure.Teams;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,10 +35,12 @@ builder.Services.AddApiAuthentication(builder.Environment);
 builder.Services.AddApiCors(builder.Configuration);
 builder.Services.AddStaffAuthorization();
 builder.Services.AddApiProblemDetails();
+builder.Services.ConfigureHttpJsonOptions(options => options.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
 var app = builder.Build();
 
 await app.Services.BootstrapFirstAdminAsync(app.Environment);
+await app.Services.InitializeTeamsAsync(app.Environment);
 
 app.UseApiExceptionHandling();
 app.UseApiStatusCodeProblemDetails();

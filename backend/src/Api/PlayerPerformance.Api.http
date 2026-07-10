@@ -35,3 +35,20 @@ X-CSRF-TOKEN: {{csrfToken}}
 ### Sign out
 POST {{PlayerPerformance_Api_HostAddress}}/api/auth/logout
 X-CSRF-TOKEN: {{csrfToken}}
+
+### List team selections (admin)
+GET {{PlayerPerformance_Api_HostAddress}}/api/settings/teams
+
+### Create a team selection (admin)
+POST {{PlayerPerformance_Api_HostAddress}}/api/settings/teams
+Content-Type: application/json
+X-CSRF-TOKEN: {{csrfToken}}
+
+{ "name": "U16", "trackingLevel": "STANDARD" }
+
+### Replace the complete non-archived team order (admin)
+PUT {{PlayerPerformance_Api_HostAddress}}/api/settings/teams/order
+Content-Type: application/json
+X-CSRF-TOKEN: {{csrfToken}}
+
+{ "orderedTeamIds": ["00000000-0000-0000-0000-000000000001"] }

@@ -10,9 +10,16 @@ This file intentionally starts lightweight. It should become more detailed as bu
 
 ## Current Goal
 
-- Unit 22 next: Teams and Selections Backend.
+- Unit 22 completed: Teams and Selections Backend.
 
 ## Completed
+
+- Unit 22 completed:
+  - Added the canonical `Team` aggregate with server-owned normalized names, display order, and UTC timestamps; `TeamTrackingLevel` is fixed to `BASIC`, `STANDARD`, and `FULL`, while `TeamStatus` is fixed to `ACTIVE`, `INACTIVE`, and `ARCHIVED`.
+  - Added admin-only, password-change-gated `/api/settings/teams` list, get, create, update, reorder, activate, deactivate, archive, and restore operations. Team names are trimmed and normalized with the established deterministic rule; the database unique index protects names across all lifecycle states and duplicate names return safe `409` responses.
+  - Added contiguous non-archived ordering, complete-list reorder validation, archive normalization, and restore append behavior. Restored teams always return as `INACTIVE`; administrators explicitly activate them when appropriate.
+  - Added the `20260710143906_AddTeamsSelections` migration, string-persisted tracking/status enums, non-negative display-order constraint, relevant indexes, and idempotent startup seeding. An empty teams table seeds `First Team` (`FULL`), `U19`/`U17` (`STANDARD`), and `U15`/`U13`/`U11` (`BASIC`) in that order; populated tables are not supplemented or reset.
+  - Added domain and integration coverage for aggregate lifecycle rules, default seeding, admin authorization, CSRF-protected mutations, and archived-list filtering. Staff team-scope assignments intentionally remain deferred to Unit 23.
 
 - Unit 21 completed:
   - Added `Season` (`Id`, display/normalized name, `DateOnly` start/end dates, archive flag, and UTC created/updated timestamps) and `Competition` (the same fields except dates) as EF-free Domain entities with explicit update, archive, and restore behavior.

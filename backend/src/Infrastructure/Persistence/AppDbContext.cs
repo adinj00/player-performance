@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using PlayerPerformance.Infrastructure.Identity;
 using PlayerPerformance.Infrastructure.Staff;
 using PlayerPerformance.Domain.Settings;
+using PlayerPerformance.Domain.Teams;
 
 namespace PlayerPerformance.Infrastructure.Persistence;
 
@@ -13,6 +14,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options)
     public DbSet<StaffAccessProfile> StaffAccessProfiles => Set<StaffAccessProfile>();
     public DbSet<Season> Seasons => Set<Season>();
     public DbSet<Competition> Competitions => Set<Competition>();
+    public DbSet<Team> Teams => Set<Team>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

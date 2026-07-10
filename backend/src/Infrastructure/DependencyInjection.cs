@@ -11,6 +11,8 @@ using PlayerPerformance.Infrastructure.Persistence;
 using PlayerPerformance.Infrastructure.Time;
 using PlayerPerformance.Application.Settings;
 using PlayerPerformance.Infrastructure.Settings;
+using PlayerPerformance.Application.Teams;
+using PlayerPerformance.Infrastructure.Teams;
 
 namespace PlayerPerformance.Infrastructure;
 
@@ -34,6 +36,8 @@ public static class DependencyInjection
         services.AddScoped<ICurrentUserAccess, CurrentUserAccessResolver>();
         services.AddScoped<IAuthenticationService, IdentityAuthenticationService>();
         services.AddScoped<ISettingsRepository, SettingsRepository>();
+        services.AddScoped<ITeamsRepository, TeamsRepository>();
+        services.AddScoped<TeamStartupInitializer>();
 
         services.AddDbContext<AppDbContext>(options =>
         {
