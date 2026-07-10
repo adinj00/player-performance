@@ -381,8 +381,8 @@ Dependencies: Unit 40, Unit 53.
 
 ## Next Immediate Unit
 
-The next implementation unit after Unit 23 should be:
+The next implementation unit after Unit 24 should be:
 
-**Unit 24: Staff Users and Roles UI**
+**Unit 25: Venues and Opponents Backend**
 
-Reason: the backend now exposes the complete staff invitation, role, permission, team-scope, lifecycle, session, and authorization contracts required for an administrator-facing UI. Completing this frontend workflow makes staff access operational before later settings, player, match, and report modules depend on role- and team-aware users.
+Reason: staff access is now operational, while matches still require stable administrator-managed venue and opponent identifiers. Completing these final backend settings resources prepares Unit 26 settings UI and the later match model without introducing match behavior prematurely.
