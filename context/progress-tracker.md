@@ -10,9 +10,18 @@ This file intentionally starts lightweight. It should become more detailed as bu
 
 ## Current Goal
 
-- Unit 27: Players Backend Foundation is complete.
+- Unit 28: Player Team Assignment Backend is complete; Unit 29 player UI remains next.
 
 ## Completed
+
+- Unit 28 completed:
+  - Added the persistent `PlayerTeamAssignment` model with immutable player/team identity, required `DateOnly` start date, optional inclusive `DateOnly` end date, and UTC created/updated timestamps. Current/upcoming/past timing state is derived from the approved clock and is never persisted.
+  - Added admin-only create and end routes beneath `/api/players/{playerId}/assignments`; assignment history reads are available to authenticated active staff only when the player is readable under the canonical team scope. There is no assignment delete, reopen, team-change, or generic update route.
+  - Active players can hold simultaneous assignments to different teams. Application-level overlap validation rejects inclusive overlapping periods for the same player/team, including duplicate open-ended assignments; adjacent periods and later returns are supported. Only active teams may receive assignments.
+  - Player deactivate/archive now return a safe conflict while the player has a current assignment. Assignment mutations remain audit-ready application use cases; audit persistence is deferred to Unit 38 and UI work is deferred to Unit 29.
+  - Player reads now use assignment-aware scope rules: `ADMIN` reads all, `ALL_TEAMS` staff read all lifecycle-allowed players, and `SELECTED_TEAMS` staff read only players with a current assignment in scope. List reads accept an optional database-side `teamId` current-assignment filter and include compact current-assignment summaries without duplicate player rows.
+  - Added assignment persistence configuration, history-safe foreign keys, supporting indexes, a unique filtered open-assignment index, and the EF-generated focused `20260711095718_AddPlayerTeamAssignments` migration. After the local API process was stopped, EF migration generation and `dotnet ef database update` completed successfully against the configured PostgreSQL development database; the migration contains only the assignment table, foreign keys, and related indexes.
+  - Added focused domain and integration coverage for assignment date/end behavior, overlap conflicts, assignment list/end flow, and updated player read authorization behavior. Verification passed: restore, whitespace format/check, zero-warning build, and tests (43 unit, 28 integration). `git diff --check` passed.
 
 - Unit 27 completed:
   - Added the persistent club-level `Player` aggregate with only first name, last name, optional preferred name, optional `DateOnly` date of birth, `PlayerRecordStatus`, and UTC created/updated timestamps. There is no team/current-selection foreign key or other future player metadata.

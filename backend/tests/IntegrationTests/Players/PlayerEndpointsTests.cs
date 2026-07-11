@@ -17,8 +17,8 @@ public sealed class PlayerEndpointsTests
         await factory.CreateAccessProfileAsync(coach.Id, StaffRole.COACH);
         using var coachClient = CreateClient(factory);
         await LoginAsync(coachClient, coach.Email!);
-        using var forbidden = await coachClient.GetAsync("/api/players");
-        Assert.Equal(HttpStatusCode.Forbidden, forbidden.StatusCode);
+        using var permittedRead = await coachClient.GetAsync("/api/players");
+        Assert.Equal(HttpStatusCode.OK, permittedRead.StatusCode);
         var admin = await factory.CreateUserAsync("admin.players@example.com", "Temporary!Pass123");
         await factory.CreateAccessProfileAsync(admin.Id, StaffRole.ADMIN);
         using var client = CreateClient(factory);
@@ -68,6 +68,33 @@ public sealed class PlayerEndpointsTests
         Assert.Equal(HttpStatusCode.UnprocessableEntity, invalid.StatusCode);
         using var delete = await SendAsync(client, HttpMethod.Delete, $"/api/players/{Guid.NewGuid()}", csrf);
         Assert.Equal(HttpStatusCode.MethodNotAllowed, delete.StatusCode);
+    }
+
+    [Fact]
+    public async Task AssignmentEndpoints_ShouldCreateListEndAndRejectSameTeamOverlap()
+    {
+        using var factory = new IdentityTestApplicationFactory();
+        var admin = await factory.CreateUserAsync("admin.assignments@example.com", "Temporary!Pass123");
+        await factory.CreateAccessProfileAsync(admin.Id, StaffRole.ADMIN);
+        using var client = CreateClient(factory);
+        await LoginAsync(client, admin.Email!);
+        var csrf = await GetCsrfAsync(client);
+        using var teamResponse = await SendJsonAsync(client, HttpMethod.Post, "/api/settings/teams", new { name = "U19 Assignment", trackingLevel = "STANDARD" }, csrf);
+        Assert.Equal(HttpStatusCode.Created, teamResponse.StatusCode);
+        var teamId = await GetIdAsync(teamResponse);
+        using var playerResponse = await SendJsonAsync(client, HttpMethod.Post, "/api/players", new { firstName = "Amar", lastName = "Assignment" }, csrf);
+        var playerId = await GetIdAsync(playerResponse);
+        using var created = await SendJsonAsync(client, HttpMethod.Post, $"/api/players/{playerId}/assignments", new { teamId, startDate = "2026-01-01" }, csrf);
+        Assert.Equal(HttpStatusCode.Created, created.StatusCode);
+        var assignmentId = await GetIdAsync(created);
+        using var overlap = await SendJsonAsync(client, HttpMethod.Post, $"/api/players/{playerId}/assignments", new { teamId, startDate = "2026-07-01" }, csrf);
+        Assert.Equal(HttpStatusCode.Conflict, overlap.StatusCode);
+        using var assignments = await client.GetAsync($"/api/players/{playerId}/assignments");
+        Assert.Contains("CURRENT", await assignments.Content.ReadAsStringAsync());
+        using var ended = await SendJsonAsync(client, HttpMethod.Post, $"/api/players/{playerId}/assignments/{assignmentId}/end", new { endDate = "2026-07-11" }, csrf);
+        Assert.Equal(HttpStatusCode.OK, ended.StatusCode);
+        using var repeated = await SendJsonAsync(client, HttpMethod.Post, $"/api/players/{playerId}/assignments/{assignmentId}/end", new { endDate = "2026-07-11" }, csrf);
+        Assert.Equal(HttpStatusCode.Conflict, repeated.StatusCode);
     }
 
     private static HttpClient CreateClient(WebApplicationFactory<Program> factory) => factory.CreateClient(new WebApplicationFactoryClientOptions { BaseAddress = new Uri("https://localhost") });

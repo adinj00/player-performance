@@ -20,6 +20,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options)
     public DbSet<Opponent> Opponents => Set<Opponent>();
     public DbSet<Team> Teams => Set<Team>();
     public DbSet<Player> Players => Set<Player>();
+    public DbSet<PlayerTeamAssignment> PlayerTeamAssignments => Set<PlayerTeamAssignment>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

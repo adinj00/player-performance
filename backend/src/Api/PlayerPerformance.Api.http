@@ -67,6 +67,23 @@ X-CSRF-TOKEN: {{csrfToken}}
 POST {{PlayerPerformance_Api_HostAddress}}/api/players/00000000-0000-0000-0000-000000000001/archive
 X-CSRF-TOKEN: {{csrfToken}}
 
+### List a player's assignment history (authenticated staff with access)
+GET {{PlayerPerformance_Api_HostAddress}}/api/players/00000000-0000-0000-0000-000000000001/assignments
+
+### Create a player assignment (admin)
+POST {{PlayerPerformance_Api_HostAddress}}/api/players/00000000-0000-0000-0000-000000000001/assignments
+Content-Type: application/json
+X-CSRF-TOKEN: {{csrfToken}}
+
+{ "teamId": "00000000-0000-0000-0000-000000000002", "startDate": "2026-07-01" }
+
+### End a player assignment (admin)
+POST {{PlayerPerformance_Api_HostAddress}}/api/players/00000000-0000-0000-0000-000000000001/assignments/00000000-0000-0000-0000-000000000003/end
+Content-Type: application/json
+X-CSRF-TOKEN: {{csrfToken}}
+
+{ "endDate": "2026-12-31" }
+
 ### Create a venue (admin)
 POST {{PlayerPerformance_Api_HostAddress}}/api/settings/venues
 Content-Type: application/json

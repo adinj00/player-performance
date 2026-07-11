@@ -14,6 +14,7 @@ public static class DependencyInjection
         services.AddScoped<ISettingsService, SettingsService>();
         services.AddScoped<ITeamsService, TeamsService>();
         services.AddScoped<IPlayersService, PlayersService>();
+        services.AddScoped<IPlayerTeamAssignmentsService, PlayerTeamAssignmentsService>();
 
         return services;
     }
