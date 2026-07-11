@@ -381,8 +381,8 @@ Dependencies: Unit 40, Unit 53.
 
 ## Next Immediate Unit
 
-The next implementation unit after Unit 31 should be:
+The next implementation unit after Unit 32 should be:
 
-**Unit 32: Match Report Workflow Backend**
+**Unit 33: Manual Match Statistics Backend**
 
-Reason: match metadata and concrete player appearances now exist. The next dependency-safe step is to introduce the backend-owned report lifecycle, review/verification permissions, correction workflow, allowed actions, and workflow locks before manual player and goalkeeper statistics are added in Unit 33.
+Reason: concrete player appearances and the backend-owned match-report workflow now exist. The next dependency-safe step is to add manual player and goalkeeper statistics, freeze the report’s applied tracking level, enforce tracking-level field gating, and extend submit-for-review readiness before building the matches and statistics UI in Units 34–37.
