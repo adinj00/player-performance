@@ -283,7 +283,7 @@ import { Button } from "../../../components/ui/button";
 
 - Use TanStack Query for server state, API fetching, caching, mutations, and invalidation.
 - Do not duplicate server-owned data in Zustand or React Context.
-- Use `nuqs` for URL/search-parameter state such as filters, selected season, selected team, tabs, pagination, and search terms.
+- Use React Router search params only when a workflow explicitly needs shareable URL state. Keep high-frequency operational filters such as Players and Users search in local React state so input changes do not trigger router synchronization.
 - Use Zustand only for global client-side UI state that is not server data and does not belong in the URL.
 - Use React Context Providers for stable app-level context and provider composition, such as auth/session provider, query client provider, and static app configuration.
 - Keep form state inside form libraries/components unless it must be shared outside the form.
@@ -403,7 +403,7 @@ Recommended ignore rules:
 - Do not install packages speculatively because they might be useful later.
 - Feature specs should list required dependencies for that task.
 - Do not replace established project choices without updating the relevant context file.
-- For frontend, selected standard libraries include TanStack Query, nuqs, Zustand, Zod, React Hook Form, TanStack Table, shadcn/ui, and Recharts through shadcn charts.
+- For frontend, selected standard libraries include TanStack Query, Zustand, Zod, React Hook Form, shadcn/ui, and Recharts through shadcn charts. React Router owns routing/search params where needed; nuqs is not currently installed.
 - For backend, selected likely libraries include EF Core, Npgsql provider, ASP.NET Core Identity persistence, Mapster, FluentValidation, CSV/XLSX readers when needed, and test packages when needed.
 
 ## Testing and Quality Gates

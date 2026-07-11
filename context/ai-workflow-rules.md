@@ -128,7 +128,7 @@ Project-specific missing requirement rules:
 Approved frontend library direction:
 
 - TanStack Query for server state.
-- nuqs for URL/search-parameter state.
+- React Router search params only for explicitly shareable URL state; local React state for high-frequency operational filters.
 - Zustand only for global client-side UI state.
 - React Context Providers for stable app-level provider composition.
 - Zod for frontend schemas.
@@ -229,7 +229,7 @@ Frontend verification:
 - Verify shadcn/ui primitives were not visually overridden ad hoc.
 - Verify raw Tailwind palette classes were not introduced for app UI colors.
 - Verify server data is handled with TanStack Query, not duplicated in Zustand or React Context.
-- Verify URL/filter state uses nuqs where appropriate.
+- Verify URL/filter state uses the smallest appropriate owner and does not synchronize high-frequency typing into the router unnecessarily.
 - Verify forms use React Hook Form with Zod when form validation is required.
 
 Full-stack verification:

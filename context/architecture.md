@@ -7,7 +7,7 @@
 | Frontend Framework | React + Vite + TypeScript | Single-page web application for staff workflows, dashboards, forms, tables, and analysis views |
 | Frontend Styling | Tailwind CSS v4 + shadcn/ui | Token-based UI system, reusable primitives, dashboard layout, forms, tables, dialogs, and charts |
 | Frontend Data Fetching | TanStack Query | Server-state fetching, caching, invalidation, and mutations |
-| Frontend URL State | nuqs | URL search parameter state for filters, selected season/team, tabs, pagination, and shareable views |
+| Frontend URL State | React Router search params and local React state | URL state where a workflow requires shareable navigation; local component state for current Players/Users filters to keep typing and filter changes independent of router updates |
 | Frontend Client UI State | Zustand | Limited global client-side UI state such as sidebar state, command palette state, or transient layout preferences |
 | Frontend Validation | Zod + React Hook Form | Form schemas, frontend validation, and typed form handling |
 | Frontend Tables | TanStack Table + shadcn/ui table primitives | Headless table behavior with design-system rendering |
@@ -514,7 +514,7 @@ Shared logic should not be moved to global folders until at least two features n
 ### State Ownership
 
 - Server data belongs in TanStack Query.
-- URL/filter state belongs in nuqs.
+- URL/filter state belongs in the smallest appropriate owner: React Router search params for explicitly shareable navigation state, or local React state for high-frequency operational filters such as Players and Users search.
 - Reusable global client-only UI state may belong in Zustand.
 - Stable app-level providers belong in React Context providers.
 - Do not duplicate server-owned data in Zustand or Context.

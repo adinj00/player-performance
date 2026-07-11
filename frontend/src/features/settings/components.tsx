@@ -12,6 +12,7 @@ import { z } from "zod";
 
 import { routePaths } from "@/app/route-paths";
 import { ErrorState } from "@/components/common/error-state";
+import { DatePicker } from "@/components/common/date-picker";
 import { FormErrorSummary } from "@/components/common/form-error-summary";
 import { PageHeader } from "@/components/common/page-header";
 import { Button } from "@/components/ui/button";
@@ -234,21 +235,29 @@ export function SettingFormDialog({
               <>
                 <Field data-invalid={Boolean(field("startDate"))}>
                   <FieldLabel htmlFor="start-date">Datum početka</FieldLabel>
-                  <Input
+                  <DatePicker
                     id="start-date"
-                    type="date"
                     aria-invalid={Boolean(field("startDate"))}
-                    {...form.register("startDate")}
+                    value={form.watch("startDate")}
+                    onChange={(value) =>
+                      form.setValue("startDate", value, {
+                        shouldValidate: true,
+                      })
+                    }
                   />
                   <FieldError>{field("startDate")}</FieldError>
                 </Field>
                 <Field data-invalid={Boolean(field("endDate"))}>
                   <FieldLabel htmlFor="end-date">Datum završetka</FieldLabel>
-                  <Input
+                  <DatePicker
                     id="end-date"
-                    type="date"
                     aria-invalid={Boolean(field("endDate"))}
-                    {...form.register("endDate")}
+                    value={form.watch("endDate")}
+                    onChange={(value) =>
+                      form.setValue("endDate", value, {
+                        shouldValidate: true,
+                      })
+                    }
                   />
                   <FieldError>{field("endDate")}</FieldError>
                 </Field>

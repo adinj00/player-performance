@@ -343,7 +343,7 @@ Common elements:
 - Primary page action.
 - Optional global search later if needed.
 
-Season and team selection should be treated as important dashboard context. When the selected season/team affects shareable page state, it should be stored in URL search params using `nuqs`.
+Season and team selection should be treated as important dashboard context. When the selected season/team affects shareable page state, use the app's React Router search-param conventions. High-frequency list search/filter inputs should remain local state unless shareable URL state is explicitly required.
 
 ### Main Content Area
 
@@ -572,7 +572,7 @@ Charts must use theme tokens and should remain readable in the light-only UI.
 ## Frontend State and UI Data Rules
 
 - Use TanStack Query for server state, API fetching, caching, and mutations.
-- Use `nuqs` for URL search parameter state such as filters, tabs, pagination, selected season, and selected team.
+- Use React Router search params only for explicitly shareable state. Keep high-frequency list filters local when router synchronization would interfere with responsive input behavior.
 - Use Zustand only for global client-side UI state that is not server data and does not belong in the URL.
 - Use React Context Providers for stable app-level provider composition and static context.
 - Do not duplicate server-owned data in Zustand or React Context.
@@ -583,7 +583,7 @@ Examples:
 | ------------------------- | -------------------------------------------------- |
 | Players list              | TanStack Query                                     |
 | Match detail from API     | TanStack Query                                     |
-| Table filters in URL      | nuqs                                               |
+| Table filters             | Local React state, or React Router search params when explicitly shareable |
 | Sidebar collapsed state   | Zustand                                            |
 | QueryClientProvider       | React Context Provider                             |
 | Auth/session query result | TanStack Query plus provider composition as needed |
@@ -649,4 +649,4 @@ This file approves the initial UI direction:
 - No ad-hoc visual overrides on shadcn/ui usages.
 - Layout-only utility classes are allowed.
 - Desktop-first responsive dashboard layout.
-- TanStack Query, nuqs, Zustand, Zod, React Hook Form, TanStack Table, and shadcn/Recharts as the frontend UI/data toolkit.
+- TanStack Query, Zustand, Zod, React Hook Form, TanStack Table, and shadcn/Recharts as the frontend UI/data toolkit.
