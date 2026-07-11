@@ -6,6 +6,7 @@ using PlayerPerformance.Infrastructure.Staff;
 using PlayerPerformance.Domain.Settings;
 using PlayerPerformance.Domain.Teams;
 using PlayerPerformance.Domain.Players;
+using PlayerPerformance.Domain.Matches;
 
 namespace PlayerPerformance.Infrastructure.Persistence;
 
@@ -21,6 +22,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options)
     public DbSet<Team> Teams => Set<Team>();
     public DbSet<Player> Players => Set<Player>();
     public DbSet<PlayerTeamAssignment> PlayerTeamAssignments => Set<PlayerTeamAssignment>();
+    public DbSet<Match> Matches => Set<Match>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

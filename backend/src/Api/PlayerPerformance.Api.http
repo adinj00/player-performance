@@ -1,5 +1,11 @@
 @PlayerPerformance_Api_HostAddress = http://localhost:5051
 
+### List matches
+GET {{PlayerPerformance_Api_HostAddress}}/api/matches
+
+### Get a match
+GET {{PlayerPerformance_Api_HostAddress}}/api/matches/00000000-0000-0000-0000-000000000000
+
 GET {{PlayerPerformance_Api_HostAddress}}/health
 Accept: application/json
 

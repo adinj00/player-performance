@@ -466,7 +466,17 @@ This file intentionally starts lightweight. It should become more detailed as bu
 
 ## Known Blockers
 
+- Unit 30: `dotnet ef database update` reached the local PostgreSQL database but could not apply because its migration history is out of sync with existing tables (`competitions` already exists while EF attempts an earlier migration). The focused match migration was generated through EF tooling, but EF's snapshot rollback caused it to include existing tables; it was replaced with the equivalent focused match-only migration. This tooling exception must be resolved against the local database history before applying the migration there.
+
 - Unit 25: `dotnet ef migrations add AddVenuesAndOpponents` could not run because the developer's running `PlayerPerformance.Api` process (PID 2564) locks the normal API build outputs. The focused migration was prepared from the verified EF model instead. The isolated restore, whitespace formatting/check, zero-warning build, and full test suite pass; generating/applying the migration with EF tooling remains the final local verification step once that process is stopped.
+
+## Unit 30: Matches Backend Foundation
+
+- Status: complete, with the local database-update blocker documented above.
+- Added the persistent `Match` aggregate with immutable team selection, `HOME`/`AWAY`/`NEUTRAL` context, explicit `SCHEDULED`/`PLAYED`/`POSTPONED`/`CANCELLED` transitions, paired non-negative final-score invariants, and archive/restore lifecycle.
+- Added team-scope-aware match list/detail and create/update/archive/restore APIs. Reads are server-scoped; admins have full access, data operators can mutate only their scope, and archive/restore remain admin-only. Creation and updates validate active references, season date range, exact active duplicates, and immutable team identity.
+- Added EF mapping, restrictive historical foreign keys, query indexes, the focused `20260711153539_AddMatchesBackendFoundation` migration, API request examples, and match domain coverage.
+- Verification passed: isolated restore; whitespace format and verify; zero-warning solution build; 47 unit and 28 integration tests; `git diff --check`. `dotnet ef database update` could not complete only because the existing local database migration history is inconsistent with its already-present settings tables.
 
 ## Unit 24: Staff Users and Roles UI
 

@@ -86,6 +86,92 @@ namespace PlayerPerformance.Infrastructure.Persistence.Migrations
                     b.ToTable("staff_user_tokens", (string)null);
                 });
 
+            modelBuilder.Entity("PlayerPerformance.Domain.Matches.Match", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CompetitionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("competition_id");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<bool>("IsArchived")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_archived");
+
+                    b.Property<DateTime>("KickoffAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("kickoff_at_utc");
+
+                    b.Property<string>("LocationType")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("location_type");
+
+                    b.Property<Guid>("OpponentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("opponent_id");
+
+                    b.Property<int?>("OpponentScore")
+                        .HasColumnType("integer")
+                        .HasColumnName("opponent_score");
+
+                    b.Property<string>("Round")
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)")
+                        .HasColumnName("round");
+
+                    b.Property<Guid>("SeasonId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("season_id");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("status");
+
+                    b.Property<Guid>("TeamId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("team_id");
+
+                    b.Property<int?>("TeamScore")
+                        .HasColumnType("integer")
+                        .HasColumnName("team_score");
+
+                    b.Property<DateTime>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at_utc");
+
+                    b.Property<Guid?>("VenueId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("venue_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CompetitionId");
+
+                    b.HasIndex("OpponentId");
+
+                    b.HasIndex("VenueId");
+
+                    b.HasIndex("SeasonId", "KickoffAtUtc");
+
+                    b.HasIndex("Status", "IsArchived");
+
+                    b.HasIndex("TeamId", "KickoffAtUtc");
+
+                    b.ToTable("matches", (string)null);
+                });
+
             modelBuilder.Entity("PlayerPerformance.Domain.Players.Player", b =>
                 {
                     b.Property<Guid>("Id")
@@ -582,6 +668,38 @@ namespace PlayerPerformance.Infrastructure.Persistence.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("PlayerPerformance.Domain.Matches.Match", b =>
+                {
+                    b.HasOne("PlayerPerformance.Domain.Settings.Competition", null)
+                        .WithMany()
+                        .HasForeignKey("CompetitionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("PlayerPerformance.Domain.Settings.Opponent", null)
+                        .WithMany()
+                        .HasForeignKey("OpponentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("PlayerPerformance.Domain.Settings.Season", null)
+                        .WithMany()
+                        .HasForeignKey("SeasonId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("PlayerPerformance.Domain.Teams.Team", null)
+                        .WithMany()
+                        .HasForeignKey("TeamId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("PlayerPerformance.Domain.Settings.Venue", null)
+                        .WithMany()
+                        .HasForeignKey("VenueId")
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("PlayerPerformance.Domain.Players.PlayerTeamAssignment", b =>

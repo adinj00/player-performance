@@ -3,6 +3,7 @@ using FluentValidation;
 using PlayerPerformance.Application.Settings;
 using PlayerPerformance.Application.Teams;
 using PlayerPerformance.Application.Players;
+using PlayerPerformance.Application.Matches;
 
 namespace PlayerPerformance.Application;
 
@@ -15,6 +16,7 @@ public static class DependencyInjection
         services.AddScoped<ITeamsService, TeamsService>();
         services.AddScoped<IPlayersService, PlayersService>();
         services.AddScoped<IPlayerTeamAssignmentsService, PlayerTeamAssignmentsService>();
+        services.AddScoped<IMatchesService, MatchesService>();
 
         return services;
     }
