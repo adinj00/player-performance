@@ -170,7 +170,6 @@
 - Do not store large media files, import source files, or generated files directly in PostgreSQL.
 - Database records for files must store metadata and storage keys/references only.
 
-
 ### Localization and UI Copy
 
 - Bosnian Latin is the default UI language.
@@ -333,6 +332,11 @@ import { Button } from "../../../components/ui/button";
 - Do not apply ad-hoc color, border, shadow, or typography overrides directly to shadcn/ui component usages.
 - Layout-only utility classes are allowed on shadcn/ui usages when needed for width, spacing, grid placement, flex behavior, alignment, or responsive behavior.
 - Repeated visual variations must be implemented through documented component variants or app-level reusable components, not through one-off local styling.
+- Before implementing a custom UI primitive, check `context/references/shadcn-components.md` for an existing shadcn/ui component that satisfies the requirement.
+- Prefer existing shadcn/ui components and composition over custom implementations of equivalent controls, dialogs, menus, tables, empty states, navigation patterns, or form primitives.
+- Install shadcn/ui components just in time when required by the active feature spec.
+- Do not install the entire shadcn/ui catalog upfront.
+- A custom app-level component is appropriate when it composes primitives into project-specific behavior; it should not unnecessarily reimplement an existing primitive.
 
 Allowed layout-only example:
 

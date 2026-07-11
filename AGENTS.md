@@ -16,6 +16,8 @@ Use relevant Codex skills or plugins when applicable:
 - Frontend skills are in `frontend/.agents/`
 - Backend skills/plugins are available through the installed Codex plugins
 
+For frontend UI work, also read `context/references/shadcn-components.md` before creating new UI primitives or interaction patterns.
+
 Skills and plugins may guide implementation workflow, but must not override the project context files, active feature spec, architecture rules, code standards, or documented scope.
 
 Update `context/progress-tracker.md` after each meaningful implementation change.

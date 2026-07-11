@@ -17,7 +17,6 @@ Primary characteristics:
 - shadcn/ui primitives as the base component system.
 - Desktop-first responsive layout with clean tablet and mobile rendering.
 
-
 ## UI Language
 
 The default application language is Bosnian Latin (`bs`). English (`en`) may be supported as an optional selectable UI language.
@@ -66,57 +65,57 @@ All color usage must flow through semantic CSS variables defined in `index.css` 
 
 ### Club Tokens
 
-| Role | CSS Variable | Purpose |
-| --- | --- | --- |
-| Club red | `--club-red` | FK Velež primary brand accent and primary action color |
-| Club gold | `--club-gold` | Focus rings, highlights, secondary accent, and selected emphasis |
-| Soft club gold | `--club-gold-soft` | Subtle highlight background and secondary surfaces |
+| Role           | CSS Variable       | Purpose                                                          |
+| -------------- | ------------------ | ---------------------------------------------------------------- |
+| Club red       | `--club-red`       | FK Velež primary brand accent and primary action color           |
+| Club gold      | `--club-gold`      | Focus rings, highlights, secondary accent, and selected emphasis |
+| Soft club gold | `--club-gold-soft` | Subtle highlight background and secondary surfaces               |
 
 ### Core shadcn/ui Tokens
 
-| Role | CSS Variable | Purpose |
-| --- | --- | --- |
-| Page background | `--background` | Main page background |
-| Primary text | `--foreground` | Main text color |
-| Card background | `--card` | Cards and contained panels |
-| Card text | `--card-foreground` | Text on card surfaces |
-| Popover background | `--popover` | Menus, dropdowns, popovers |
-| Popover text | `--popover-foreground` | Text in overlays |
-| Primary action | `--primary` | Main buttons and primary interactive elements |
-| Primary action text | `--primary-foreground` | Text on primary actions |
-| Secondary surface | `--secondary` | Secondary buttons and selected neutral highlights |
-| Secondary text | `--secondary-foreground` | Text on secondary elements |
-| Muted surface | `--muted` | Muted backgrounds and quiet sections |
-| Muted text | `--muted-foreground` | Secondary/help text |
-| Accent surface | `--accent` | Hover, active, and subtle emphasis surfaces |
-| Accent text | `--accent-foreground` | Text on accent surfaces |
-| Destructive action | `--destructive` | Deletion, dangerous actions, serious errors |
-| Destructive text | `--destructive-foreground` | Text on destructive actions |
-| Border | `--border` | Borders and dividers |
-| Input border | `--input` | Form controls and input borders |
-| Focus ring | `--ring` | Focus state and accessible interaction ring |
+| Role                | CSS Variable               | Purpose                                           |
+| ------------------- | -------------------------- | ------------------------------------------------- |
+| Page background     | `--background`             | Main page background                              |
+| Primary text        | `--foreground`             | Main text color                                   |
+| Card background     | `--card`                   | Cards and contained panels                        |
+| Card text           | `--card-foreground`        | Text on card surfaces                             |
+| Popover background  | `--popover`                | Menus, dropdowns, popovers                        |
+| Popover text        | `--popover-foreground`     | Text in overlays                                  |
+| Primary action      | `--primary`                | Main buttons and primary interactive elements     |
+| Primary action text | `--primary-foreground`     | Text on primary actions                           |
+| Secondary surface   | `--secondary`              | Secondary buttons and selected neutral highlights |
+| Secondary text      | `--secondary-foreground`   | Text on secondary elements                        |
+| Muted surface       | `--muted`                  | Muted backgrounds and quiet sections              |
+| Muted text          | `--muted-foreground`       | Secondary/help text                               |
+| Accent surface      | `--accent`                 | Hover, active, and subtle emphasis surfaces       |
+| Accent text         | `--accent-foreground`      | Text on accent surfaces                           |
+| Destructive action  | `--destructive`            | Deletion, dangerous actions, serious errors       |
+| Destructive text    | `--destructive-foreground` | Text on destructive actions                       |
+| Border              | `--border`                 | Borders and dividers                              |
+| Input border        | `--input`                  | Form controls and input borders                   |
+| Focus ring          | `--ring`                   | Focus state and accessible interaction ring       |
 
 ### Dashboard Surface Tokens
 
-| Role | CSS Variable | Purpose |
-| --- | --- | --- |
-| Surface | `--surface` | Dashboard background sections and page panels |
-| Surface text | `--surface-foreground` | Text on custom surfaces |
-| Muted surface | `--surface-muted` | Filter bars, subtle table containers, empty-state panels |
-| Elevated surface | `--surface-elevated` | Raised cards, stat cards, overlay panels |
+| Role             | CSS Variable           | Purpose                                                  |
+| ---------------- | ---------------------- | -------------------------------------------------------- |
+| Surface          | `--surface`            | Dashboard background sections and page panels            |
+| Surface text     | `--surface-foreground` | Text on custom surfaces                                  |
+| Muted surface    | `--surface-muted`      | Filter bars, subtle table containers, empty-state panels |
+| Elevated surface | `--surface-elevated`   | Raised cards, stat cards, overlay panels                 |
 
 ### State Tokens
 
-| Role | CSS Variable | Use Cases |
-| --- | --- | --- |
-| Success | `--success` | Verified, imported, available, completed |
-| Success text | `--success-foreground` | Text on success backgrounds |
-| Warning | `--warning` | Ready for review, limited, needs attention |
-| Warning text | `--warning-foreground` | Text on warning backgrounds |
-| Info | `--info` | Draft, informational states, neutral workflow hints |
-| Info text | `--info-foreground` | Text on info backgrounds |
-| Destructive | `--destructive` | Failed, unavailable, delete, critical correction |
-| Destructive text | `--destructive-foreground` | Text on destructive backgrounds |
+| Role             | CSS Variable               | Use Cases                                           |
+| ---------------- | -------------------------- | --------------------------------------------------- |
+| Success          | `--success`                | Verified, imported, available, completed            |
+| Success text     | `--success-foreground`     | Text on success backgrounds                         |
+| Warning          | `--warning`                | Ready for review, limited, needs attention          |
+| Warning text     | `--warning-foreground`     | Text on warning backgrounds                         |
+| Info             | `--info`                   | Draft, informational states, neutral workflow hints |
+| Info text        | `--info-foreground`        | Text on info backgrounds                            |
+| Destructive      | `--destructive`            | Failed, unavailable, delete, critical correction    |
+| Destructive text | `--destructive-foreground` | Text on destructive backgrounds                     |
 
 ### Chart Tokens
 
@@ -126,11 +125,11 @@ Charts must use theme-aware token colors. Do not hardcode hex, OKLCH, RGB, HSL, 
 
 ## Typography
 
-| Role | Font | CSS Variable |
-| --- | --- | --- |
-| UI text | Manrope Variable | `--font-sans` |
-| Headings | Manrope Variable | `--font-heading` |
-| Numeric/technical data | JetBrains Mono Variable | `--font-mono` |
+| Role                   | Font                    | CSS Variable     |
+| ---------------------- | ----------------------- | ---------------- |
+| UI text                | Manrope Variable        | `--font-sans`    |
+| Headings               | Manrope Variable        | `--font-heading` |
+| Numeric/technical data | JetBrains Mono Variable | `--font-mono`    |
 
 Typography rules:
 
@@ -144,11 +143,11 @@ Typography rules:
 
 The base radius is defined by `--radius: 0.875rem` and exposed through Tailwind radius tokens.
 
-| Context | Token/Class |
-| --- | --- |
-| Small controls | `rounded-sm` or `rounded-md` |
-| Inputs and buttons | shadcn/ui default radius |
-| Cards and panels | `rounded-lg` or `rounded-xl` |
+| Context                     | Token/Class                   |
+| --------------------------- | ----------------------------- |
+| Small controls              | `rounded-sm` or `rounded-md`  |
+| Inputs and buttons          | shadcn/ui default radius      |
+| Cards and panels            | `rounded-lg` or `rounded-xl`  |
 | Dialogs and larger overlays | `rounded-xl` or `rounded-2xl` |
 
 Do not use arbitrary radius values unless a component-specific task explicitly requires it.
@@ -195,6 +194,22 @@ Rules:
 - App-specific reusable components should compose shadcn primitives and live outside `components/ui`, usually in `components/common`, `components/layout`, or a feature-specific `components` folder.
 - Prefer component variants and semantic props over ad-hoc styling.
 
+### shadcn/ui Component Selection
+
+Before creating a custom UI primitive or interaction pattern, check whether an appropriate shadcn/ui component already exists.
+
+Prefer composing existing shadcn/ui components over building equivalent UI behavior from scratch.
+
+The current component catalog is documented in:
+
+`context/references/shadcn-components.md`
+
+The catalog is a reference for available component types. Components must still be installed just in time, only when the active feature spec requires them.
+
+Use the shadcn CLI to add components whenever practical.
+
+App-specific reusable components may compose shadcn primitives, but should not duplicate an existing shadcn primitive without a clear project-specific reason.
+
 ## shadcn/ui Usage Rules
 
 Use shadcn/ui primitives through their documented variants and default behavior.
@@ -204,9 +219,7 @@ Do not apply ad-hoc color, border, shadow, or typography overrides directly to s
 Do not write component usages like:
 
 ```tsx
-<Button className="bg-red-700 text-white border-yellow-400">
-  Save
-</Button>
+<Button className="bg-red-700 text-white border-yellow-400">Save</Button>
 ```
 
 Prefer documented variants:
@@ -566,13 +579,13 @@ Charts must use theme tokens and should remain readable in the light-only UI.
 
 Examples:
 
-| State Type | Tool |
-| --- | --- |
-| Players list | TanStack Query |
-| Match detail from API | TanStack Query |
-| Table filters in URL | nuqs |
-| Sidebar collapsed state | Zustand |
-| QueryClientProvider | React Context Provider |
+| State Type                | Tool                                               |
+| ------------------------- | -------------------------------------------------- |
+| Players list              | TanStack Query                                     |
+| Match detail from API     | TanStack Query                                     |
+| Table filters in URL      | nuqs                                               |
+| Sidebar collapsed state   | Zustand                                            |
+| QueryClientProvider       | React Context Provider                             |
 | Auth/session query result | TanStack Query plus provider composition as needed |
 
 ## Icons
@@ -581,11 +594,11 @@ Use Lucide React icons unless a task explicitly introduces another icon source.
 
 Recommended sizes:
 
-| Context | Size |
-| --- | --- |
-| Inline icon | `h-4 w-4` |
-| Button icon | `h-4 w-4` or `h-5 w-5` |
-| Sidebar icon | `h-5 w-5` |
+| Context          | Size                     |
+| ---------------- | ------------------------ |
+| Inline icon      | `h-4 w-4`                |
+| Button icon      | `h-4 w-4` or `h-5 w-5`   |
+| Sidebar icon     | `h-5 w-5`                |
 | Empty state icon | `h-8 w-8` or `h-10 w-10` |
 
 Use stroke-based icons. Avoid mixing filled icon styles with Lucide unless the design system is updated.

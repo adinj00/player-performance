@@ -248,6 +248,17 @@ If verification cannot be completed, document the reason in `context/progress-tr
 - Do not require skill or plugin files to exist inside the project repository if the coding environment exposes them globally.
 - Do not install new skills, plugins, or MCP servers as part of a feature implementation unless the project owner explicitly requests it.
 
+### Frontend UI Component Selection Workflow
+
+For frontend UI work:
+
+1. Read the relevant UI requirements in `context/ui-context.md`.
+2. Check `context/references/shadcn-components.md` before creating a custom UI primitive.
+3. Prefer an existing shadcn/ui component when it matches the required behavior.
+4. Install the component just in time through the approved shadcn workflow.
+5. Build custom app-level components by composing primitives when project-specific behavior is required.
+6. Do not replace a suitable shadcn/ui component with a hand-built equivalent without a documented reason.
+
 ## Non-Negotiable Project Rules
 
 - Keep the application single-club for FK Velež Mostar in V1.
