@@ -5,6 +5,7 @@ using PlayerPerformance.Infrastructure.Identity;
 using PlayerPerformance.Infrastructure.Staff;
 using PlayerPerformance.Domain.Settings;
 using PlayerPerformance.Domain.Teams;
+using PlayerPerformance.Domain.Players;
 
 namespace PlayerPerformance.Infrastructure.Persistence;
 
@@ -18,6 +19,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options)
     public DbSet<Venue> Venues => Set<Venue>();
     public DbSet<Opponent> Opponents => Set<Opponent>();
     public DbSet<Team> Teams => Set<Team>();
+    public DbSet<Player> Players => Set<Player>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

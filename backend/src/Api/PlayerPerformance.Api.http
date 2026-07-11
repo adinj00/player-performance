@@ -53,6 +53,20 @@ X-CSRF-TOKEN: {{csrfToken}}
 
 { "orderedTeamIds": ["00000000-0000-0000-0000-000000000001"] }
 
+### List players (admin)
+GET {{PlayerPerformance_Api_HostAddress}}/api/players?page=1&pageSize=25
+
+### Create player (admin)
+POST {{PlayerPerformance_Api_HostAddress}}/api/players
+Content-Type: application/json
+X-CSRF-TOKEN: {{csrfToken}}
+
+{ "firstName": "Amar", "lastName": "Kovač", "preferredName": "Aki", "dateOfBirth": "2005-02-03" }
+
+### Archive player (admin)
+POST {{PlayerPerformance_Api_HostAddress}}/api/players/00000000-0000-0000-0000-000000000001/archive
+X-CSRF-TOKEN: {{csrfToken}}
+
 ### Create a venue (admin)
 POST {{PlayerPerformance_Api_HostAddress}}/api/settings/venues
 Content-Type: application/json

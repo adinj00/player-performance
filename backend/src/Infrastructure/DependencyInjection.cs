@@ -15,6 +15,8 @@ using PlayerPerformance.Application.Teams;
 using PlayerPerformance.Infrastructure.Teams;
 using PlayerPerformance.Application.Users;
 using PlayerPerformance.Infrastructure.Staff;
+using PlayerPerformance.Application.Players;
+using PlayerPerformance.Infrastructure.Players;
 
 namespace PlayerPerformance.Infrastructure;
 
@@ -40,6 +42,7 @@ public static class DependencyInjection
         services.AddScoped<IAuthenticationService, IdentityAuthenticationService>();
         services.AddScoped<ISettingsRepository, SettingsRepository>();
         services.AddScoped<ITeamsRepository, TeamsRepository>();
+        services.AddScoped<IPlayersRepository, PlayersRepository>();
         services.AddScoped<IStaffUsersService, IdentityStaffUsersService>();
         services.AddScoped<TeamStartupInitializer>();
 

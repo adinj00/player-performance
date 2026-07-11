@@ -10,9 +10,18 @@ This file intentionally starts lightweight. It should become more detailed as bu
 
 ## Current Goal
 
-- Unit 27 next: Players Backend Foundation.
+- Unit 27: Players Backend Foundation is complete.
 
 ## Completed
+
+- Unit 27 completed:
+  - Added the persistent club-level `Player` aggregate with only first name, last name, optional preferred name, optional `DateOnly` date of birth, `PlayerRecordStatus`, and UTC created/updated timestamps. There is no team/current-selection foreign key or other future player metadata.
+  - Added explicit create/profile-update/lifecycle use cases with trimmed Unicode-safe names, future-date rejection, ACTIVE creation, archive/restore behavior (restore returns INACTIVE), and archived-record update/activation/deactivation conflicts.
+  - Added admin-only, authenticated, password-change-gated `/api/players` list, detail, create, update, activate, deactivate, archive, and restore routes. Non-administrators receive `403`; no hard-delete route exists.
+  - Added database-side filtering, deterministic last-name/first-name/id ordering, paging metadata, archived-default exclusion, status/search support, EF configuration, and the focused `20260711120000_AddPlayersBackendFoundation` migration. Team assignment history remains deferred to Unit 28, non-admin team-scoped player access remains deferred until those assignments exist, and player mutation audit persistence remains deferred to Unit 38.
+  - Added domain and integration coverage for name normalization, date validation, lifecycle constraints, authorization, duplicate names, filtering, archive/restore, archived update conflicts, validation, and missing/delete routes. The API `.http` file contains player request examples.
+  - Verification passed in isolated outputs: `dotnet restore backend/PlayerPerformance.sln`, `dotnet build backend/PlayerPerformance.sln --no-restore` with zero warnings/errors, `dotnet test backend/PlayerPerformance.sln --no-build` (40 unit and 27 integration tests), repository whitespace formatting/check, and `git diff --check`.
+  - After the authorized API process was stopped, EF migration discovery showed `20260711120000_AddPlayersBackendFoundation (Pending)` and `dotnet ef database update` applied it successfully to the configured PostgreSQL development database. The EF CLI reported only the existing tools/runtime version warning (`8.0.0` tools vs `8.0.10` runtime).
 
 - Unit 26 completed:
   - Replaced the settings placeholder with administrator-only, nested routes for seasons, competitions, teams/selections, venues, and opponents; `/settings` redirects to seasons and the sidebar hides `Postavke` for non-administrators.
