@@ -27,6 +27,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options)
     public DbSet<MatchLineupEntry> MatchLineupEntries => Set<MatchLineupEntry>();
     public DbSet<PlayerMatchAppearance> PlayerMatchAppearances => Set<PlayerMatchAppearance>();
     public DbSet<MatchSubstitution> MatchSubstitutions => Set<MatchSubstitution>();
+    public DbSet<MatchReport> MatchReports => Set<MatchReport>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -145,3 +145,32 @@ X-CSRF-TOKEN: {{csrfToken}}
 ### Restore an opponent (admin)
 POST {{PlayerPerformance_Api_HostAddress}}/api/settings/opponents/00000000-0000-0000-0000-000000000001/restore
 X-CSRF-TOKEN: {{csrfToken}}
+
+### Create a match report (admin or scoped data operator)
+POST {{PlayerPerformance_Api_HostAddress}}/api/matches/00000000-0000-0000-0000-000000000001/report
+X-CSRF-TOKEN: {{csrfToken}}
+
+### Get a match report
+GET {{PlayerPerformance_Api_HostAddress}}/api/matches/00000000-0000-0000-0000-000000000001/report
+
+### List match reports
+GET {{PlayerPerformance_Api_HostAddress}}/api/match-reports?page=1&pageSize=25
+
+### Submit a match report
+POST {{PlayerPerformance_Api_HostAddress}}/api/match-reports/00000000-0000-0000-0000-000000000001/submit
+X-CSRF-TOKEN: {{csrfToken}}
+
+### Verify a match report
+POST {{PlayerPerformance_Api_HostAddress}}/api/match-reports/00000000-0000-0000-0000-000000000001/verify
+X-CSRF-TOKEN: {{csrfToken}}
+
+### Request a report correction
+POST {{PlayerPerformance_Api_HostAddress}}/api/match-reports/00000000-0000-0000-0000-000000000001/request-correction
+Content-Type: application/json
+X-CSRF-TOKEN: {{csrfToken}}
+
+{ "reason": "Dopuniti zapisnik utakmice." }
+
+### Archive a verified match report (admin)
+POST {{PlayerPerformance_Api_HostAddress}}/api/match-reports/00000000-0000-0000-0000-000000000001/archive
+X-CSRF-TOKEN: {{csrfToken}}

@@ -131,4 +131,5 @@ internal static class MatchErrors
     public static readonly Error References = new("invalid_references", "One or more selected match references are invalid or archived.");
     public static readonly Error Duplicate = new("duplicate_match", "An identical active match already exists.");
     public static readonly Error Conflict = new("match_conflict", "The requested match change is not allowed.");
+    public static readonly Error WorkflowLocked = new("report_workflow_locked", "Match data is locked while its report is under review, verified, or archived.");
 }

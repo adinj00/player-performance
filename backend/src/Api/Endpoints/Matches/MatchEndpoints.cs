@@ -59,7 +59,7 @@ internal static class MatchEndpoints
     private static IResult ToLineupResult(Result<MatchLineupResponse> result, HttpContext context) => result.IsSuccess ? TypedResults.Ok(result.Value) : Problem(result.Error, context);
     private static ProblemHttpResult Problem(Error error, HttpContext context)
     {
-        var status = error.Code switch { "not_found" => StatusCodes.Status404NotFound, "forbidden" => StatusCodes.Status403Forbidden, "duplicate_match" or "match_conflict" => StatusCodes.Status409Conflict, "validation_failed" or "invalid_references" => StatusCodes.Status422UnprocessableEntity, _ => StatusCodes.Status400BadRequest };
+        var status = error.Code switch { "not_found" => StatusCodes.Status404NotFound, "forbidden" => StatusCodes.Status403Forbidden, "duplicate_match" or "match_conflict" or "report_workflow_locked" => StatusCodes.Status409Conflict, "validation_failed" or "invalid_references" => StatusCodes.Status422UnprocessableEntity, _ => StatusCodes.Status400BadRequest };
         return TypedResults.Problem(new ProblemDetails { Status = status, Title = "Request could not be completed", Detail = error.Message, Extensions = { ["code"] = error.Code, ["traceId"] = context.TraceIdentifier } });
     }
 }

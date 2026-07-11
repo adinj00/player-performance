@@ -18,6 +18,7 @@ internal static class EndpointRouteBuilderExtensions
         endpoints.MapStaffUserEndpoints();
         endpoints.MapPlayerEndpoints();
         endpoints.MapMatchEndpoints();
+        endpoints.MapMatchReportEndpoints();
 
         if (environment.IsEnvironment("Testing"))
         {

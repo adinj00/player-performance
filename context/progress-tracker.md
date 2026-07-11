@@ -527,3 +527,12 @@ This file intentionally starts lightweight. It should become more detailed as bu
 - Added team-scope-authorized `GET` and atomic `PUT /api/matches/{matchId}/lineup` endpoints. The save operation supports preliminary scheduled/postponed lineups, validates new-player assignment eligibility at the match date, rejects archived/cancelled mutation, and retains appearance IDs when the same player remains in the appearance set.
 - Added PostgreSQL mappings and EF-generated `20260711184101_AddMatchLineupAppearances` migration with restrictive historical player foreign keys and required match/player and substitution-sequence uniqueness constraints.
 - Verification passed: isolated restore; zero-warning solution build; 52 unit and 28 integration tests; whitespace formatting and verify; `git diff --check`; and `dotnet ef database update`, which applied both the Unit 30 match migration and the Unit 31 lineup/appearance migration to the configured local PostgreSQL database.
+
+## Unit 32: Match Report Workflow Backend
+
+- Status: complete.
+- Added the persistent `MatchReport` aggregate and explicit `DRAFT`, `READY_FOR_REVIEW`, `VERIFIED`, `NEEDS_CORRECTION`, and terminal `ARCHIVED` transitions. It records creation, latest submission, verification, correction-request reason/metadata, and archive metadata.
+- Added report create, detail, filtered/paginated list, submit, verify, request-correction, and archive endpoints. Authorization, team scope, verification permission, report visibility, and backend-owned `allowedActions` are enforced in the Application layer; no generic status mutation or report delete endpoint was added.
+- Added shared workflow guards so `READY_FOR_REVIEW`, `VERIFIED`, and `ARCHIVED` reports lock match metadata and lineup mutations with a workflow-specific `409` response; correction re-enables normal authorized edits. Match archive now rejects active report workflows and permits archive after the report is archived.
+- Added EF Core report mapping and the EF-generated `20260711194432_AddMatchReportWorkflow` migration with one-report-per-match enforcement, restrictive match foreign key, and workflow indexes.
+- Verification passed: isolated restore; whitespace format and verify; zero-warning solution build; 56 unit and 28 integration tests; `git diff --check`; and `dotnet ef database update`, which applied the Unit 32 migration to the configured local PostgreSQL database. The EF CLI noted its installed `8.0.0` tools are older than the `8.0.10` runtime, but migration generation and application completed successfully.

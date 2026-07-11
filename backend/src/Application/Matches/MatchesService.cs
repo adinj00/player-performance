@@ -7,7 +7,7 @@ using PlayerPerformance.Domain.Staff;
 
 namespace PlayerPerformance.Application.Matches;
 
-internal sealed class MatchesService(IMatchesRepository repository, IMatchLineupRepository lineupRepository, ICurrentUserAccess currentUserAccess, ISystemClock clock, IValidator<CreateMatchRequest> createValidator, IValidator<UpdateMatchRequest> updateValidator, IValidator<MatchListQuery> listValidator, IValidator<SaveMatchLineupRequest> lineupValidator) : IMatchesService
+internal sealed class MatchesService(IMatchesRepository repository, IMatchLineupRepository lineupRepository, IMatchReportWorkflowGuard workflowGuard, ICurrentUserAccess currentUserAccess, ISystemClock clock, IValidator<CreateMatchRequest> createValidator, IValidator<UpdateMatchRequest> updateValidator, IValidator<MatchListQuery> listValidator, IValidator<SaveMatchLineupRequest> lineupValidator) : IMatchesService
 {
     public async Task<Result<PagedMatchListResponse>> ListAsync(MatchListQuery query, CancellationToken ct)
     {
@@ -57,6 +57,9 @@ internal sealed class MatchesService(IMatchesRepository repository, IMatchLineup
             return Result<MatchResponse>.Failure(MatchErrors.NotFound);
         if (!CanMutate(access) || !CanAccess(access, match.TeamId))
             return Result<MatchResponse>.Failure(MatchErrors.Forbidden);
+        var workflow = await workflowGuard.EnsureEditableAsync(id, ct);
+        if (!workflow.IsSuccess)
+            return Result<MatchResponse>.Failure(MatchErrors.WorkflowLocked);
         var references = await repository.GetActiveReferencesAsync(request.SeasonId, request.CompetitionId, match.TeamId, request.OpponentId, request.VenueId, ct);
         if (references is null || !IsInSeason(request.KickoffAtUtc, references))
             return Result<MatchResponse>.Failure(references is null ? MatchErrors.References : MatchErrors.Validation);
@@ -91,6 +94,9 @@ internal sealed class MatchesService(IMatchesRepository repository, IMatchLineup
             return Result<MatchLineupResponse>.Failure(MatchErrors.Forbidden);
         if (aggregate.Match.IsArchived || aggregate.Match.Status == MatchStatus.CANCELLED)
             return Result<MatchLineupResponse>.Failure(MatchErrors.Conflict);
+        var workflow = await workflowGuard.EnsureEditableAsync(id, ct);
+        if (!workflow.IsSuccess)
+            return Result<MatchLineupResponse>.Failure(MatchErrors.WorkflowLocked);
 
         try
         {
@@ -120,6 +126,8 @@ internal sealed class MatchesService(IMatchesRepository repository, IMatchLineup
         var match = await repository.GetAsync(id, ct);
         if (match is null)
             return Result<MatchResponse>.Failure(MatchErrors.NotFound);
+        if (archive && !(await workflowGuard.EnsureMatchCanBeArchivedAsync(id, ct)).IsSuccess)
+            return Result<MatchResponse>.Failure(MatchErrors.Conflict);
         if (archive)
             match.Archive(clock.UtcNow);
         else

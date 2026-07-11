@@ -17,6 +17,8 @@ public static class DependencyInjection
         services.AddScoped<IPlayersService, PlayersService>();
         services.AddScoped<IPlayerTeamAssignmentsService, PlayerTeamAssignmentsService>();
         services.AddScoped<IMatchesService, MatchesService>();
+        services.AddScoped<IMatchReportsService, MatchReportsService>();
+        services.AddScoped<IMatchReportWorkflowGuard, MatchReportsService>();
 
         return services;
     }
