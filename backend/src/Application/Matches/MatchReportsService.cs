@@ -7,7 +7,7 @@ using PlayerPerformance.Domain.Staff;
 
 namespace PlayerPerformance.Application.Matches;
 
-internal sealed class MatchReportsService(IMatchReportsRepository repository, IMatchesRepository matchesRepository, ICurrentUserAccess currentUserAccess, ISystemClock clock, IValidator<RequestCorrectionRequest> correctionValidator, IValidator<MatchReportListQuery> listValidator) : IMatchReportsService, IMatchReportWorkflowGuard
+internal sealed class MatchReportsService(IMatchReportsRepository repository, IMatchesRepository matchesRepository, IMatchStatisticsService statisticsService, ICurrentUserAccess currentUserAccess, ISystemClock clock, IValidator<RequestCorrectionRequest> correctionValidator, IValidator<MatchReportListQuery> listValidator) : IMatchReportsService, IMatchReportWorkflowGuard
 {
     public async Task<Result<MatchReportResponse>> CreateAsync(Guid matchId, CancellationToken ct)
     {
@@ -50,7 +50,28 @@ internal sealed class MatchReportsService(IMatchReportsRepository repository, IM
         return Result<PagedMatchReportListResponse>.Success(new(page.Items.Select(x => ToListItem(x, access)).ToArray(), query.Page, query.PageSize, page.TotalCount, page.TotalCount == 0 ? 0 : (int)Math.Ceiling(page.TotalCount / (double)query.PageSize)));
     }
 
-    public Task<Result<MatchReportResponse>> SubmitAsync(Guid reportId, CancellationToken ct) => TransitionAsync(reportId, CanEdit, (r, actor, now, aggregate) => { if (aggregate.AppearanceCount == 0) throw new ArgumentException(); r.Submit(actor, now); }, ct);
+    public async Task<Result<MatchReportResponse>> SubmitAsync(Guid reportId, CancellationToken ct)
+    {
+        var access = await currentUserAccess.GetAsync(ct);
+        var aggregate = await repository.GetAggregateAsync(reportId, ct);
+        if (aggregate is null || !CanAccess(access, aggregate.Match.TeamId))
+            return Result<MatchReportResponse>.Failure(MatchReportErrors.NotFound);
+        if (!CanEdit(access))
+            return Result<MatchReportResponse>.Failure(MatchReportErrors.Forbidden);
+        if (aggregate.Match.IsArchived || aggregate.Match.Status != MatchStatus.PLAYED)
+            return Result<MatchReportResponse>.Failure(MatchReportErrors.Conflict);
+        if (aggregate.AppearanceCount == 0)
+            return Result<MatchReportResponse>.Failure(MatchReportErrors.Validation);
+        var completeness = await statisticsService.EnsureSubmissionCompleteAsync(aggregate, ct);
+        if (!completeness.IsSuccess)
+            return Result<MatchReportResponse>.Failure(MatchReportErrors.Validation);
+        try
+        { aggregate.Report.Submit(access.UserId!.Value, clock.UtcNow); }
+        catch (InvalidOperationException) { return Result<MatchReportResponse>.Failure(MatchReportErrors.Conflict); }
+        await repository.SaveChangesAsync(ct);
+        var read = await repository.GetReadByMatchAsync(aggregate.Match.Id, null, ct);
+        return Result<MatchReportResponse>.Success(ToResponse(read!, access));
+    }
     public Task<Result<MatchReportResponse>> VerifyAsync(Guid reportId, CancellationToken ct) => TransitionAsync(reportId, CanVerify, static (r, actor, now, _) => r.Verify(actor, now), ct);
     public async Task<Result<MatchReportResponse>> RequestCorrectionAsync(Guid reportId, RequestCorrectionRequest request, CancellationToken ct)
     {

@@ -1,5 +1,6 @@
 using PlayerPerformance.Domain.Common.Entities;
 using PlayerPerformance.Domain.Common.Guards;
+using PlayerPerformance.Domain.Teams;
 
 namespace PlayerPerformance.Domain.Matches;
 
@@ -7,7 +8,9 @@ public sealed class MatchReport : Entity
 {
     public const int MaxCorrectionReasonLength = 1000;
 
-    private MatchReport() : base(Guid.Empty) { }
+    private MatchReport() : base(Guid.Empty)
+    {
+    }
 
     private MatchReport(Guid id, Guid matchId, Guid createdByUserId, DateTime utcNow) : base(id)
     {
@@ -32,6 +35,7 @@ public sealed class MatchReport : Entity
     public string? LastCorrectionReason { get; private set; }
     public Guid? ArchivedByUserId { get; private set; }
     public DateTime? ArchivedAtUtc { get; private set; }
+    public TeamTrackingLevel? AppliedTrackingLevel { get; private set; }
 
     public static MatchReport Create(Guid id, Guid matchId, Guid createdByUserId, DateTime utcNow)
     {
@@ -68,6 +72,16 @@ public sealed class MatchReport : Entity
         TransitionTo(MatchReportStatus.ARCHIVED, MatchReportStatus.VERIFIED);
         ArchivedByUserId = RequiredActor(actorUserId);
         ArchivedAtUtc = utcNow;
+        UpdatedAtUtc = utcNow;
+    }
+
+    public void ApplyTrackingLevel(TeamTrackingLevel trackingLevel, DateTime utcNow)
+    {
+        if (AppliedTrackingLevel.HasValue)
+            return;
+        if (!Enum.IsDefined(trackingLevel))
+            throw new ArgumentOutOfRangeException(nameof(trackingLevel));
+        AppliedTrackingLevel = trackingLevel;
         UpdatedAtUtc = utcNow;
     }
 

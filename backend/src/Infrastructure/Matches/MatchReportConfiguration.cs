@@ -24,6 +24,7 @@ internal sealed class MatchReportConfiguration : IEntityTypeConfiguration<MatchR
         builder.Property(x => x.LastCorrectionReason).HasColumnName("last_correction_reason").HasMaxLength(MatchReport.MaxCorrectionReasonLength);
         builder.Property(x => x.ArchivedByUserId).HasColumnName("archived_by_user_id");
         builder.Property(x => x.ArchivedAtUtc).HasColumnName("archived_at_utc");
+        builder.Property(x => x.AppliedTrackingLevel).HasColumnName("applied_tracking_level").HasConversion<string>().HasMaxLength(16);
         builder.HasIndex(x => x.MatchId).IsUnique();
         builder.HasIndex(x => x.Status);
         builder.HasIndex(x => new { x.Status, x.UpdatedAtUtc });

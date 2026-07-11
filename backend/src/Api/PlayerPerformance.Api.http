@@ -160,6 +160,16 @@ GET {{PlayerPerformance_Api_HostAddress}}/api/match-reports?page=1&pageSize=25
 POST {{PlayerPerformance_Api_HostAddress}}/api/match-reports/00000000-0000-0000-0000-000000000001/submit
 X-CSRF-TOKEN: {{csrfToken}}
 
+### Read statistics for a report
+GET {{PlayerPerformance_Api_HostAddress}}/api/match-reports/00000000-0000-0000-0000-000000000001/statistics
+
+### Save the complete statistics snapshot
+PUT {{PlayerPerformance_Api_HostAddress}}/api/match-reports/00000000-0000-0000-0000-000000000001/statistics
+Content-Type: application/json
+X-CSRF-TOKEN: {{csrfToken}}
+
+{ "playerStatistics": [], "goalkeeperStatistics": [] }
+
 ### Verify a match report
 POST {{PlayerPerformance_Api_HostAddress}}/api/match-reports/00000000-0000-0000-0000-000000000001/verify
 X-CSRF-TOKEN: {{csrfToken}}

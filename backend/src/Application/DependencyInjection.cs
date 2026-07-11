@@ -19,6 +19,8 @@ public static class DependencyInjection
         services.AddScoped<IMatchesService, MatchesService>();
         services.AddScoped<IMatchReportsService, MatchReportsService>();
         services.AddScoped<IMatchReportWorkflowGuard, MatchReportsService>();
+        services.AddSingleton<IMatchStatisticsProfileService, MatchStatisticsProfileService>();
+        services.AddScoped<IMatchStatisticsService, MatchStatisticsService>();
 
         return services;
     }

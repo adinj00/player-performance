@@ -49,6 +49,8 @@ public static class DependencyInjection
         services.AddScoped<IMatchesRepository, MatchesRepository>();
         services.AddScoped<IMatchLineupRepository, MatchLineupRepository>();
         services.AddScoped<IMatchReportsRepository, MatchReportsRepository>();
+        services.AddScoped<IMatchStatisticsRepository, MatchStatisticsRepository>();
+        services.AddScoped<IMatchStatisticsCleanup, MatchStatisticsRepository>();
         services.AddScoped<IStaffUsersService, IdentityStaffUsersService>();
         services.AddScoped<TeamStartupInitializer>();
 

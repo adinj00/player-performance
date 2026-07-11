@@ -7,7 +7,7 @@ using PlayerPerformance.Domain.Staff;
 
 namespace PlayerPerformance.Application.Matches;
 
-internal sealed class MatchesService(IMatchesRepository repository, IMatchLineupRepository lineupRepository, IMatchReportWorkflowGuard workflowGuard, ICurrentUserAccess currentUserAccess, ISystemClock clock, IValidator<CreateMatchRequest> createValidator, IValidator<UpdateMatchRequest> updateValidator, IValidator<MatchListQuery> listValidator, IValidator<SaveMatchLineupRequest> lineupValidator) : IMatchesService
+internal sealed class MatchesService(IMatchesRepository repository, IMatchLineupRepository lineupRepository, IMatchStatisticsCleanup statisticsCleanup, IMatchReportWorkflowGuard workflowGuard, ICurrentUserAccess currentUserAccess, ISystemClock clock, IValidator<CreateMatchRequest> createValidator, IValidator<UpdateMatchRequest> updateValidator, IValidator<MatchListQuery> listValidator, IValidator<SaveMatchLineupRequest> lineupValidator) : IMatchesService
 {
     public async Task<Result<PagedMatchListResponse>> ListAsync(MatchListQuery query, CancellationToken ct)
     {
@@ -114,7 +114,7 @@ internal sealed class MatchesService(IMatchesRepository repository, IMatchLineup
         if (eligibility.Values.Any(x => !x))
             return Result<MatchLineupResponse>.Failure(MatchErrors.Validation);
 
-        ApplyLineupSnapshot(aggregate, request);
+        await ApplyLineupSnapshotAsync(aggregate, request, ct);
         await lineupRepository.SaveChangesAsync(ct);
         return Result<MatchLineupResponse>.Success(ToLineupResponse((await lineupRepository.GetReadAsync(id, null, ct))!));
     }
@@ -165,7 +165,7 @@ internal sealed class MatchesService(IMatchesRepository repository, IMatchLineup
             request.Substitutions.Select(x => new MatchSubstitutionSnapshotEntry(x.PlayerOutId, x.PlayerInId, x.Minute, x.StoppageTimeMinute, x.Sequence)).ToArray());
     }
 
-    private void ApplyLineupSnapshot(MatchLineupAggregate aggregate, SaveMatchLineupRequest request)
+    private async Task ApplyLineupSnapshotAsync(MatchLineupAggregate aggregate, SaveMatchLineupRequest request, CancellationToken ct)
     {
         var lineup = aggregate.Lineup;
         if (lineup is null)
@@ -190,7 +190,9 @@ internal sealed class MatchesService(IMatchesRepository repository, IMatchLineup
         }
 
         var appearances = aggregate.Appearances.ToDictionary(x => x.PlayerId);
-        foreach (var existing in aggregate.Appearances.Where(x => !request.Appearances.Any(y => y.PlayerId == x.PlayerId)))
+        var removedAppearances = aggregate.Appearances.Where(x => !request.Appearances.Any(y => y.PlayerId == x.PlayerId)).ToArray();
+        await statisticsCleanup.RemoveForAppearancesAsync(removedAppearances.Select(x => x.Id).ToArray(), ct);
+        foreach (var existing in removedAppearances)
             lineupRepository.RemoveAppearance(existing);
         foreach (var appearance in request.Appearances)
         {

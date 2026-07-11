@@ -28,6 +28,8 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options)
     public DbSet<PlayerMatchAppearance> PlayerMatchAppearances => Set<PlayerMatchAppearance>();
     public DbSet<MatchSubstitution> MatchSubstitutions => Set<MatchSubstitution>();
     public DbSet<MatchReport> MatchReports => Set<MatchReport>();
+    public DbSet<PlayerMatchStats> PlayerMatchStats => Set<PlayerMatchStats>();
+    public DbSet<GoalkeeperMatchStats> GoalkeeperMatchStats => Set<GoalkeeperMatchStats>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
