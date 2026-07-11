@@ -6,20 +6,11 @@ public sealed class FirstAdminBootstrapOptions
 {
     public const string SectionName = "Bootstrap:FirstAdmin";
 
-    public bool Enabled
-    {
-        get; init;
-    }
+    public bool Enabled { get; init; }
 
-    public string? Email
-    {
-        get; init;
-    }
+    public string? Email { get; init; }
 
-    public string? TemporaryPassword
-    {
-        get; init;
-    }
+    public string? TemporaryPassword { get; init; }
 
     public string? GetEmptyStoreValidationError()
     {

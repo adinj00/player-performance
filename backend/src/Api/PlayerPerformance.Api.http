@@ -52,3 +52,59 @@ Content-Type: application/json
 X-CSRF-TOKEN: {{csrfToken}}
 
 { "orderedTeamIds": ["00000000-0000-0000-0000-000000000001"] }
+
+### Create a venue (admin)
+POST {{PlayerPerformance_Api_HostAddress}}/api/settings/venues
+Content-Type: application/json
+X-CSRF-TOKEN: {{csrfToken}}
+
+{ "name": "Stadion" }
+
+### Create an opponent (admin)
+POST {{PlayerPerformance_Api_HostAddress}}/api/settings/opponents
+Content-Type: application/json
+X-CSRF-TOKEN: {{csrfToken}}
+
+{ "name": "FK Example" }
+
+### List venues, including archived records (admin)
+GET {{PlayerPerformance_Api_HostAddress}}/api/settings/venues?includeArchived=true
+
+### Get a venue (admin)
+GET {{PlayerPerformance_Api_HostAddress}}/api/settings/venues/00000000-0000-0000-0000-000000000001
+
+### Update a venue (admin)
+PATCH {{PlayerPerformance_Api_HostAddress}}/api/settings/venues/00000000-0000-0000-0000-000000000001
+Content-Type: application/json
+X-CSRF-TOKEN: {{csrfToken}}
+
+{ "name": "Stadion Mostar" }
+
+### Archive a venue (admin)
+POST {{PlayerPerformance_Api_HostAddress}}/api/settings/venues/00000000-0000-0000-0000-000000000001/archive
+X-CSRF-TOKEN: {{csrfToken}}
+
+### Restore a venue (admin)
+POST {{PlayerPerformance_Api_HostAddress}}/api/settings/venues/00000000-0000-0000-0000-000000000001/restore
+X-CSRF-TOKEN: {{csrfToken}}
+
+### List opponents, including archived records (admin)
+GET {{PlayerPerformance_Api_HostAddress}}/api/settings/opponents?includeArchived=true
+
+### Get an opponent (admin)
+GET {{PlayerPerformance_Api_HostAddress}}/api/settings/opponents/00000000-0000-0000-0000-000000000001
+
+### Update an opponent (admin)
+PATCH {{PlayerPerformance_Api_HostAddress}}/api/settings/opponents/00000000-0000-0000-0000-000000000001
+Content-Type: application/json
+X-CSRF-TOKEN: {{csrfToken}}
+
+{ "name": "FK Example Updated" }
+
+### Archive an opponent (admin)
+POST {{PlayerPerformance_Api_HostAddress}}/api/settings/opponents/00000000-0000-0000-0000-000000000001/archive
+X-CSRF-TOKEN: {{csrfToken}}
+
+### Restore an opponent (admin)
+POST {{PlayerPerformance_Api_HostAddress}}/api/settings/opponents/00000000-0000-0000-0000-000000000001/restore
+X-CSRF-TOKEN: {{csrfToken}}

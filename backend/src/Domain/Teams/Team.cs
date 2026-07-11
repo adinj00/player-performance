@@ -16,34 +16,13 @@ public sealed class Team : Entity
         CreatedAtUtc = utcNow;
         UpdatedAtUtc = utcNow;
     }
-    public string Name
-    {
-        get; private set;
-    }
-    public string NormalizedName
-    {
-        get; private set;
-    }
-    public TeamTrackingLevel TrackingLevel
-    {
-        get; private set;
-    }
-    public TeamStatus Status
-    {
-        get; private set;
-    }
-    public int DisplayOrder
-    {
-        get; private set;
-    }
-    public DateTime CreatedAtUtc
-    {
-        get; private set;
-    }
-    public DateTime UpdatedAtUtc
-    {
-        get; private set;
-    }
+    public string Name { get; private set; }
+    public string NormalizedName { get; private set; }
+    public TeamTrackingLevel TrackingLevel { get; private set; }
+    public TeamStatus Status { get; private set; }
+    public int DisplayOrder { get; private set; }
+    public DateTime CreatedAtUtc { get; private set; }
+    public DateTime UpdatedAtUtc { get; private set; }
     public static Team Create(Guid id, string name, string normalizedName, TeamTrackingLevel trackingLevel, int displayOrder, DateTime utcNow)
     {
         Guard.AgainstDefault(id, nameof(id));

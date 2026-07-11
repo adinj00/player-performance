@@ -126,6 +126,19 @@ namespace PlayerPerformance.Infrastructure.Persistence.Migrations
                     b.ToTable("competitions", (string)null);
                 });
 
+            modelBuilder.Entity("PlayerPerformance.Domain.Settings.Opponent", b =>
+                {
+                    b.Property<Guid>("Id").HasColumnType("uuid");
+                    b.Property<DateTime>("CreatedAtUtc").HasColumnType("timestamp with time zone").HasColumnName("created_at_utc");
+                    b.Property<bool>("IsArchived").ValueGeneratedOnAdd().HasColumnType("boolean").HasColumnName("is_archived").HasDefaultValue(false);
+                    b.Property<string>("Name").IsRequired().HasMaxLength(120).HasColumnType("character varying(120)").HasColumnName("name");
+                    b.Property<string>("NormalizedName").IsRequired().HasMaxLength(120).HasColumnType("character varying(120)").HasColumnName("normalized_name");
+                    b.Property<DateTime>("UpdatedAtUtc").HasColumnType("timestamp with time zone").HasColumnName("updated_at_utc");
+                    b.HasKey("Id");
+                    b.HasIndex("NormalizedName").IsUnique();
+                    b.ToTable("opponents", (string)null);
+                });
+
             modelBuilder.Entity("PlayerPerformance.Domain.Settings.Season", b =>
                 {
                     b.Property<Guid>("Id")
@@ -227,6 +240,19 @@ namespace PlayerPerformance.Infrastructure.Persistence.Migrations
                         {
                             t.HasCheckConstraint("ck_teams_display_order_non_negative", "display_order >= 0");
                         });
+                });
+
+            modelBuilder.Entity("PlayerPerformance.Domain.Settings.Venue", b =>
+                {
+                    b.Property<Guid>("Id").HasColumnType("uuid");
+                    b.Property<DateTime>("CreatedAtUtc").HasColumnType("timestamp with time zone").HasColumnName("created_at_utc");
+                    b.Property<bool>("IsArchived").ValueGeneratedOnAdd().HasColumnType("boolean").HasColumnName("is_archived").HasDefaultValue(false);
+                    b.Property<string>("Name").IsRequired().HasMaxLength(120).HasColumnType("character varying(120)").HasColumnName("name");
+                    b.Property<string>("NormalizedName").IsRequired().HasMaxLength(120).HasColumnType("character varying(120)").HasColumnName("normalized_name");
+                    b.Property<DateTime>("UpdatedAtUtc").HasColumnType("timestamp with time zone").HasColumnName("updated_at_utc");
+                    b.HasKey("Id");
+                    b.HasIndex("NormalizedName").IsUnique();
+                    b.ToTable("venues", (string)null);
                 });
 
             modelBuilder.Entity("PlayerPerformance.Infrastructure.Identity.ApplicationUser", b =>

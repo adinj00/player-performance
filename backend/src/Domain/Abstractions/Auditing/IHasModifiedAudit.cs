@@ -2,13 +2,11 @@ namespace PlayerPerformance.Domain.Abstractions.Auditing;
 
 public interface IHasModifiedAudit
 {
-    DateTime? LastModifiedAtUtc
-    {
+    DateTime? LastModifiedAtUtc {
         get;
     }
 
-    string? LastModifiedBy
-    {
+    string? LastModifiedBy {
         get;
     }
 }

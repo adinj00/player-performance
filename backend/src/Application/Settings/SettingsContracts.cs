@@ -11,6 +11,12 @@ public sealed record CreateCompetitionRequest(string? Name);
 public sealed record UpdateCompetitionRequest(string? Name);
 public sealed record SeasonResponse(Guid Id, string Name, DateOnly StartDate, DateOnly EndDate, bool IsArchived, DateTime CreatedAtUtc, DateTime UpdatedAtUtc);
 public sealed record CompetitionResponse(Guid Id, string Name, bool IsArchived, DateTime CreatedAtUtc, DateTime UpdatedAtUtc);
+public sealed record CreateVenueRequest(string? Name);
+public sealed record UpdateVenueRequest(string? Name);
+public sealed record VenueResponse(Guid Id, string Name, bool IsArchived, DateTime CreatedAtUtc, DateTime UpdatedAtUtc);
+public sealed record CreateOpponentRequest(string? Name);
+public sealed record UpdateOpponentRequest(string? Name);
+public sealed record OpponentResponse(Guid Id, string Name, bool IsArchived, DateTime CreatedAtUtc, DateTime UpdatedAtUtc);
 
 public static class SettingsNameRules
 {
@@ -46,16 +52,36 @@ public sealed class UpdateCompetitionRequestValidator : AbstractValidator<Update
 {
     public UpdateCompetitionRequestValidator() => RuleFor(x => x.Name).Cascade(CascadeMode.Stop).Must(x => !string.IsNullOrWhiteSpace(x)).WithErrorCode("name_required").Must(x => x is null || x.Trim().Length <= SettingsNameRules.NameMaxLength).WithErrorCode("name_too_long");
 }
+public sealed class CreateVenueRequestValidator : AbstractValidator<CreateVenueRequest>
+{
+    public CreateVenueRequestValidator() => RuleFor(x => x.Name).Cascade(CascadeMode.Stop).Must(x => !string.IsNullOrWhiteSpace(x)).WithErrorCode("name_required").Must(x => x is null || x.Trim().Length <= SettingsNameRules.NameMaxLength).WithErrorCode("name_too_long");
+}
+public sealed class UpdateVenueRequestValidator : AbstractValidator<UpdateVenueRequest>
+{
+    public UpdateVenueRequestValidator() => RuleFor(x => x.Name).Cascade(CascadeMode.Stop).Must(x => !string.IsNullOrWhiteSpace(x)).WithErrorCode("name_required").Must(x => x is null || x.Trim().Length <= SettingsNameRules.NameMaxLength).WithErrorCode("name_too_long");
+}
+public sealed class CreateOpponentRequestValidator : AbstractValidator<CreateOpponentRequest>
+{
+    public CreateOpponentRequestValidator() => RuleFor(x => x.Name).Cascade(CascadeMode.Stop).Must(x => !string.IsNullOrWhiteSpace(x)).WithErrorCode("name_required").Must(x => x is null || x.Trim().Length <= SettingsNameRules.NameMaxLength).WithErrorCode("name_too_long");
+}
+public sealed class UpdateOpponentRequestValidator : AbstractValidator<UpdateOpponentRequest>
+{
+    public UpdateOpponentRequestValidator() => RuleFor(x => x.Name).Cascade(CascadeMode.Stop).Must(x => !string.IsNullOrWhiteSpace(x)).WithErrorCode("name_required").Must(x => x is null || x.Trim().Length <= SettingsNameRules.NameMaxLength).WithErrorCode("name_too_long");
+}
 
 public interface ISettingsService
 {
     Task<IReadOnlyList<SeasonResponse>> ListSeasonsAsync(bool includeArchived, CancellationToken ct); Task<SeasonResponse?> GetSeasonAsync(Guid id, CancellationToken ct); Task<Result<SeasonResponse>> CreateSeasonAsync(CreateSeasonRequest request, CancellationToken ct); Task<Result<SeasonResponse>> UpdateSeasonAsync(Guid id, UpdateSeasonRequest request, CancellationToken ct); Task<Result<SeasonResponse>> ArchiveSeasonAsync(Guid id, CancellationToken ct); Task<Result<SeasonResponse>> RestoreSeasonAsync(Guid id, CancellationToken ct);
     Task<IReadOnlyList<CompetitionResponse>> ListCompetitionsAsync(bool includeArchived, CancellationToken ct); Task<CompetitionResponse?> GetCompetitionAsync(Guid id, CancellationToken ct); Task<Result<CompetitionResponse>> CreateCompetitionAsync(CreateCompetitionRequest request, CancellationToken ct); Task<Result<CompetitionResponse>> UpdateCompetitionAsync(Guid id, UpdateCompetitionRequest request, CancellationToken ct); Task<Result<CompetitionResponse>> ArchiveCompetitionAsync(Guid id, CancellationToken ct); Task<Result<CompetitionResponse>> RestoreCompetitionAsync(Guid id, CancellationToken ct);
+    Task<IReadOnlyList<VenueResponse>> ListVenuesAsync(bool includeArchived, CancellationToken ct); Task<VenueResponse?> GetVenueAsync(Guid id, CancellationToken ct); Task<Result<VenueResponse>> CreateVenueAsync(CreateVenueRequest request, CancellationToken ct); Task<Result<VenueResponse>> UpdateVenueAsync(Guid id, UpdateVenueRequest request, CancellationToken ct); Task<Result<VenueResponse>> ArchiveVenueAsync(Guid id, CancellationToken ct); Task<Result<VenueResponse>> RestoreVenueAsync(Guid id, CancellationToken ct);
+    Task<IReadOnlyList<OpponentResponse>> ListOpponentsAsync(bool includeArchived, CancellationToken ct); Task<OpponentResponse?> GetOpponentAsync(Guid id, CancellationToken ct); Task<Result<OpponentResponse>> CreateOpponentAsync(CreateOpponentRequest request, CancellationToken ct); Task<Result<OpponentResponse>> UpdateOpponentAsync(Guid id, UpdateOpponentRequest request, CancellationToken ct); Task<Result<OpponentResponse>> ArchiveOpponentAsync(Guid id, CancellationToken ct); Task<Result<OpponentResponse>> RestoreOpponentAsync(Guid id, CancellationToken ct);
 }
 public interface ISettingsRepository
 {
     Task<IReadOnlyList<Season>> ListSeasonsAsync(bool includeArchived, CancellationToken ct); Task<Season?> GetSeasonAsync(Guid id, CancellationToken ct); Task<bool> SeasonNameExistsAsync(string normalizedName, Guid? excludingId, CancellationToken ct); void Add(Season season);
     Task<IReadOnlyList<Competition>> ListCompetitionsAsync(bool includeArchived, CancellationToken ct); Task<Competition?> GetCompetitionAsync(Guid id, CancellationToken ct); Task<bool> CompetitionNameExistsAsync(string normalizedName, Guid? excludingId, CancellationToken ct); void Add(Competition competition); Task SaveChangesAsync(CancellationToken ct);
+    Task<IReadOnlyList<Venue>> ListVenuesAsync(bool includeArchived, CancellationToken ct); Task<Venue?> GetVenueAsync(Guid id, CancellationToken ct); Task<bool> VenueNameExistsAsync(string normalizedName, Guid? excludingId, CancellationToken ct); void Add(Venue venue);
+    Task<IReadOnlyList<Opponent>> ListOpponentsAsync(bool includeArchived, CancellationToken ct); Task<Opponent?> GetOpponentAsync(Guid id, CancellationToken ct); Task<bool> OpponentNameExistsAsync(string normalizedName, Guid? excludingId, CancellationToken ct); void Add(Opponent opponent);
 }
 public sealed class SettingsDuplicateNameException : Exception
 {

@@ -16,6 +16,14 @@ internal sealed class SettingsRepository(AppDbContext dbContext) : ISettingsRepo
     public Task<Competition?> GetCompetitionAsync(Guid id, CancellationToken ct) => dbContext.Competitions.SingleOrDefaultAsync(x => x.Id == id, ct);
     public Task<bool> CompetitionNameExistsAsync(string normalizedName, Guid? excludingId, CancellationToken ct) => dbContext.Competitions.AnyAsync(x => x.NormalizedName == normalizedName && (!excludingId.HasValue || x.Id != excludingId.Value), ct);
     public void Add(Competition competition) => dbContext.Competitions.Add(competition);
+    public async Task<IReadOnlyList<Venue>> ListVenuesAsync(bool includeArchived, CancellationToken ct) => await dbContext.Venues.AsNoTracking().Where(x => includeArchived || !x.IsArchived).OrderBy(x => x.NormalizedName).ThenBy(x => x.Id).ToListAsync(ct);
+    public Task<Venue?> GetVenueAsync(Guid id, CancellationToken ct) => dbContext.Venues.SingleOrDefaultAsync(x => x.Id == id, ct);
+    public Task<bool> VenueNameExistsAsync(string normalizedName, Guid? excludingId, CancellationToken ct) => dbContext.Venues.AnyAsync(x => x.NormalizedName == normalizedName && (!excludingId.HasValue || x.Id != excludingId.Value), ct);
+    public void Add(Venue venue) => dbContext.Venues.Add(venue);
+    public async Task<IReadOnlyList<Opponent>> ListOpponentsAsync(bool includeArchived, CancellationToken ct) => await dbContext.Opponents.AsNoTracking().Where(x => includeArchived || !x.IsArchived).OrderBy(x => x.NormalizedName).ThenBy(x => x.Id).ToListAsync(ct);
+    public Task<Opponent?> GetOpponentAsync(Guid id, CancellationToken ct) => dbContext.Opponents.SingleOrDefaultAsync(x => x.Id == id, ct);
+    public Task<bool> OpponentNameExistsAsync(string normalizedName, Guid? excludingId, CancellationToken ct) => dbContext.Opponents.AnyAsync(x => x.NormalizedName == normalizedName && (!excludingId.HasValue || x.Id != excludingId.Value), ct);
+    public void Add(Opponent opponent) => dbContext.Opponents.Add(opponent);
     public async Task SaveChangesAsync(CancellationToken ct)
     {
         try

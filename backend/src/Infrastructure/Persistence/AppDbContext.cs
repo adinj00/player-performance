@@ -15,6 +15,8 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options)
     public DbSet<StaffTeamScope> StaffTeamScopes => Set<StaffTeamScope>();
     public DbSet<Season> Seasons => Set<Season>();
     public DbSet<Competition> Competitions => Set<Competition>();
+    public DbSet<Venue> Venues => Set<Venue>();
+    public DbSet<Opponent> Opponents => Set<Opponent>();
     public DbSet<Team> Teams => Set<Team>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

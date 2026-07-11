@@ -14,34 +14,13 @@ public sealed class Season : Entity
         CreatedAtUtc = utcNow;
         UpdatedAtUtc = utcNow;
     }
-    public string Name
-    {
-        get; private set;
-    }
-    public string NormalizedName
-    {
-        get; private set;
-    }
-    public DateOnly StartDate
-    {
-        get; private set;
-    }
-    public DateOnly EndDate
-    {
-        get; private set;
-    }
-    public bool IsArchived
-    {
-        get; private set;
-    }
-    public DateTime CreatedAtUtc
-    {
-        get; private set;
-    }
-    public DateTime UpdatedAtUtc
-    {
-        get; private set;
-    }
+    public string Name { get; private set; }
+    public string NormalizedName { get; private set; }
+    public DateOnly StartDate { get; private set; }
+    public DateOnly EndDate { get; private set; }
+    public bool IsArchived { get; private set; }
+    public DateTime CreatedAtUtc { get; private set; }
+    public DateTime UpdatedAtUtc { get; private set; }
     public static Season Create(Guid id, string name, string normalizedName, DateOnly startDate, DateOnly endDate, DateTime utcNow)
     {
         EnsureValidDateRange(startDate, endDate);

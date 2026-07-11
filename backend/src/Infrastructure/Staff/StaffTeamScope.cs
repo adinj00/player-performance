@@ -2,16 +2,13 @@ namespace PlayerPerformance.Infrastructure.Staff;
 
 public sealed class StaffTeamScope
 {
-    public Guid UserId
-    {
+    public Guid UserId {
         get; set;
     }
-    public Guid TeamId
-    {
+    public Guid TeamId {
         get; set;
     }
-    public DateTimeOffset CreatedUtc
-    {
+    public DateTimeOffset CreatedUtc {
         get; set;
     }
 }

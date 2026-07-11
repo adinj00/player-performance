@@ -4,40 +4,33 @@ namespace PlayerPerformance.Infrastructure.Staff;
 
 public sealed class StaffAccessProfile
 {
-    public Guid UserId
-    {
+    public Guid UserId {
         get; set;
     }
 
-    public StaffRole PrimaryRole
-    {
+    public StaffRole PrimaryRole {
         get; set;
     }
     public string DisplayName { get; set; } = string.Empty;
     public TeamScopeType TeamScopeType { get; set; } = TeamScopeType.ALL_TEAMS;
 
-    public bool CanVerifyReports
-    {
+    public bool CanVerifyReports {
         get; set;
     }
 
-    public bool CanImportData
-    {
+    public bool CanImportData {
         get; set;
     }
 
-    public bool CanViewMedicalDetails
-    {
+    public bool CanViewMedicalDetails {
         get; set;
     }
 
-    public DateTimeOffset CreatedUtc
-    {
+    public DateTimeOffset CreatedUtc {
         get; set;
     }
 
-    public DateTimeOffset? UpdatedUtc
-    {
+    public DateTimeOffset? UpdatedUtc {
         get; set;
     }
 }

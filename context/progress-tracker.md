@@ -10,9 +10,15 @@ This file intentionally starts lightweight. It should become more detailed as bu
 
 ## Current Goal
 
-- Unit 22 completed: Teams and Selections Backend.
+- Unit 25 in verification: Venues and Opponents Backend.
 
 ## Completed
+
+- Unit 25 implementation is ready for final EF migration verification:
+  - Added separate `Venue` and `Opponent` aggregates with only the approved name, normalized-name, archive, and UTC timestamp fields. Both use the canonical settings normalization and soft archive/restore lifecycle; archived records cannot be normally updated.
+  - Extended the existing Settings application slice, repository, EF Core model, and admin-only/password-change-gated `/api/settings/venues` and `/api/settings/opponents` endpoints. Lists sort by normalized name then identifier, exclude archived records by default, and accept `includeArchived=true`.
+  - Added a focused `20260711110000_AddVenuesAndOpponents` migration that creates only `venues` and `opponents`, including required names, archive/timestamp columns, and unique normalized-name indexes. No seed records, match relationships, deletion endpoints, or speculative metadata were added.
+  - Added domain and integration coverage for lifecycle behavior, administrator authorization, CSRF-protected mutations, independent venue/opponent namespaces, and archived-list filtering. The API `.http` file now documents every new route.
 
 - Unit 22 completed:
   - Added the canonical `Team` aggregate with server-owned normalized names, display order, and UTC timestamps; `TeamTrackingLevel` is fixed to `BASIC`, `STANDARD`, and `FULL`, while `TeamStatus` is fixed to `ACTIVE`, `INACTIVE`, and `ARCHIVED`.
@@ -421,6 +427,12 @@ This file intentionally starts lightweight. It should become more detailed as bu
   - `backend`: generated and applied `20260710131639_AddSettingsSeasonsAndCompetitions` with EF Core tooling against the configured local PostgreSQL database. The migration was generated after a stale no-build attempt; the local development migration history also contains the harmless empty `20260710131358_AddSeasonsAndCompetitions` record from that attempt, while the source-controlled migration set contains only the intended Unit 21 migration.
 
 ## Confirmed Decisions
+
+- Unit 25 preserves venue and opponent names across archive states; archived names remain reserved by their respective unique normalized-name indexes. Venue and opponent namespaces are independent, so the same display name is valid once in each table.
+
+## Known Blockers
+
+- Unit 25: `dotnet ef migrations add AddVenuesAndOpponents` could not run because the developer's running `PlayerPerformance.Api` process (PID 2564) locks the normal API build outputs. The focused migration was prepared from the verified EF model instead. The isolated restore, whitespace formatting/check, zero-warning build, and full test suite pass; generating/applying the migration with EF tooling remains the final local verification step once that process is stopped.
 
 ## Unit 24: Staff Users and Roles UI
 
