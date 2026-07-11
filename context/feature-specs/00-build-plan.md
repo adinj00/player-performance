@@ -381,8 +381,8 @@ Dependencies: Unit 40, Unit 53.
 
 ## Next Immediate Unit
 
-The next implementation unit after Unit 29 should be:
+The next implementation unit after Unit 30 should be:
 
-**Unit 30: Matches Backend Foundation**
+**Unit 31: Match Lineup and Appearance Backend**
 
-Reason: the Players module now exposes persistent player records and assignment history, while the club configuration and staff team-scope foundations are already in place. The next dependency-safe step is to introduce the persistent match metadata model and secure, team-scope-aware match APIs before lineup, appearances, report workflow, statistics, and match UI are built in later units.
+Reason: persistent match metadata now exists, while player records and time-bound team assignment history are already available. The next dependency-safe step is to model the actual match squad and concrete player participation so later report workflow and manual statistics can attach to stable `PlayerMatchAppearance` records rather than to a player's current team assignment.
