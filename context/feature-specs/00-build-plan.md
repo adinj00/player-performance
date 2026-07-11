@@ -381,8 +381,8 @@ Dependencies: Unit 40, Unit 53.
 
 ## Next Immediate Unit
 
-The next implementation unit after Unit 30 should be:
+The next implementation unit after Unit 31 should be:
 
-**Unit 31: Match Lineup and Appearance Backend**
+**Unit 32: Match Report Workflow Backend**
 
-Reason: persistent match metadata now exists, while player records and time-bound team assignment history are already available. The next dependency-safe step is to model the actual match squad and concrete player participation so later report workflow and manual statistics can attach to stable `PlayerMatchAppearance` records rather than to a player's current team assignment.
+Reason: match metadata and concrete player appearances now exist. The next dependency-safe step is to introduce the backend-owned report lifecycle, review/verification permissions, correction workflow, allowed actions, and workflow locks before manual player and goalkeeper statistics are added in Unit 33.
