@@ -381,8 +381,8 @@ Dependencies: Unit 40, Unit 53.
 
 ## Next Immediate Unit
 
-The next implementation unit after Unit 24 should be:
+The next implementation unit after Unit 25 should be:
 
-**Unit 25: Venues and Opponents Backend**
+**Unit 26: Settings UI Foundation**
 
-Reason: staff access is now operational, while matches still require stable administrator-managed venue and opponent identifiers. Completing these final backend settings resources prepares Unit 26 settings UI and the later match model without introducing match behavior prematurely.
+Reason: seasons, competitions, teams/selections, venues, and opponents now have stable administrator-only backend contracts. Wiring these settings into one coherent frontend module completes the club-configuration foundation before player records and assignments begin in Unit 27.
