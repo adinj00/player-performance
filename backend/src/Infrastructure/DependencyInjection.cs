@@ -47,6 +47,7 @@ public static class DependencyInjection
         services.AddScoped<IPlayersRepository, PlayersRepository>();
         services.AddScoped<IPlayerTeamAssignmentsRepository, PlayerTeamAssignmentsRepository>();
         services.AddScoped<IMatchesRepository, MatchesRepository>();
+        services.AddScoped<IMatchLineupRepository, MatchLineupRepository>();
         services.AddScoped<IStaffUsersService, IdentityStaffUsersService>();
         services.AddScoped<TeamStartupInitializer>();
 

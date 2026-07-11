@@ -519,3 +519,11 @@ This file intentionally starts lightweight. It should become more detailed as bu
 - Future EF Core migration creation and database update work should use `dotnet ef` tooling by default instead of handwritten migration files whenever the local environment supports the CLI workflow.
 - Future EF Core migrations should be generated into `backend/src/Infrastructure/Persistence/Migrations/` using `--output-dir Persistence/Migrations` so the `AppDbContext` remains separated from generated migration artifacts.
 - When a backend task requires a new EF Core migration, the preferred verification flow is to run both `dotnet ef migrations add ... --output-dir Persistence/Migrations` and `dotnet ef database update` unless the environment prevents it or the task explicitly says otherwise.
+
+## Unit 31: Match Lineup and Appearance Backend
+
+- Status: complete.
+- Added the match-lineup, lineup-entry, appearance, and ordered-substitution domain model. Played-match validation enforces captain, unique lineup/appearance identities, non-negative minutes, and ordered on-field transitions while allowing return substitutions and without fixed squad or minute-total rules.
+- Added team-scope-authorized `GET` and atomic `PUT /api/matches/{matchId}/lineup` endpoints. The save operation supports preliminary scheduled/postponed lineups, validates new-player assignment eligibility at the match date, rejects archived/cancelled mutation, and retains appearance IDs when the same player remains in the appearance set.
+- Added PostgreSQL mappings and EF-generated `20260711184101_AddMatchLineupAppearances` migration with restrictive historical player foreign keys and required match/player and substitution-sequence uniqueness constraints.
+- Verification passed: isolated restore; zero-warning solution build; 52 unit and 28 integration tests; whitespace formatting and verify; `git diff --check`; and `dotnet ef database update`, which applied both the Unit 30 match migration and the Unit 31 lineup/appearance migration to the configured local PostgreSQL database.

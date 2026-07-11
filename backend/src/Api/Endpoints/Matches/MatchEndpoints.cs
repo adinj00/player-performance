@@ -17,8 +17,10 @@ internal static class MatchEndpoints
         var matches = endpoints.MapGroup("/api/matches").RequireAuthorization().WithTags("Matches");
         matches.MapGet("", ListAsync);
         matches.MapGet("/{matchId:guid}", GetAsync);
+        matches.MapGet("/{matchId:guid}/lineup", GetLineupAsync);
         matches.MapPost("", CreateAsync);
         matches.MapPatch("/{matchId:guid}", UpdateAsync);
+        matches.MapPut("/{matchId:guid}/lineup", SaveLineupAsync);
         matches.MapPost("/{matchId:guid}/archive", ArchiveAsync).RequireAuthorization(StaffAuthorizationPolicies.AdminOnly);
         matches.MapPost("/{matchId:guid}/restore", RestoreAsync).RequireAuthorization(StaffAuthorizationPolicies.AdminOnly);
         return endpoints;
@@ -29,6 +31,7 @@ internal static class MatchEndpoints
         return result.IsSuccess ? TypedResults.Ok(result.Value) : Problem(result.Error, context);
     }
     private static async Task<Results<Ok<MatchResponse>, NotFound>> GetAsync(Guid matchId, IMatchesService service, CancellationToken ct) => (await service.GetAsync(matchId, ct)) is { } response ? TypedResults.Ok(response) : TypedResults.NotFound();
+    private static async Task<Results<Ok<MatchLineupResponse>, NotFound>> GetLineupAsync(Guid matchId, IMatchesService service, CancellationToken ct) => (await service.GetLineupAsync(matchId, ct)) is { } response ? TypedResults.Ok(response) : TypedResults.NotFound();
     private static async Task<IResult> CreateAsync(HttpContext context, IAntiforgery antiforgery, CreateMatchRequest request, IMatchesService service, CancellationToken ct)
     {
         var failure = await AntiforgeryValidation.ValidateRequestAsync(context, antiforgery);
@@ -39,6 +42,11 @@ internal static class MatchEndpoints
         var failure = await AntiforgeryValidation.ValidateRequestAsync(context, antiforgery);
         return failure ?? ToResult(await service.UpdateAsync(matchId, request, ct), context);
     }
+    private static async Task<IResult> SaveLineupAsync(Guid matchId, HttpContext context, IAntiforgery antiforgery, SaveMatchLineupRequest request, IMatchesService service, CancellationToken ct)
+    {
+        var failure = await AntiforgeryValidation.ValidateRequestAsync(context, antiforgery);
+        return failure ?? ToLineupResult(await service.SaveLineupAsync(matchId, request, ct), context);
+    }
     private static async Task<IResult> ArchiveAsync(Guid matchId, HttpContext context, IAntiforgery antiforgery, IMatchesService service, CancellationToken ct) => await ChangeArchiveStateAsync(matchId, context, antiforgery, service.ArchiveAsync, ct);
     private static async Task<IResult> RestoreAsync(Guid matchId, HttpContext context, IAntiforgery antiforgery, IMatchesService service, CancellationToken ct) => await ChangeArchiveStateAsync(matchId, context, antiforgery, service.RestoreAsync, ct);
     private static async Task<IResult> ChangeArchiveStateAsync(Guid matchId, HttpContext context, IAntiforgery antiforgery, Func<Guid, CancellationToken, Task<Result<MatchResponse>>> operation, CancellationToken ct)
@@ -48,6 +56,7 @@ internal static class MatchEndpoints
     }
     private static IResult ToCreated(Result<MatchResponse> result, HttpContext context) => result.IsSuccess ? TypedResults.Created($"/api/matches/{result.Value.Id}", result.Value) : Problem(result.Error, context);
     private static IResult ToResult(Result<MatchResponse> result, HttpContext context) => result.IsSuccess ? TypedResults.Ok(result.Value) : Problem(result.Error, context);
+    private static IResult ToLineupResult(Result<MatchLineupResponse> result, HttpContext context) => result.IsSuccess ? TypedResults.Ok(result.Value) : Problem(result.Error, context);
     private static ProblemHttpResult Problem(Error error, HttpContext context)
     {
         var status = error.Code switch { "not_found" => StatusCodes.Status404NotFound, "forbidden" => StatusCodes.Status403Forbidden, "duplicate_match" or "match_conflict" => StatusCodes.Status409Conflict, "validation_failed" or "invalid_references" => StatusCodes.Status422UnprocessableEntity, _ => StatusCodes.Status400BadRequest };
