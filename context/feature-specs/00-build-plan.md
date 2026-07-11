@@ -381,8 +381,8 @@ Dependencies: Unit 40, Unit 53.
 
 ## Next Immediate Unit
 
-The next implementation unit after Unit 25 should be:
+The next implementation unit after Unit 26 should be:
 
-**Unit 26: Settings UI Foundation**
+**Unit 27: Players Backend Foundation**
 
-Reason: seasons, competitions, teams/selections, venues, and opponents now have stable administrator-only backend contracts. Wiring these settings into one coherent frontend module completes the club-configuration foundation before player records and assignments begin in Unit 27.
+Reason: club configuration and staff access foundations now exist. The next dependency-safe step is to introduce the persistent club-level player record and its lifecycle before adding time-bound team assignment history in Unit 28 and the player UI in Unit 29.
