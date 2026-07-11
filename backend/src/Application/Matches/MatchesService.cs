@@ -20,7 +20,7 @@ internal sealed class MatchesService(IMatchesRepository repository, ICurrentUser
             return Result<PagedMatchListResponse>.Failure(MatchErrors.Forbidden);
         var scope = GetScope(access);
         var page = await repository.ListAsync(query, scope, ct);
-        return Result<PagedMatchListResponse>.Success(new(page.Items.Select(ToResponse).ToArray(), query.Page, query.PageSize, page.TotalCount, page.TotalCount == 0 ? 0 : (int) Math.Ceiling(page.TotalCount / (double) query.PageSize)));
+        return Result<PagedMatchListResponse>.Success(new(page.Items.Select(ToResponse).ToArray(), query.Page, query.PageSize, page.TotalCount, page.TotalCount == 0 ? 0 : (int)Math.Ceiling(page.TotalCount / (double)query.PageSize)));
     }
     public async Task<MatchResponse?> GetAsync(Guid id, CancellationToken ct)
     {

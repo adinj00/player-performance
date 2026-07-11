@@ -55,7 +55,7 @@ internal sealed class PlayersRepository(AppDbContext dbContext) : IPlayersReposi
                                  orderby assignment.StartDate descending, assignment.EndDate descending, assignment.Id
                                  select new { assignment.PlayerId, assignment.TeamId, team.Name, assignment.StartDate, assignment.EndDate })
             .ToListAsync(ct);
-        return assignments.GroupBy(x => x.PlayerId).ToDictionary(x => x.Key, x => (IReadOnlyList<CurrentPlayerTeamAssignment>) x.Select(a => new CurrentPlayerTeamAssignment(a.TeamId, a.Name, a.StartDate, a.EndDate)).ToList());
+        return assignments.GroupBy(x => x.PlayerId).ToDictionary(x => x.Key, x => (IReadOnlyList<CurrentPlayerTeamAssignment>)x.Select(a => new CurrentPlayerTeamAssignment(a.TeamId, a.Name, a.StartDate, a.EndDate)).ToList());
     }
     public void Add(Player player) => dbContext.Players.Add(player);
     public Task SaveChangesAsync(CancellationToken ct) => dbContext.SaveChangesAsync(ct);

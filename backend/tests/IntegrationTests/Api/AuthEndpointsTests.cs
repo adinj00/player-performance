@@ -64,7 +64,7 @@ public sealed class AuthEndpointsTests : IClassFixture<IdentityTestApplicationFa
         var problemDetails = await response.Content.ReadFromJsonAsync<ProblemDetails>();
 
         Assert.NotNull(problemDetails);
-        Assert.Equal((int) HttpStatusCode.Unauthorized, problemDetails!.Status);
+        Assert.Equal((int)HttpStatusCode.Unauthorized, problemDetails!.Status);
         Assert.Equal("Unauthorized", problemDetails.Title);
     }
 

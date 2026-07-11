@@ -44,5 +44,5 @@ public sealed class TeamTests
 
     [Fact]
     public void Create_ShouldRejectUndefinedTrackingLevel()
-        => Assert.Throws<ArgumentOutOfRangeException>(() => Team.Create(Guid.NewGuid(), "U13", "U13", (TeamTrackingLevel) 999, 0, DateTime.UtcNow));
+        => Assert.Throws<ArgumentOutOfRangeException>(() => Team.Create(Guid.NewGuid(), "U13", "U13", (TeamTrackingLevel)999, 0, DateTime.UtcNow));
 }

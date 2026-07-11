@@ -27,7 +27,7 @@ public sealed class PlayersService(IPlayersRepository repository, IPlayerTeamAss
         var today = DateOnly.FromDateTime(clock.UtcNow);
         var scope = access.IsAdmin || access.TeamScopeType == TeamScopeType.ALL_TEAMS ? null : access.SelectedTeamIds;
         var page = await repository.ListAsync(normalizedQuery, today, scope, ct);
-        var totalPages = page.TotalCount == 0 ? 0 : (int) Math.Ceiling(page.TotalCount / (double) normalizedQuery.PageSize);
+        var totalPages = page.TotalCount == 0 ? 0 : (int)Math.Ceiling(page.TotalCount / (double)normalizedQuery.PageSize);
         return Result<PagedPlayerListResponse>.Success(new(page.Items.Select(x => ToResponse(x.Player, x.CurrentAssignments)).ToList(), normalizedQuery.Page, normalizedQuery.PageSize, page.TotalCount, totalPages));
     }
 
