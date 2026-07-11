@@ -16,7 +16,7 @@ export function AppSidebar({ className, onNavigate }: AppSidebarProps) {
       ...group,
       items: group.items.filter(
         (item) =>
-          item.path !== "/users" ||
+          (item.path !== "/users" && item.path !== "/settings") ||
           (!isLoading && user?.primaryRole === "ADMIN"),
       ),
     }))

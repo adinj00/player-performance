@@ -10,9 +10,25 @@ This file intentionally starts lightweight. It should become more detailed as bu
 
 ## Current Goal
 
-- Unit 25 in verification: Venues and Opponents Backend.
+- Unit 27 next: Players Backend Foundation.
 
 ## Completed
+
+- Unit 26 completed:
+  - Replaced the settings placeholder with administrator-only, nested routes for seasons, competitions, teams/selections, venues, and opponents; `/settings` redirects to seasons and the sidebar hides `Postavke` for non-administrators.
+  - Added typed, CSRF-capable settings API clients and TanStack Query hooks for the existing Unit 21, Unit 22, and Unit 25 contracts. Archived visibility is URL-backed with `archived=include`; server ordering is preserved.
+  - Added reusable settings navigation, RHF/Zod forms, lifecycle confirmations, table states, centralized Bosnian Latin team/tracking-level labels, date-only season formatting, and accessible move-up/move-down ordering controls that submit the complete non-archived team ID list.
+  - No packages, shadcn primitives, backend files, or API contracts were added or changed.
+  - Verification passed: `npm.cmd run format`, `npm.cmd run format:check`, `npm.cmd run lint` (two pre-existing/non-blocking React Compiler compatibility warnings, including React Hook Form usage in this unit), `npm.cmd run build`, and `git diff --check`.
+
+- Settings list endpoint correction:
+  - Made the `includeArchived` query value optional with a `false` default for seasons, competitions, venues, opponents, and teams. This matches the documented default-list contract and the frontend behavior, which only sends `includeArchived=true` when archived visibility is selected.
+  - Configured an explicit invalid enum sentinel for `StaffAccessProfile.TeamScopeType`, removing EF Core's generated-default warning while preserving explicit `ALL_TEAMS` and `SELECTED_TEAMS` values and the existing database default.
+  - Verification passed: isolated `dotnet restore`, `dotnet build PlayerPerformance.sln --no-restore`, and `dotnet test PlayerPerformance.sln --no-restore --no-build` (36 unit and 25 integration tests), `dotnet format PlayerPerformance.sln whitespace --no-restore --verify-no-changes`, and `git diff --check`.
+  - Replaced the archived-record native checkbox with the established shadcn checkbox primitive.
+  - Added and applied `20260711082629_RepairVenuesAndOpponentsSchema`, an idempotent repair migration that creates the Unit 25 `venues` and `opponents` tables plus normalized-name indexes only when missing. It repairs local databases where the original Unit 25 migration was present in history but its schema was absent.
+  - Follow-up verification passed: backend whitespace check, isolated restore/build/test (36 unit and 25 integration tests), frontend formatting/format check/lint/build, and `git diff --check`. Frontend lint retains its two non-blocking React Compiler compatibility warnings.
+  - Removed duplicate create actions from settings empty states; each resource now keeps its single persistent create action in the top-right page controls.
 
 - Unit 25 implementation is ready for final EF migration verification:
   - Added separate `Venue` and `Opponent` aggregates with only the approved name, normalized-name, archive, and UTC timestamp fields. Both use the canonical settings normalization and soft archive/restore lifecycle; archived records cannot be normally updated.

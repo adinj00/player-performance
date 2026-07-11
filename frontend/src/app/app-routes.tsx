@@ -3,6 +3,7 @@ import { NuqsAdapter } from "nuqs/adapters/react-router/v7";
 import { useEffect } from "react";
 import {
   BrowserRouter,
+  Navigate,
   Outlet,
   Route,
   Routes,
@@ -27,11 +28,16 @@ import { MatchesPage } from "@/pages/matches-page";
 import { MedicalPage } from "@/pages/medical-page";
 import { MediaPage } from "@/pages/media-page";
 import { PlayersPage } from "@/pages/players-page";
-import { SettingsPage } from "@/pages/settings-page";
 import { TeamsPage } from "@/pages/teams-page";
 import { TrainingGpsPage } from "@/pages/training-gps-page";
 import { UsersPage } from "@/pages/users-page";
 import { AcceptInvitationPage } from "@/pages/accept-invitation-page";
+import { SettingsLayout } from "@/features/settings/components";
+import {
+  NamedSettingsPage,
+  SeasonsSettingsPage,
+  TeamsSettingsPage,
+} from "@/features/settings/pages";
 
 function ProtectedAppShell() {
   return (
@@ -128,7 +134,26 @@ export function AppRoutes() {
             <Route path={routePaths.medical} element={<MedicalPage />} />
             <Route path={routePaths.media} element={<MediaPage />} />
             <Route path={routePaths.users} element={<UsersPage />} />
-            <Route path={routePaths.settings} element={<SettingsPage />} />
+            <Route path={routePaths.settings} element={<SettingsLayout />}>
+              <Route
+                index
+                element={<Navigate to={routePaths.settingsSeasons} replace />}
+              />
+              <Route path="seasons" element={<SeasonsSettingsPage />} />
+              <Route
+                path="competitions"
+                element={<NamedSettingsPage resource="competitions" />}
+              />
+              <Route path="teams" element={<TeamsSettingsPage />} />
+              <Route
+                path="venues"
+                element={<NamedSettingsPage resource="venues" />}
+              />
+              <Route
+                path="opponents"
+                element={<NamedSettingsPage resource="opponents" />}
+              />
+            </Route>
           </Route>
           <Route path="*" element={<NotFoundPage />} />
         </Routes>

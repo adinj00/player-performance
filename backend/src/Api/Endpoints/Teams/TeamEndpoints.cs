@@ -13,7 +13,7 @@ internal static class TeamEndpoints
     public static IEndpointRouteBuilder MapTeamEndpoints(this IEndpointRouteBuilder endpoints)
     {
         var teams = endpoints.MapGroup("/api/settings/teams").RequireAuthorization(StaffAuthorizationPolicies.AdminOnly).WithTags("Settings");
-        teams.MapGet("", (bool includeArchived, ITeamsService service, CancellationToken ct) => service.ListAsync(includeArchived, ct));
+        teams.MapGet("", (ITeamsService service, CancellationToken ct, bool includeArchived = false) => service.ListAsync(includeArchived, ct));
         teams.MapGet("/{teamId:guid}", GetAsync);
         teams.MapPost("", CreateAsync);
         teams.MapPatch("/{teamId:guid}", UpdateAsync);

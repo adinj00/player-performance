@@ -27,6 +27,11 @@ export const routePaths = {
   media: "/media",
   users: "/users",
   settings: "/settings",
+  settingsSeasons: "/settings/seasons",
+  settingsCompetitions: "/settings/competitions",
+  settingsTeams: "/settings/teams",
+  settingsVenues: "/settings/venues",
+  settingsOpponents: "/settings/opponents",
 } as const;
 
 export interface AppRouteDefinition {
@@ -103,6 +108,31 @@ export const appRouteDefinitions: AppRouteDefinition[] = [
     title: "Postavke",
     description:
       "Modul za sistemske postavke će biti dodan u kasnijem feature specu.",
+  },
+  {
+    path: routePaths.settingsSeasons,
+    title: "Postavke",
+    description: "Upravljanje osnovnim podacima sistema.",
+  },
+  {
+    path: routePaths.settingsCompetitions,
+    title: "Postavke",
+    description: "Upravljanje osnovnim podacima sistema.",
+  },
+  {
+    path: routePaths.settingsTeams,
+    title: "Postavke",
+    description: "Upravljanje osnovnim podacima sistema.",
+  },
+  {
+    path: routePaths.settingsVenues,
+    title: "Postavke",
+    description: "Upravljanje osnovnim podacima sistema.",
+  },
+  {
+    path: routePaths.settingsOpponents,
+    title: "Postavke",
+    description: "Upravljanje osnovnim podacima sistema.",
   },
 ];
 
