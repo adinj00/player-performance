@@ -14,6 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { matchesApi } from "@/features/matches/api/matches-api";
 import { LineupTab } from "@/features/matches/components/lineup-tab";
+import { StatisticsTab } from "@/features/matches/components/statistics-tab";
 import {
   locationLabels,
   matchStatusLabels,
@@ -69,11 +70,14 @@ export function MatchDetailPage() {
         <TabsList>
           <TabsTrigger value="overview">Pregled</TabsTrigger>
           <TabsTrigger value="lineup">Sastav</TabsTrigger>
-          {futureTabs.map((tab) => (
-            <TabsTrigger key={tab} value={tab}>
-              {tab}
-            </TabsTrigger>
-          ))}
+          <TabsTrigger value="statistics">Statistika</TabsTrigger>
+          {futureTabs
+            .filter((tab) => tab !== "Statistika")
+            .map((tab) => (
+              <TabsTrigger key={tab} value={tab}>
+                {tab}
+              </TabsTrigger>
+            ))}
         </TabsList>
         <TabsContent value="overview">
           <dl className="grid gap-4 rounded-xl border p-5 sm:grid-cols-2">
@@ -106,16 +110,23 @@ export function MatchDetailPage() {
         <TabsContent value="lineup">
           <LineupTab match={data} />
         </TabsContent>
-        {futureTabs.map((tab) => (
-          <TabsContent key={tab} value={tab}>
-            <Empty>
-              <EmptyHeader>
-                <EmptyTitle>{tab}</EmptyTitle>
-                <EmptyDescription>Ovaj dio još nije dostupan.</EmptyDescription>
-              </EmptyHeader>
-            </Empty>
-          </TabsContent>
-        ))}
+        <TabsContent value="statistics">
+          <StatisticsTab match={data} />
+        </TabsContent>
+        {futureTabs
+          .filter((tab) => tab !== "Statistika")
+          .map((tab) => (
+            <TabsContent key={tab} value={tab}>
+              <Empty>
+                <EmptyHeader>
+                  <EmptyTitle>{tab}</EmptyTitle>
+                  <EmptyDescription>
+                    Ovaj dio još nije dostupan.
+                  </EmptyDescription>
+                </EmptyHeader>
+              </Empty>
+            </TabsContent>
+          ))}
       </Tabs>
     </div>
   );

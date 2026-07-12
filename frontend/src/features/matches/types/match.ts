@@ -130,3 +130,80 @@ export interface MatchReportResponse {
   status:
     "DRAFT" | "READY_FOR_REVIEW" | "VERIFIED" | "NEEDS_CORRECTION" | "ARCHIVED";
 }
+
+export type MatchReportStatus = MatchReportResponse["status"];
+
+export type PlayerStatisticFieldCode =
+  | "goals"
+  | "assists"
+  | "yellowCards"
+  | "redCards"
+  | "shots"
+  | "shotsOnTarget"
+  | "passesAttempted"
+  | "passesCompleted"
+  | "keyPasses"
+  | "duelsAttempted"
+  | "duelsWon"
+  | "foulsCommitted"
+  | "foulsWon"
+  | "offsides"
+  | "ballRecoveries"
+  | "possessionLosses";
+
+export type GoalkeeperStatisticFieldCode =
+  "saves" | "goalsConceded" | "cleanSheet" | "penaltySaves";
+
+export interface StatisticsAppearance {
+  playerMatchAppearanceId: string;
+  playerId: string;
+  firstName: string;
+  lastName: string;
+  preferredName: string | null;
+  minutesPlayed: number;
+}
+
+export type PlayerStatisticsRow = {
+  playerMatchAppearanceId: string;
+  isComplete: boolean;
+} & {
+  [K in PlayerStatisticFieldCode]: number | null;
+};
+
+export type GoalkeeperStatisticsRow = {
+  playerMatchAppearanceId: string;
+  isComplete: boolean;
+  saves: number | null;
+  goalsConceded: number | null;
+  cleanSheet: boolean | null;
+  penaltySaves: number | null;
+};
+
+export interface MatchReportStatisticsResponse {
+  reportId: string;
+  matchId: string;
+  reportStatus: MatchReportStatus;
+  appliedTrackingLevel: "BASIC" | "STANDARD" | "FULL" | null;
+  enabledPlayerFields: string[];
+  enabledGoalkeeperFields: string[];
+  appearances: StatisticsAppearance[];
+  playerStatistics: PlayerStatisticsRow[];
+  goalkeeperStatistics: GoalkeeperStatisticsRow[];
+  isComplete: boolean;
+  canEditStatistics: boolean;
+}
+
+export interface SaveMatchReportStatisticsRequest {
+  playerStatistics: Array<
+    { playerMatchAppearanceId: string } & Record<
+      PlayerStatisticFieldCode,
+      number | null
+    >
+  >;
+  goalkeeperStatistics: Array<
+    { playerMatchAppearanceId: string } & Record<
+      GoalkeeperStatisticFieldCode,
+      number | boolean | null
+    >
+  >;
+}

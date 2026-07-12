@@ -6,10 +6,12 @@ import type {
   MatchListFilters,
   MatchLineupResponse,
   MatchReportResponse,
+  MatchReportStatisticsResponse,
   MatchResponse,
   PagedMatches,
   EligibleLineupPlayer,
   SaveMatchLineupRequest,
+  SaveMatchReportStatisticsRequest,
   UpdateMatchRequest,
 } from "@/features/matches/types/match";
 
@@ -59,6 +61,21 @@ export const matchesApi = {
     ),
   getReport: (id: string) =>
     apiRequest<MatchReportResponse>(`/api/matches/${id}/report`),
+  createReport: (id: string) =>
+    mutate<MatchReportResponse>(`/api/matches/${id}/report`, "POST"),
+  getStatistics: (reportId: string) =>
+    apiRequest<MatchReportStatisticsResponse>(
+      `/api/match-reports/${reportId}/statistics`,
+    ),
+  saveStatistics: (
+    reportId: string,
+    request: SaveMatchReportStatisticsRequest,
+  ) =>
+    mutate<MatchReportStatisticsResponse>(
+      `/api/match-reports/${reportId}/statistics`,
+      "PUT",
+      request,
+    ),
   saveLineup: (id: string, request: SaveMatchLineupRequest) =>
     mutate<MatchLineupResponse>(`/api/matches/${id}/lineup`, "PUT", request),
   create: (request: CreateMatchRequest) =>

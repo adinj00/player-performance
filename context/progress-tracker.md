@@ -571,6 +571,14 @@ This file intentionally starts lightweight. It should become more detailed as bu
 - Added focused integration coverage for historical/current/future match-date eligibility, range boundaries, excluded archived and other-team players, admin access, read-only role denial, and safe missing-match behavior.
 - Verification passed: backend whitespace format and verify, zero-warning `dotnet build`, 61 unit tests, 29 integration tests, frontend Prettier format/check, frontend build, and frontend lint (warnings only: existing React Compiler compatibility notices plus React Hook Form watch usage in the new editor). `git diff --check` passed.
 
+## Unit 36: Manual Match Statistics UI
+
+- Status: complete. Added the match-detail `Statistika` tab with typed report/statistics contracts, focused TanStack Query calls, server-driven enabled-field rendering, central Bosnian presentation metadata, and one atomic statistics save request.
+- The UI supports draft report initialization for admin/data-operator sessions, played/archived/unavailable/no-report/no-appearance/loading/error/read-only states, player and goalkeeper sub-tabs, multiple manually selected goalkeeper appearances, nullable clean-sheet selection, local completeness feedback, and workflow-conflict reload feedback.
+- Numeric input preserves empty-to-null and zero values, rejects invalid decimal/negative entries before saving, and validates the backend-supported shots/passes/duels relationships. Edit cancellation and goalkeeper-row removal require discard/confirmation dialogs; browser-level navigation remains outside the current router guard pattern.
+- Added shadcn `Progress` and `Tooltip` primitives through the CLI. No backend files, workflow transitions, or API contracts were changed.
+- Verification passed: `npm.cmd run format`, `npm.cmd run format:check`, `npm.cmd run lint` (existing React Compiler compatibility warnings only), and `npm.cmd run build`. The existing Vite bundle-size warning remains informational. Manual authenticated API/browser verification remains dependent on the local API/PostgreSQL session.
+
 ## First-admin bootstrap configuration follow-up
 
 - Added `Bootstrap__FirstAdmin__Name=Administrator` to `backend/.env.example`. The initial bootstrap role handoff now uses this setting for the first administrator's staff display name, alongside the existing email and temporary-password settings. No migration is needed because `StaffAccessProfile.DisplayName` already exists.
