@@ -239,9 +239,9 @@ Dependencies: Unit 31, Unit 32, Unit 34.
 
 ### Unit 36: Manual Match Statistics UI
 
-Add player statistics and goalkeeper statistics entry UI optimized for desktop/tablet, with save states and validation feedback.
+Add tracking-level-driven player and goalkeeper statistics read/edit UI optimized for desktop/tablet, minimal draft report initialization, completeness states, atomic saves, and validation/workflow feedback.
 
-Dependencies: Unit 33, Unit 35.
+Dependencies: Unit 32, Unit 33, Unit 35.
 
 ### Unit 37: Match Report Review UI
 
@@ -381,8 +381,8 @@ Dependencies: Unit 40, Unit 53.
 
 ## Next Immediate Unit
 
-The next implementation unit after Unit 34 should be:
+The next implementation unit after Unit 35 should be:
 
-**Unit 35: Lineup and Appearances UI**
+**Unit 36: Manual Match Statistics UI**
 
-Reason: the Matches list and detail shell now exist, and the backend already owns atomic lineup/participation persistence. The next dependency-safe step is to replace the `Sastav` placeholder with a real permission-aware editor and view. This unit also adds the narrowly scoped match-date eligible-player query required to avoid incorrectly selecting players from current assignments for historical or future fixtures.
+Reason: concrete match appearances and the `Sastav` interface now exist, while Unit 33 already provides tracking-level-aware atomic statistics APIs. The next dependency-safe step is to replace the `Statistika` placeholder with dense player and goalkeeper entry/read views. Because statistics are report-owned and no previous UI creates a report, this unit also includes only the minimal draft report initialization required before data entry; workflow transition actions remain in Unit 37.
