@@ -582,11 +582,69 @@ This file intentionally starts lightweight. It should become more detailed as bu
 
 ## Unit 36: Manual Match Statistics UI
 
-- Status: complete. Added the match-detail `Statistika` tab with typed report/statistics contracts, focused TanStack Query calls, server-driven enabled-field rendering, central Bosnian presentation metadata, and one atomic statistics save request.
+- Status: partial. The implemented workflow is usable and the project quality gates pass, but the Unit 36 audit below identifies remaining specification requirements before this unit can be marked complete.
 - The UI supports draft report initialization for admin/data-operator sessions, played/archived/unavailable/no-report/no-appearance/loading/error/read-only states, player and goalkeeper sub-tabs, multiple manually selected goalkeeper appearances, nullable clean-sheet selection, local completeness feedback, and workflow-conflict reload feedback.
 - Numeric input preserves empty-to-null and zero values, rejects invalid decimal/negative entries before saving, and validates the backend-supported shots/passes/duels relationships. Edit cancellation and goalkeeper-row removal require discard/confirmation dialogs; browser-level navigation remains outside the current router guard pattern.
 - Added shadcn `Progress` and `Tooltip` primitives through the CLI. No backend files, workflow transitions, or API contracts were changed.
 - Verification passed: `npm.cmd run format`, `npm.cmd run format:check`, `npm.cmd run lint` (existing React Compiler compatibility warnings only), and `npm.cmd run build`. The existing Vite bundle-size warning remains informational. Manual authenticated API/browser verification remains dependent on the local API/PostgreSQL session.
+
+### Specification audit — 2026-07-12
+
+- Implemented and verified in code: report lookup/creation, statistics GET and atomic PUT calls, backend-driven field rendering, central presentation registry, numeric null-versus-zero handling, supported relationship validation, player and goalkeeper read/edit flows, duplicate-goalkeeper prevention, selected-row add/remove behavior, loading/no-report/no-appearance/unavailable/unsupported-field states, local completeness, and focused query invalidation.
+- Required before exact-spec completion: dynamic Zod schemas are not used; player-grid headers are not grouped by the registry's presentation group; backend validation is displayed only as a form summary rather than mapped to cells/rows; `409` responses do not preserve recoverable unsaved values or distinguish workflow locks from appearance-snapshot mismatches; dirty edits do not guard top-level match-tab changes or in-app navigation; and no approved frontend test foundation exists, so the recommended parser/payload tests are absent.
+- Intentional user-directed variance: goalkeeper-statistics rows now use the lineup editor's immediate add/remove interaction. Removal is persisted only by `Sačuvaj statistiku`, rather than the feature spec's confirmation dialog for populated goalkeeper rows.
+- Audit verification passed: `npm.cmd run format:check`, `npm.cmd run lint`, `npm.cmd run build`, and `git diff --check`. The Vite bundle-size notice remains informational; no manual authenticated end-to-end run was performed in this environment.
+- Audit follow-up: report-query failures now render a retryable error state rather than the no-report state, and goalkeeper numeric input names include the selected player's name. `npm.cmd run format`, `npm.cmd run lint`, and `npm.cmd run build` passed.
+- Statistics header follow-up: moved the report-status badge beside the statistics title so the right-aligned `Uredi statistiku` action can appear or disappear without shifting the status indicator.
+- Match-detail navigation follow-up: installed the official shadcn Breadcrumb component through the CLI and replaced the visible hand-built route text with semantic `Utakmice / {selekcija} – {protivnik}` navigation.
+
+## Unit 36 report-loading fix
+
+- Fixed the `GET /api/matches/{matchId}/report` 500 exposed by the Statistics tab. `MatchReportsRepository.GetReadByMatchAsync` now applies the match-id predicate before projecting to `MatchReportReadModel`, which EF Core can translate to SQL. This preserves server-side scope filtering and avoids client evaluation.
+- Verification: isolated restore, zero-warning build, and the full backend test suite passed using `backend/.artifacts/report-query-fix` (61 unit tests and 29 integration tests). `git diff --check` passed. The normal build-output path remains locked by the running local API process; the isolated build avoids that process without changing it. The repository-wide whitespace verification still reports pre-existing formatting/line-ending issues outside this focused fix.
+
+## Match detail and goalkeeper-statistics UX follow-up
+
+- Match-detail routes now resolve to the `Utakmice` application-header title rather than the fallback `Nepoznata stranica` label.
+- The empty goalkeeper-statistics state now clearly explains that a user must enter statistics edit mode before selecting an existing appearance for goalkeeper statistics. Player positions and lineup goalkeeper roles remain intentionally out of scope; a goalkeeper is manually identified only by adding goalkeeper statistics for that match appearance.
+- Verification passed: `npm.cmd run format`, `npm.cmd run format:check`, `npm.cmd run lint`, and `npm.cmd run build`. The Vite bundle-size notice remains informational.
+
+## Goalkeeper-statistics interaction follow-up
+
+- `Dodaj golmana` is now available directly in the `Golmani` tab whenever the backend permits statistics editing; choosing it enters edit mode and adds an unsaved goalkeeper row to the existing atomic statistics snapshot.
+- Goalkeeper selection and clean-sheet values use player names and Bosnian `Da`/`Ne` labels instead of raw appearance IDs and boolean values. Read mode uses the same labels. Goalkeeper statistics remain additional to the required player-statistics row for the same match appearance.
+- Verification passed: `npm.cmd run format`, `npm.cmd run format:check`, `npm.cmd run lint`, and `npm.cmd run build`. The Vite bundle-size notice remains informational.
+
+## Goalkeeper-statistics removal follow-up
+
+- Empty goalkeeper draft rows are excluded from both the atomic save payload and the displayed goalkeeper completeness count. Removing the final selected goalkeeper now sends an empty goalkeeper snapshot, allowing the backend to remove the persisted goalkeeper-statistics record without a validation `422`.
+- Verification passed: `npm.cmd run format`, `npm.cmd run format:check`, `npm.cmd run lint`, and `npm.cmd run build`. The Vite bundle-size notice remains informational.
+
+## Goalkeeper-statistics save stability follow-up
+
+- Statistics saving now resets the form from the authoritative response before leaving edit mode, eliminating the stale goalkeeper-row render that could crash the page after adding or removing a goalkeeper. Identity rendering also safely handles a transient missing appearance while data refreshes.
+- The player-statistics tab now states that it includes goalkeepers, while the goalkeeper tab is labeled as additional statistics. This reflects the required API snapshot: all appearances retain player statistics and goalkeeper statistics add goalkeeper-only fields for the selected appearance.
+- Verification passed: `npm.cmd run format`, `npm.cmd run format:check`, `npm.cmd run lint`, and `npm.cmd run build`. The Vite bundle-size notice remains informational.
+
+## Goalkeeper draft-row removal follow-up
+
+- Empty, newly added goalkeeper rows now disappear immediately when their remove action is clicked. The confirmation dialog remains for selected or populated goalkeeper rows, preserving the safeguard for meaningful changes.
+- Verification passed: `npm.cmd run format`, `npm.cmd run format:check`, `npm.cmd run lint`, and `npm.cmd run build`. The Vite bundle-size notice remains informational.
+
+## Goalkeeper-statistics selector follow-up
+
+- Replaced blank goalkeeper-row creation with the same select-to-add interaction used by the lineup editor's starting lineup and substitute lists. Selecting an available appearance adds its goalkeeper-statistics row immediately; selected rows display the player identity and can be removed directly.
+- Verification passed: `npm.cmd run format`, `npm.cmd run format:check`, `npm.cmd run lint`, and `npm.cmd run build`. The Vite bundle-size notice remains informational.
+
+## Goalkeeper-statistics direct-removal follow-up
+
+- Goalkeeper-statistics rows now use the same immediate remove behavior as lineup rows. The remove action updates only the in-memory atomic snapshot; `Sačuvaj statistiku` is the sole persistence confirmation. The separate goalkeeper-removal dialog was removed.
+- Verification passed: `npm.cmd run format`, `npm.cmd run format:check`, `npm.cmd run lint`, and `npm.cmd run build`. The Vite bundle-size notice remains informational.
+
+## Goalkeeper-statistics row-removal rendering fix
+
+- The goalkeeper table now takes its row structure from React Hook Form's field array rather than the asynchronously watched form values. Removing a goalkeeper therefore removes its visible row immediately, without a transient `Nastup nije dostupan` placeholder.
+- Verification passed: `npm.cmd run format`, `npm.cmd run format:check`, `npm.cmd run lint`, and `npm.cmd run build`. The Vite bundle-size notice remains informational.
 
 ## First-admin bootstrap configuration follow-up
 

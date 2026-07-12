@@ -259,19 +259,21 @@ export function createStatisticsPayload(
         ]),
       ),
     })) as SaveMatchReportStatisticsRequest["playerStatistics"],
-    goalkeeperStatistics: values.goalkeepers.map((row) => ({
-      playerMatchAppearanceId: row.playerMatchAppearanceId,
-      ...Object.fromEntries(
-        goalkeeperFields.map((field) => [
-          field,
-          field === "cleanSheet"
-            ? row.values[field] === ""
-              ? null
-              : row.values[field] === "true"
-            : (parseNullableInteger(row.values[field] ?? "") ?? null),
-        ]),
-      ),
-    })) as SaveMatchReportStatisticsRequest["goalkeeperStatistics"],
+    goalkeeperStatistics: values.goalkeepers
+      .filter((row) => row.playerMatchAppearanceId)
+      .map((row) => ({
+        playerMatchAppearanceId: row.playerMatchAppearanceId,
+        ...Object.fromEntries(
+          goalkeeperFields.map((field) => [
+            field,
+            field === "cleanSheet"
+              ? row.values[field] === ""
+                ? null
+                : row.values[field] === "true"
+              : (parseNullableInteger(row.values[field] ?? "") ?? null),
+          ]),
+        ),
+      })) as SaveMatchReportStatisticsRequest["goalkeeperStatistics"],
   };
 }
 

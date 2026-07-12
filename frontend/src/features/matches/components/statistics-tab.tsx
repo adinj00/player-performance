@@ -90,8 +90,8 @@ const statusLabels = {
   NEEDS_CORRECTION: "Potrebna ispravka",
   ARCHIVED: "Arhivirano",
 } as const;
-const nameOf = (a: StatisticsAppearance) =>
-  a.preferredName || `${a.firstName} ${a.lastName}`;
+const nameOf = (a: StatisticsAppearance | undefined) =>
+  a ? a.preferredName || `${a.firstName} ${a.lastName}` : "Odaberite igrača";
 const canCreate = (role: string | null | undefined) =>
   role === "ADMIN" || role === "DATA_OPERATOR";
 const fields = (codes: string[]) =>
@@ -139,7 +139,19 @@ export function StatisticsTab({ match }: { match: MatchResponse }) {
   if (match.isArchived && !report.data) return <Unavailable archived />;
   if (report.isLoading || statistics.isLoading)
     return <Skeleton className="h-80 w-full" />;
-  if (report.isError || !report.data)
+  if (report.isError)
+    return (
+      <Alert variant="destructive">
+        <AlertTitle>Izvještaj nije moguće učitati</AlertTitle>
+        <AlertDescription>
+          Provjerite vezu i pokušajte ponovo.{" "}
+          <Button variant="link" onClick={() => report.refetch()}>
+            Pokušajte ponovo
+          </Button>
+        </AlertDescription>
+      </Alert>
+    );
+  if (!report.data)
     return (
       <Empty>
         <EmptyHeader>
@@ -204,7 +216,6 @@ function Editor({
   const client = useQueryClient();
   const [editing, setEditing] = useState(false);
   const [discard, setDiscard] = useState(false);
-  const [remove, setRemove] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const form = useForm<StatisticsFormValues>({
     defaultValues: createStatisticsFormValues(data),
@@ -216,6 +227,16 @@ function Editor({
     control: form.control,
     name: "goalkeepers",
   });
+  const addGoalkeeper = (playerMatchAppearanceId: string) => {
+    setEditing(true);
+    keeperArray.append({
+      playerMatchAppearanceId,
+      values: Object.fromEntries(
+        data.enabledGoalkeeperFields.map((field) => [field, ""]),
+      ),
+    });
+  };
+  const removeGoalkeeper = (index: number) => keeperArray.remove(index);
   useEffect(() => {
     if (!editing) form.reset(createStatisticsFormValues(data));
   }, [data, editing, form]);
@@ -233,7 +254,9 @@ function Editor({
         data.reportId,
         createStatisticsPayload(value, data),
       ),
-    onSuccess: async () => {
+    onSuccess: async (response) => {
+      form.reset(createStatisticsFormValues(response));
+      client.setQueryData(["match-statistics", data.reportId], response);
       setEditing(false);
       await Promise.all([
         client.invalidateQueries({
@@ -288,10 +311,22 @@ function Editor({
   const completePlayers = players.filter((row) =>
     isComplete(row.values, data.enabledPlayerFields),
   ).length;
-  const completeKeepers = keepers.filter((row) =>
+  const keeperRows: StatisticsFormRow[] = keeperArray.fields.map(
+    (field, index) => ({
+      playerMatchAppearanceId: field.playerMatchAppearanceId,
+      values: keepers[index]?.values ?? field.values,
+    }),
+  );
+  const selectedKeepers = keeperRows.filter(
+    (row) => row.playerMatchAppearanceId,
+  );
+  const goalkeeperAppearanceIds = new Set(
+    selectedKeepers.map((row) => row.playerMatchAppearanceId),
+  );
+  const completeKeepers = selectedKeepers.filter((row) =>
     isComplete(row.values, data.enabledGoalkeeperFields),
   ).length;
-  const total = players.length + keepers.length;
+  const total = players.length + selectedKeepers.length;
   const percent = total
     ? Math.round(((completePlayers + completeKeepers) / total) * 100)
     : 0;
@@ -360,7 +395,12 @@ function Editor({
       <section className="flex flex-col gap-3 rounded-xl border p-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h2 className="font-heading text-xl">Statistika</h2>
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="font-heading text-xl">Statistika</h2>
+              <Badge variant="secondary">
+                {statusLabels[data.reportStatus]}
+              </Badge>
+            </div>
             <p className="text-muted-foreground text-sm">
               Nivo praćenja:{" "}
               {data.appliedTrackingLevel
@@ -368,12 +408,9 @@ function Editor({
                 : "Nije određen"}
             </p>
           </div>
-          <div className="flex gap-2">
-            <Badge variant="secondary">{statusLabels[data.reportStatus]}</Badge>
-            {editable && !editing ? (
-              <Button onClick={() => setEditing(true)}>Uredi statistiku</Button>
-            ) : null}
-          </div>
+          {editable && !editing ? (
+            <Button onClick={() => setEditing(true)}>Uredi statistiku</Button>
+          ) : null}
         </div>
         <Progress value={percent}>
           <ProgressLabel>Kompletnost statistike</ProgressLabel>
@@ -381,8 +418,10 @@ function Editor({
         </Progress>
         <p className="text-muted-foreground text-sm">
           Igrači: {completePlayers}/{players.length} · Golmani:{" "}
-          {completeKeepers}/{keepers.length}
-          {keepers.length === 0 ? " — golmanska statistika nije unesena" : ""}
+          {completeKeepers}/{keeperRows.length}
+          {keeperRows.length === 0
+            ? " — golmanska statistika nije unesena"
+            : ""}
         </p>
         {!editable && !match.isArchived ? (
           <Alert>
@@ -403,8 +442,10 @@ function Editor({
       <form onSubmit={submit} className="flex flex-col gap-4">
         <Tabs defaultValue="players">
           <TabsList>
-            <TabsTrigger value="players">Igrači</TabsTrigger>
-            <TabsTrigger value="keepers">Golmani</TabsTrigger>
+            <TabsTrigger value="players">
+              Igrači (uključujući golmane)
+            </TabsTrigger>
+            <TabsTrigger value="keepers">Golmani (dodatno)</TabsTrigger>
           </TabsList>
           <TabsContent value="players">
             <div className="overflow-x-auto rounded-xl border">
@@ -444,34 +485,47 @@ function Editor({
           </TabsContent>
           <TabsContent value="keepers">
             <div className="flex flex-col gap-3">
-              {editing ? (
+              {editable ? (
                 <div className="flex justify-end">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() =>
-                      keeperArray.append({
-                        playerMatchAppearanceId: "",
-                        values: Object.fromEntries(
-                          data.enabledGoalkeeperFields.map((field) => [
-                            field,
-                            "",
-                          ]),
-                        ),
-                      })
-                    }
+                  <Select
+                    onValueChange={(value) => {
+                      if (typeof value === "string") addGoalkeeper(value);
+                    }}
                   >
-                    <Plus data-icon="inline-start" />
-                    Dodaj golmana
-                  </Button>
+                    <SelectTrigger size="sm">
+                      <Plus data-icon="inline-start" />
+                      <SelectValue placeholder="Dodaj golmana" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {data.appearances
+                          .filter(
+                            (appearance) =>
+                              !goalkeeperAppearanceIds.has(
+                                appearance.playerMatchAppearanceId,
+                              ),
+                          )
+                          .map((appearance) => (
+                            <SelectItem
+                              key={appearance.playerMatchAppearanceId}
+                              value={appearance.playerMatchAppearanceId}
+                            >
+                              {nameOf(appearance)}
+                            </SelectItem>
+                          ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
                 </div>
               ) : null}
-              {keepers.length === 0 ? (
+              {keeperRows.length === 0 ? (
                 <Empty>
                   <EmptyHeader>
                     <EmptyTitle>Golmanska statistika nije unesena</EmptyTitle>
                     <EmptyDescription>
-                      Možete dodati više golmana iz evidentiranih nastupa.
+                      Dodajte evidentirani nastup za golmansku statistiku.
+                      Golmanska statistika dopunjuje statistiku igrača za taj
+                      nastup.
                     </EmptyDescription>
                   </EmptyHeader>
                 </Empty>
@@ -479,10 +533,10 @@ function Editor({
                 <KeeperGrid
                   appearances={data.appearances}
                   fields={keeperFields}
-                  rows={keepers}
+                  rows={keeperRows}
                   editing={editing}
                   form={form}
-                  onRemove={setRemove}
+                  onRemove={removeGoalkeeper}
                 />
               )}
             </div>
@@ -531,33 +585,6 @@ function Editor({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      <Dialog
-        open={remove !== null}
-        onOpenChange={(open) => !open && setRemove(null)}
-      >
-        <DialogContent showCloseButton={false}>
-          <DialogHeader>
-            <DialogTitle>Ukloniti golmansku statistiku?</DialogTitle>
-            <DialogDescription>
-              Uklanjanje će se sačuvati tek nakon spremanja statistike.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setRemove(null)}>
-              Odustani
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={() => {
-                if (remove !== null) keeperArray.remove(remove);
-                setRemove(null);
-              }}
-            >
-              Ukloni
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
@@ -581,9 +608,17 @@ function Identity({
   appearance,
   complete,
 }: {
-  appearance: StatisticsAppearance;
+  appearance: StatisticsAppearance | undefined;
   complete: boolean;
 }) {
+  if (!appearance)
+    return (
+      <div className="min-w-48">
+        <p className="font-medium">Nastup nije dostupan</p>
+        <p className="text-muted-foreground text-xs">Podaci se osvježavaju</p>
+      </div>
+    );
+
   return (
     <div className="min-w-48">
       <p className="font-medium">{nameOf(appearance)}</p>
@@ -609,8 +644,18 @@ function NumberCell({
   form: ReturnType<typeof useForm<StatisticsFormValues>>;
   name: string;
 }) {
-  if (!editing)
-    return <span className="font-mono">{form.getValues(path) || "—"}</span>;
+  if (!editing) {
+    const value = form.getValues(path);
+    const displayValue =
+      field === "cleanSheet"
+        ? value === "true"
+          ? "Da"
+          : value === "false"
+            ? "Ne"
+            : "—"
+        : value || "—";
+    return <span className="font-mono">{displayValue}</span>;
+  }
   return (
     <Input
       aria-label={`${name}, ${statisticFieldRegistry[field].label}`}
@@ -657,55 +702,13 @@ function KeeperGrid({
           {rows.map((row, index) => (
             <TableRow key={row.playerMatchAppearanceId || `new-${index}`}>
               <TableCell>
-                {editing ? (
-                  <Select
-                    value={row.playerMatchAppearanceId || null}
-                    onValueChange={(value) =>
-                      form.setValue(
-                        `goalkeepers.${index}.playerMatchAppearanceId`,
-                        value ?? "",
-                        { shouldDirty: true },
-                      )
-                    }
-                  >
-                    <SelectTrigger className="w-52">
-                      <SelectValue placeholder="Odaberite igrača" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        {appearances
-                          .filter(
-                            (appearance) =>
-                              appearance.playerMatchAppearanceId ===
-                                row.playerMatchAppearanceId ||
-                              !rows.some(
-                                (item, itemIndex) =>
-                                  itemIndex !== index &&
-                                  item.playerMatchAppearanceId ===
-                                    appearance.playerMatchAppearanceId,
-                              ),
-                          )
-                          .map((appearance) => (
-                            <SelectItem
-                              key={appearance.playerMatchAppearanceId}
-                              value={appearance.playerMatchAppearanceId}
-                            >
-                              {nameOf(appearance)}
-                            </SelectItem>
-                          ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                ) : (
-                  <Identity
-                    appearance={appearances.find(
-                      (a) =>
-                        a.playerMatchAppearanceId ===
-                        row.playerMatchAppearanceId,
-                    )!}
-                    complete={isComplete(row.values, fields)}
-                  />
-                )}
+                <Identity
+                  appearance={appearances.find(
+                    (a) =>
+                      a.playerMatchAppearanceId === row.playerMatchAppearanceId,
+                  )}
+                  complete={isComplete(row.values, fields)}
+                />
               </TableCell>
               {fields.map((field) => (
                 <TableCell key={field}>
@@ -724,7 +727,13 @@ function KeeperGrid({
                         aria-label={`${nameOf(appearances.find((a) => a.playerMatchAppearanceId === row.playerMatchAppearanceId) ?? appearances[0])}, Sačuvana mreža`}
                         className="w-32"
                       >
-                        <SelectValue placeholder="Nije uneseno" />
+                        <SelectValue>
+                          {row.values.cleanSheet === "true"
+                            ? "Da"
+                            : row.values.cleanSheet === "false"
+                              ? "Ne"
+                              : "Nije uneseno"}
+                        </SelectValue>
                       </SelectTrigger>
                       <SelectContent>
                         <SelectGroup>
@@ -739,7 +748,13 @@ function KeeperGrid({
                       field={field}
                       path={`goalkeepers.${index}.values.${field}`}
                       form={form}
-                      name="Golman"
+                      name={nameOf(
+                        appearances.find(
+                          (appearance) =>
+                            appearance.playerMatchAppearanceId ===
+                            row.playerMatchAppearanceId,
+                        ),
+                      )}
                     />
                   )}
                 </TableCell>
@@ -748,8 +763,8 @@ function KeeperGrid({
                 <TableCell>
                   <Button
                     type="button"
-                    variant="ghost"
-                    size="icon-sm"
+                    variant="destructive"
+                    size="icon-xs"
                     aria-label="Ukloni golmansku statistiku"
                     onClick={() => onRemove(index)}
                   >

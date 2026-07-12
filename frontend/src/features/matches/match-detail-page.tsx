@@ -5,6 +5,14 @@ import { Link, useParams } from "react-router-dom";
 import { routePaths } from "@/app/route-paths";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import {
   Empty,
@@ -80,7 +88,22 @@ export function MatchDetailPage() {
         user.teamScope.selectedTeamIds.includes(data.team.id)));
   return (
     <div className="flex flex-col gap-6">
-      <nav className="text-muted-foreground text-sm">
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink render={<Link to={routePaths.matches} />}>
+              Utakmice
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>
+              {data.team.name} – {data.opponent.name}
+            </BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+      <nav className="sr-only">
         <Link to={routePaths.matches}>Utakmice</Link> / {data.team.name} –{" "}
         {data.opponent.name}
       </nav>

@@ -179,5 +179,12 @@ export const navigationGroups: NavigationGroupDefinition[] = [
 ];
 
 export function getRouteDefinition(pathname: string) {
+  if (pathname.startsWith(`${routePaths.matches}/`)) {
+    return (
+      appRouteDefinitions.find((route) => route.path === routePaths.matches) ??
+      null
+    );
+  }
+
   return appRouteDefinitions.find((route) => route.path === pathname) ?? null;
 }

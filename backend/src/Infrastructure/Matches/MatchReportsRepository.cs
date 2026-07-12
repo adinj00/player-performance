@@ -14,7 +14,8 @@ internal sealed class MatchReportsRepository(AppDbContext dbContext) : IMatchRep
     public async Task<MatchReportAggregate?> GetByMatchAggregateAsync(Guid matchId, CancellationToken ct) =>
         await AggregateQuery(dbContext.MatchReports.Where(x => x.MatchId == matchId))
             .SingleOrDefaultAsync(ct);
-    public async Task<MatchReportReadModel?> GetReadByMatchAsync(Guid matchId, IReadOnlyCollection<Guid>? scope, CancellationToken ct) => await ReadQuery(scope).SingleOrDefaultAsync(x => x.Report.MatchId == matchId, ct);
+    public async Task<MatchReportReadModel?> GetReadByMatchAsync(Guid matchId, IReadOnlyCollection<Guid>? scope, CancellationToken ct) =>
+        await ReadQuery(scope, matchId).SingleOrDefaultAsync(ct);
     public async Task<PagedMatchReportReadModel> ListAsync(MatchReportListQuery query, IReadOnlyCollection<Guid>? scope, IReadOnlyCollection<MatchReportStatus> visibleStatuses, CancellationToken ct)
     {
         var source = ReadQuery(scope).Where(x => visibleStatuses.Contains(x.Report.Status));
@@ -44,5 +45,12 @@ internal sealed class MatchReportsRepository(AppDbContext dbContext) : IMatchRep
             report,
             match,
             dbContext.PlayerMatchAppearances.Count(x => x.MatchId == match.Id));
-    private IQueryable<MatchReportReadModel> ReadQuery(IReadOnlyCollection<Guid>? scope) => from report in dbContext.MatchReports.AsNoTracking() join match in dbContext.Matches.AsNoTracking() on report.MatchId equals match.Id join team in dbContext.Teams.AsNoTracking() on match.TeamId equals team.Id join opponent in dbContext.Opponents.AsNoTracking() on match.OpponentId equals opponent.Id join competition in dbContext.Competitions.AsNoTracking() on match.CompetitionId equals competition.Id where scope == null || scope.Contains(match.TeamId) select new MatchReportReadModel(report, match, team.Name, opponent.Name, competition.Name);
+    private IQueryable<MatchReportReadModel> ReadQuery(IReadOnlyCollection<Guid>? scope, Guid? matchId = null) =>
+        from report in dbContext.MatchReports.AsNoTracking()
+        join match in dbContext.Matches.AsNoTracking() on report.MatchId equals match.Id
+        join team in dbContext.Teams.AsNoTracking() on match.TeamId equals team.Id
+        join opponent in dbContext.Opponents.AsNoTracking() on match.OpponentId equals opponent.Id
+        join competition in dbContext.Competitions.AsNoTracking() on match.CompetitionId equals competition.Id
+        where (matchId == null || report.MatchId == matchId) && (scope == null || scope.Contains(match.TeamId))
+        select new MatchReportReadModel(report, match, team.Name, opponent.Name, competition.Name);
 }
