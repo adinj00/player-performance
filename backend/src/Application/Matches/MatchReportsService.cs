@@ -1,13 +1,14 @@
 using FluentValidation;
 using PlayerPerformance.Application.Abstractions.Time;
 using PlayerPerformance.Application.Authorization;
+using PlayerPerformance.Application.Users;
 using PlayerPerformance.Domain.Common.Results;
 using PlayerPerformance.Domain.Matches;
 using PlayerPerformance.Domain.Staff;
 
 namespace PlayerPerformance.Application.Matches;
 
-internal sealed class MatchReportsService(IMatchReportsRepository repository, IMatchesRepository matchesRepository, IMatchStatisticsService statisticsService, ICurrentUserAccess currentUserAccess, ISystemClock clock, IValidator<RequestCorrectionRequest> correctionValidator, IValidator<MatchReportListQuery> listValidator) : IMatchReportsService, IMatchReportWorkflowGuard
+internal sealed class MatchReportsService(IMatchReportsRepository repository, IMatchesRepository matchesRepository, IMatchStatisticsService statisticsService, ICurrentUserAccess currentUserAccess, ISystemClock clock, IValidator<RequestCorrectionRequest> correctionValidator, IValidator<MatchReportListQuery> listValidator, IStaffUsersService staffUsersService) : IMatchReportsService, IMatchReportWorkflowGuard
 {
     public async Task<Result<MatchReportResponse>> CreateAsync(Guid matchId, CancellationToken ct)
     {
@@ -25,7 +26,7 @@ internal sealed class MatchReportsService(IMatchReportsRepository repository, IM
         repository.Add(report);
         await repository.SaveChangesAsync(ct);
         var read = await repository.GetReadByMatchAsync(matchId, null, ct);
-        return Result<MatchReportResponse>.Success(ToResponse(read!, access));
+        return Result<MatchReportResponse>.Success(await ToResponseAsync(read!, access, ct));
     }
 
     public async Task<MatchReportResponse?> GetByMatchAsync(Guid matchId, CancellationToken ct)
@@ -34,7 +35,7 @@ internal sealed class MatchReportsService(IMatchReportsRepository repository, IM
         if (!CanRead(access))
             return null;
         var read = await repository.GetReadByMatchAsync(matchId, Scope(access), ct);
-        return read is null || !CanViewStatus(access, read.Report.Status) ? null : ToResponse(read, access);
+        return read is null || !CanViewStatus(access, read.Report.Status) ? null : await ToResponseAsync(read, access, ct);
     }
 
     public async Task<Result<PagedMatchReportListResponse>> ListAsync(MatchReportListQuery query, CancellationToken ct)
@@ -70,7 +71,7 @@ internal sealed class MatchReportsService(IMatchReportsRepository repository, IM
         catch (InvalidOperationException) { return Result<MatchReportResponse>.Failure(MatchReportErrors.Conflict); }
         await repository.SaveChangesAsync(ct);
         var read = await repository.GetReadByMatchAsync(aggregate.Match.Id, null, ct);
-        return Result<MatchReportResponse>.Success(ToResponse(read!, access));
+        return Result<MatchReportResponse>.Success(await ToResponseAsync(read!, access, ct));
     }
     public Task<Result<MatchReportResponse>> VerifyAsync(Guid reportId, CancellationToken ct) => TransitionAsync(reportId, CanVerify, static (r, actor, now, _) => r.Verify(actor, now), ct);
     public async Task<Result<MatchReportResponse>> RequestCorrectionAsync(Guid reportId, RequestCorrectionRequest request, CancellationToken ct)
@@ -116,7 +117,7 @@ internal sealed class MatchReportsService(IMatchReportsRepository repository, IM
         }
         await repository.SaveChangesAsync(ct);
         var read = await repository.GetReadByMatchAsync(aggregate.Match.Id, null, ct);
-        return Result<MatchReportResponse>.Success(ToResponse(read!, access));
+        return Result<MatchReportResponse>.Success(await ToResponseAsync(read!, access, ct));
     }
     private static bool CanRead(CurrentUserAccess a) => a.IsActive && a.HasAccessProfile;
     private static bool CanEdit(CurrentUserAccess a) => CanRead(a) && (a.IsAdmin || a.PrimaryRole == StaffRole.DATA_OPERATOR);
@@ -154,8 +155,18 @@ internal sealed class MatchReportsService(IMatchReportsRepository repository, IM
         }
         return actions;
     }
-    private static MatchReportResponse ToResponse(MatchReportReadModel x, CurrentUserAccess a) => new(x.Report.Id, x.Report.MatchId, x.Report.Status, Actions(x, a), x.Report.CreatedByUserId, x.Report.CreatedAtUtc, Actor(x.Report.SubmittedByUserId, x.Report.SubmittedAtUtc), Actor(x.Report.VerifiedByUserId, x.Report.VerifiedAtUtc), Correction(x.Report), Actor(x.Report.ArchivedByUserId, x.Report.ArchivedAtUtc));
+    private async Task<MatchReportResponse> ToResponseAsync(MatchReportReadModel x, CurrentUserAccess a, CancellationToken ct)
+    {
+        var names = await ActorNamesAsync(x.Report, ct);
+        return new(x.Report.Id, x.Report.MatchId, x.Report.Status, Actions(x, a), x.Report.CreatedByUserId, names.GetValueOrDefault(x.Report.CreatedByUserId), x.Report.CreatedAtUtc, Actor(x.Report.SubmittedByUserId, x.Report.SubmittedAtUtc, names), Actor(x.Report.VerifiedByUserId, x.Report.VerifiedAtUtc, names), Correction(x.Report, names), Actor(x.Report.ArchivedByUserId, x.Report.ArchivedAtUtc, names));
+    }
+    private async Task<IReadOnlyDictionary<Guid, string>> ActorNamesAsync(MatchReport report, CancellationToken ct)
+    {
+        var ids = new[] { report.CreatedByUserId, report.SubmittedByUserId, report.VerifiedByUserId, report.LastCorrectionRequestedByUserId, report.ArchivedByUserId }.Where(id => id.HasValue).Select(id => id!.Value).Distinct().ToArray();
+        var staff = await Task.WhenAll(ids.Select(id => staffUsersService.GetAsync(id, ct)));
+        return staff.Where(user => user is not null).ToDictionary(user => user!.Id, user => user!.DisplayName);
+    }
     private static MatchReportListItemResponse ToListItem(MatchReportReadModel x, CurrentUserAccess a) => new(x.Report.Id, x.Match.Id, x.Match.KickoffAtUtc, new(x.Match.TeamId, x.TeamName), new(x.Match.OpponentId, x.OpponentName), new(x.Match.CompetitionId, x.CompetitionName), x.Report.Status, Actions(x, a), Actor(x.Report.SubmittedByUserId, x.Report.SubmittedAtUtc), Actor(x.Report.VerifiedByUserId, x.Report.VerifiedAtUtc), Correction(x.Report));
-    private static MatchReportActorResponse? Actor(Guid? id, DateTime? at) => id.HasValue && at.HasValue ? new(id.Value, at.Value) : null;
-    private static MatchReportCorrectionResponse? Correction(MatchReport report) => report.LastCorrectionRequestedByUserId.HasValue && report.LastCorrectionRequestedAtUtc.HasValue && report.LastCorrectionReason is not null ? new(report.LastCorrectionRequestedByUserId.Value, report.LastCorrectionRequestedAtUtc.Value, report.LastCorrectionReason) : null;
+    private static MatchReportActorResponse? Actor(Guid? id, DateTime? at, IReadOnlyDictionary<Guid, string>? names = null) => id.HasValue && at.HasValue ? new(id.Value, names?.GetValueOrDefault(id.Value), at.Value) : null;
+    private static MatchReportCorrectionResponse? Correction(MatchReport report, IReadOnlyDictionary<Guid, string>? names = null) => report.LastCorrectionRequestedByUserId.HasValue && report.LastCorrectionRequestedAtUtc.HasValue && report.LastCorrectionReason is not null ? new(report.LastCorrectionRequestedByUserId.Value, names?.GetValueOrDefault(report.LastCorrectionRequestedByUserId.Value), report.LastCorrectionRequestedAtUtc.Value, report.LastCorrectionReason) : null;
 }

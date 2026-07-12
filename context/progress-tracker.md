@@ -598,6 +598,44 @@ This file intentionally starts lightweight. It should become more detailed as bu
 - Statistics header follow-up: moved the report-status badge beside the statistics title so the right-aligned `Uredi statistiku` action can appear or disappear without shifting the status indicator.
 - Match-detail navigation follow-up: installed the official shadcn Breadcrumb component through the CLI and replaced the visible hand-built route text with semantic `Utakmice / {selekcija} – {protivnik}` navigation.
 
+## Unit 37: Match Report Review UI
+
+- Status: implemented with an explicitly documented component limitation below. The frontend has a protected `/match-reports` queue with server-side `nuqs` filters and pagination, report-status tabs, scoped team options, localized status labels, TanStack Table rendering, role-safe empty/error states, and navigation to the existing match `Revizija` tab.
+- Replaced the `Revizija` placeholder with report detail, advisory lineup/statistics readiness, available workflow metadata, latest correction reason, existing lineup/statistics navigation, and backend-`allowedActions`-only workflow controls. Submit, verify, correction request, and archive use the explicit endpoints, focused query invalidation, no optimistic status assignment, stale-state refetch, pending-state protection, and Bosnian feedback.
+- Synchronized `context/architecture.md`: archived reports now have `ARCHIVED: view`; no restore endpoint, transition, or UI was introduced.
+- Added the generated shadcn `Textarea` through the CLI. Limitation: the current CLI Alert Dialog addition requires overwriting the existing generated `Button` primitive. Per the shadcn workflow, that overwrite was not performed without explicit user approval, so submit/verify/archive currently use the existing accessible shadcn `Dialog` confirmation pattern rather than the requested Alert Dialog wrapper.
+- Verification: `npm.cmd run format`, `npm.cmd run format:check`, `npm.cmd run lint`, `npm.cmd run build`, and `git diff --check` passed. The Vite bundle-size notice remains informational. Manual authenticated browser/API checks remain dependent on the local API/PostgreSQL session.
+
+### Queue responsiveness and query-fix follow-up
+
+- Replaced the wide, horizontally scrolling workflow-status tabs on phones with the same full-width Select/mobile and Tabs/tablet-plus pattern used by Settings. The status tabs now retain their natural width on larger screens, and `Poništi filtere` is available in the filter card whenever a report filter is active.
+- Fixed the report queue's EF Core translation failure. `MatchReportsRepository.ListAsync` now applies backend-visible report statuses to the `MatchReport` entity query before the `MatchReportReadModel` projection, allowing `GET /api/match-reports` to execute server-side filtering and pagination successfully.
+- Verification: frontend Prettier, lint, and build passed. Isolated backend restore/build passed with zero warnings/errors, and all tests passed: 61 unit and 29 integration tests. The source-tree `dotnet format` remains blocked by files held by the running local API process; no formatter changes were needed for the focused source edit.
+
+### Status-filter refinement
+
+- Removed report workflow status tabs entirely. Status is now a regular `Status izvještaja` Select filter in the queue filter card alongside season, selection, competition, and date filters; `Poništi filtere` remains available whenever any filter is active.
+- Verification: frontend Prettier, lint, and build passed. The currently running API process must be restarted to serve the already-verified backend query fix.
+
+### Report queue runtime recovery
+
+- Rewrote `MatchReportsRepository.ListAsync` so all report visibility, status, team, season, competition, and date predicates run against EF entity joins before the response projection. This removes the remaining projection-shape risk in the report queue query.
+- Rebuilt the normal API output after stopping the stale port-5051 process that held the Infrastructure assembly lock, then restarted the API with the `http` launch profile. `/health` returns 200 and the unauthenticated report endpoint now returns the expected 401 rather than a server error. Authenticated queue verification remains a browser-session check.
+- Verification: normal API build passed with zero warnings/errors; the isolated build and full suite remain green (61 unit and 29 integration tests).
+
+### Unit 37 audit remediation
+
+- Corrected selected-team filter visibility by using the backend session's `SELECTED_TEAMS` scope value. The queue now avoids offering inaccessible team filters.
+- Added a safe queue `Otvori reviziju` dropdown action and latest-correction column, distinguished report-load errors from the no-report state, and gave eligible data-entry users a direct `Statistika` navigation action to start report input without duplicating the Unit 36 creation control.
+- Expanded the advisory readiness summary with match state, lineup roles, captain, appearances, substitutions, applied tracking level, player/goalkeeper completeness, and workflow state. Current metadata now identifies the supplied actor IDs alongside timestamps; human-readable staff names require a future approved backend contract expansion.
+- Match-detail tab selection now remains URL-driven after navigation. Submit `422` failures now clearly instruct users to check Sastav and Statistika instead of showing the generic action-failure message.
+- Verification: `npm.cmd run format`, `npm.cmd run lint`, `npm.cmd run build`, and `git diff --check` passed. The Vite bundle-size warning remains informational.
+
+### Report workflow actor display names
+
+- Replaced report-workflow GUID display with staff `DisplayName` values. The report detail contract now supplies a creator display name and optional display names for submit, verify, correction, and archive actors; the queue remains unchanged. No migration or workflow rule changed.
+- Verification: frontend format, lint, and build passed; isolated backend build passed with zero warnings/errors; 61 unit and 29 integration tests passed. Rebuilt and restarted the local API on port 5051; `/health` returns 200.
+
 ## Unit 36 report-loading fix
 
 - Fixed the `GET /api/matches/{matchId}/report` 500 exposed by the Statistics tab. `MatchReportsRepository.GetReadByMatchAsync` now applies the match-id predicate before projecting to `MatchReportReadModel`, which EF Core can translate to SQL. This preserves server-side scope filtering and avoids client evaluation.

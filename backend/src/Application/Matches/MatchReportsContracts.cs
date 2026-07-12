@@ -11,9 +11,9 @@ public enum MatchReportAction
 }
 public sealed record RequestCorrectionRequest(string Reason);
 public sealed record MatchReportListQuery(Guid? SeasonId, Guid? TeamId, Guid? CompetitionId, MatchReportStatus? Status, DateTime? DateFrom, DateTime? DateTo, int Page = 1, int PageSize = 25);
-public sealed record MatchReportActorResponse(Guid UserId, DateTime AtUtc);
-public sealed record MatchReportCorrectionResponse(Guid UserId, DateTime AtUtc, string Reason);
-public sealed record MatchReportResponse(Guid Id, Guid MatchId, MatchReportStatus Status, IReadOnlyList<MatchReportAction> AllowedActions, Guid CreatedByUserId, DateTime CreatedAtUtc, MatchReportActorResponse? Submitted, MatchReportActorResponse? Verified, MatchReportCorrectionResponse? LastCorrection, MatchReportActorResponse? Archived);
+public sealed record MatchReportActorResponse(Guid UserId, string? DisplayName, DateTime AtUtc);
+public sealed record MatchReportCorrectionResponse(Guid UserId, string? DisplayName, DateTime AtUtc, string Reason);
+public sealed record MatchReportResponse(Guid Id, Guid MatchId, MatchReportStatus Status, IReadOnlyList<MatchReportAction> AllowedActions, Guid CreatedByUserId, string? CreatedByDisplayName, DateTime CreatedAtUtc, MatchReportActorResponse? Submitted, MatchReportActorResponse? Verified, MatchReportCorrectionResponse? LastCorrection, MatchReportActorResponse? Archived);
 public sealed record MatchReportListItemResponse(Guid Id, Guid MatchId, DateTime KickoffAtUtc, MatchReferenceResponse Team, MatchReferenceResponse Opponent, MatchReferenceResponse Competition, MatchReportStatus Status, IReadOnlyList<MatchReportAction> AllowedActions, MatchReportActorResponse? Submitted, MatchReportActorResponse? Verified, MatchReportCorrectionResponse? LastCorrection);
 public sealed record PagedMatchReportListResponse(IReadOnlyList<MatchReportListItemResponse> Items, int Page, int PageSize, int TotalCount, int TotalPages);
 public sealed class RequestCorrectionRequestValidator : AbstractValidator<RequestCorrectionRequest>

@@ -414,7 +414,7 @@ Example actions:
 - `READY_FOR_REVIEW`: review, verify, request correction.
 - `VERIFIED`: view, export, request correction, view audit log.
 - `NEEDS_CORRECTION`: edit, resubmit for review.
-- `ARCHIVED`: view, restore if admin.
+- `ARCHIVED`: view.
 
 ### Import Statuses
 

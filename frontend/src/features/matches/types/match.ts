@@ -129,9 +129,67 @@ export interface MatchReportResponse {
   matchId: string;
   status:
     "DRAFT" | "READY_FOR_REVIEW" | "VERIFIED" | "NEEDS_CORRECTION" | "ARCHIVED";
+  allowedActions: MatchReportAction[];
+  createdByUserId: string;
+  createdByDisplayName: string | null;
+  createdAtUtc: string;
+  submitted: MatchReportActor | null;
+  verified: MatchReportActor | null;
+  lastCorrection: MatchReportCorrection | null;
+  archived: MatchReportActor | null;
 }
 
 export type MatchReportStatus = MatchReportResponse["status"];
+export type MatchReportAction =
+  | "VIEW"
+  | "EDIT"
+  | "SUBMIT_FOR_REVIEW"
+  | "VERIFY"
+  | "REQUEST_CORRECTION"
+  | "ARCHIVE";
+
+export interface MatchReportActor {
+  userId: string;
+  displayName: string | null;
+  atUtc: string;
+}
+
+export interface MatchReportCorrection extends MatchReportActor {
+  reason: string;
+}
+
+export interface MatchReportListItem {
+  id: string;
+  matchId: string;
+  kickoffAtUtc: string;
+  team: MatchReference;
+  opponent: MatchReference;
+  competition: MatchReference;
+  status: MatchReportStatus;
+  allowedActions: MatchReportAction[];
+  submitted: MatchReportActor | null;
+  verified: MatchReportActor | null;
+  lastCorrection: MatchReportCorrection | null;
+}
+
+export interface PagedMatchReports {
+  items: MatchReportListItem[];
+  page: number;
+  pageSize: number;
+  totalCount: number;
+  totalPages: number;
+}
+
+export interface MatchReportListFilters {
+  seasonId?: string | null;
+  teamId?: string | null;
+  competitionId?: string | null;
+  status?: MatchReportStatus | null;
+  dateFrom?: string | null;
+  dateTo?: string | null;
+  page?: number;
+  pageSize?: number;
+}
 
 export type PlayerStatisticFieldCode =
   | "goals"

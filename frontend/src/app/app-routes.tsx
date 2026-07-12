@@ -25,7 +25,7 @@ import { sessionQueryKey } from "@/features/auth/hooks/use-session";
 import { DashboardPage } from "@/pages/dashboard-page";
 import { ImportsPage } from "@/pages/imports-page";
 import { MatchesPage } from "@/pages/matches-page";
-import { MatchDetailPage } from "@/features/matches";
+import { MatchDetailPage, MatchReportsPage } from "@/features/matches";
 import { MedicalPage } from "@/pages/medical-page";
 import { MediaPage } from "@/pages/media-page";
 import { PlayersPage } from "@/pages/players-page";
@@ -126,6 +126,10 @@ export function AppRoutes() {
           <Route element={<ProtectedAppShell />}>
             <Route path={routePaths.dashboard} element={<DashboardPage />} />
             <Route path={routePaths.matches} element={<MatchesPage />} />
+            <Route
+              path={routePaths.matchReports}
+              element={<MatchReportsPage />}
+            />
             <Route path="/matches/:matchId" element={<MatchDetailPage />} />
             <Route path={routePaths.players} element={<PlayersPage />} />
             <Route path="/players/:playerId" element={<PlayerDetailPage />} />

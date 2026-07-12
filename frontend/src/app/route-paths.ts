@@ -1,6 +1,7 @@
 import type { ComponentType } from "react";
 import {
   Activity,
+  ClipboardCheck,
   Film,
   HeartPulse,
   LayoutDashboard,
@@ -19,6 +20,7 @@ export const routePaths = {
   changePassword: "/change-password",
   acceptInvitation: "/accept-invitation",
   matches: "/matches",
+  matchReports: "/match-reports",
   matchDetail: (matchId: string) => `/matches/${matchId}`,
   players: "/players",
   trainingGps: "/training-gps",
@@ -62,6 +64,11 @@ export const appRouteDefinitions: AppRouteDefinition[] = [
     path: routePaths.matches,
     title: "Utakmice",
     description: "Modul za utakmice će biti dodan u kasnijem feature specu.",
+  },
+  {
+    path: routePaths.matchReports,
+    title: "Izvještaji utakmica",
+    description: "Pregled i verifikacija izvještaja utakmica.",
   },
   {
     path: routePaths.players,
@@ -152,6 +159,11 @@ export const navigationGroups: NavigationGroupDefinition[] = [
     label: "Performanse",
     items: [
       { label: "Utakmice", path: routePaths.matches, icon: Trophy },
+      {
+        label: "Izvještaji utakmica",
+        path: routePaths.matchReports,
+        icon: ClipboardCheck,
+      },
       { label: "Igrači", path: routePaths.players, icon: Users },
       { label: "Trening GPS", path: routePaths.trainingGps, icon: Activity },
       { label: "Importi", path: routePaths.imports, icon: Upload },

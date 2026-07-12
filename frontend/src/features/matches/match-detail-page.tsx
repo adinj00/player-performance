@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useSearchParams, useParams } from "react-router-dom";
 
 import { routePaths } from "@/app/route-paths";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -38,6 +38,7 @@ import {
 import { useSession } from "@/features/auth/hooks/use-session";
 import { LineupTab } from "@/features/matches/components/lineup-tab";
 import { StatisticsTab } from "@/features/matches/components/statistics-tab";
+import { ReportReviewTab } from "@/features/matches/components/report-review-tab";
 import {
   locationLabels,
   matchStatusLabels,
@@ -59,11 +60,19 @@ const futureTabs = matchTabs.filter(
 
 export function MatchDetailPage() {
   const { matchId } = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useSession();
   const [editing, setEditing] = useState(false);
   const [archiveOpen, setArchiveOpen] = useState(false);
-  const [activeTab, setActiveTab] =
-    useState<(typeof matchTabs)[number]["value"]>("overview");
+  const activeTab =
+    matchTabs.find((tab) => tab.value === searchParams.get("tab"))?.value ??
+    "overview";
+  const selectTab = (tab: (typeof matchTabs)[number]["value"]) => {
+    const next = new URLSearchParams(searchParams);
+    if (tab === "overview") next.delete("tab");
+    else next.set("tab", tab);
+    setSearchParams(next);
+  };
   const match = useQuery({
     queryKey: ["match", matchId],
     queryFn: () => matchesApi.get(matchId!),
@@ -144,13 +153,13 @@ export function MatchDetailPage() {
       </header>
       <Tabs
         value={activeTab}
-        onValueChange={(tab) => setActiveTab(tab as typeof activeTab)}
+        onValueChange={(tab) => selectTab(tab as typeof activeTab)}
       >
         <div className="md:hidden">
           <Select
             value={activeTab}
             onValueChange={(tab) => {
-              if (tab) setActiveTab(tab as typeof activeTab);
+              if (tab) selectTab(tab as typeof activeTab);
             }}
           >
             <SelectTrigger
@@ -213,16 +222,28 @@ export function MatchDetailPage() {
         <TabsContent value="statistics">
           <StatisticsTab match={data} />
         </TabsContent>
-        {futureTabs.map((tab) => (
-          <TabsContent key={tab.value} value={tab.value}>
-            <Empty>
-              <EmptyHeader>
-                <EmptyTitle>{tab.label}</EmptyTitle>
-                <EmptyDescription>Ovaj dio još nije dostupan.</EmptyDescription>
-              </EmptyHeader>
-            </Empty>
-          </TabsContent>
-        ))}
+        <TabsContent value="audit">
+          <ReportReviewTab
+            match={data}
+            onNavigate={(tab) => {
+              selectTab(tab);
+            }}
+          />
+        </TabsContent>
+        {futureTabs
+          .filter((tab) => tab.value !== "audit")
+          .map((tab) => (
+            <TabsContent key={tab.value} value={tab.value}>
+              <Empty>
+                <EmptyHeader>
+                  <EmptyTitle>{tab.label}</EmptyTitle>
+                  <EmptyDescription>
+                    Ovaj dio još nije dostupan.
+                  </EmptyDescription>
+                </EmptyHeader>
+              </Empty>
+            </TabsContent>
+          ))}
       </Tabs>
       {editing ? (
         <MatchEditDialog match={data} onClose={() => setEditing(false)} />
