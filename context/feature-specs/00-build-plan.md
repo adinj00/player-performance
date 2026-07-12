@@ -273,9 +273,9 @@ Dependencies: Unit 12, Unit 13, Unit 20.
 
 ### Unit 41: Media Backend Foundation
 
-Add media assets, external media references, entity linking, archive behavior, and authorization checks.
+Add a unified team-scoped media catalog with uploaded `MediaAsset` and `ExternalMediaReference` sources, streamed storage-backed uploads/content, explicit relational links to matches, match reports, and players, archive/restore behavior, workflow-aware authorization, and semantic audit coverage.
 
-Dependencies: Unit 23, Unit 40.
+Dependencies: Unit 23, Unit 28, Unit 32, Unit 38, Unit 40.
 
 ### Unit 42: Media UI Foundation
 
@@ -381,8 +381,8 @@ Dependencies: Unit 40, Unit 53.
 
 ## Next Immediate Unit
 
-The next implementation unit after Unit 39 should be:
+The next implementation unit after Unit 40 should be:
 
-**Unit 40: File Storage Abstraction**
+**Unit 41: Media Backend Foundation**
 
-Reason: the core staff, match-report, statistics, and audit workflows are now complete, and the next planned modules require durable large-file handling. The dependency-safe next step is to establish provider-neutral storage contracts, safe local-development streaming, persistent metadata, configuration validation, and compensation behavior before Unit 41 introduces media assets and authorized media operations.
+Reason: provider-neutral storage, safe local streaming, stored-file metadata, and compensation behavior now exist. The next dependency-safe step is to introduce the authorized media catalog, uploaded and external source records, explicit links to existing football entities, lifecycle rules, and secure content access before Unit 42 builds the media library and attachment UI.
