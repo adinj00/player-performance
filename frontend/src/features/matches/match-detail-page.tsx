@@ -1,9 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
 import { routePaths } from "@/app/route-paths";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Empty,
   EmptyDescription,
@@ -13,6 +15,11 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { matchesApi } from "@/features/matches/api/matches-api";
+import {
+  MatchArchiveDialog,
+  MatchEditDialog,
+} from "@/features/matches/components/match-dialogs";
+import { useSession } from "@/features/auth/hooks/use-session";
 import { LineupTab } from "@/features/matches/components/lineup-tab";
 import { StatisticsTab } from "@/features/matches/components/statistics-tab";
 import {
@@ -25,6 +32,9 @@ const futureTabs = ["Statistika", "GPS / Fizički podaci", "Video", "Revizija"];
 
 export function MatchDetailPage() {
   const { matchId } = useParams();
+  const { user } = useSession();
+  const [editing, setEditing] = useState(false);
+  const [archiveOpen, setArchiveOpen] = useState(false);
   const match = useQuery({
     queryKey: ["match", matchId],
     queryFn: () => matchesApi.get(matchId!),
@@ -42,6 +52,11 @@ export function MatchDetailPage() {
       </Alert>
     );
   const data = match.data;
+  const canEdit =
+    user?.primaryRole === "ADMIN" ||
+    (user?.primaryRole === "DATA_OPERATOR" &&
+      (user.teamScope.type === "ALL" ||
+        user.teamScope.selectedTeamIds.includes(data.team.id)));
   return (
     <div className="flex flex-col gap-6">
       <nav className="text-muted-foreground text-sm">
@@ -64,6 +79,23 @@ export function MatchDetailPage() {
           <p className="font-mono text-xl">
             {data.teamScore} : {data.opponentScore}
           </p>
+        ) : null}
+        {canEdit || user?.primaryRole === "ADMIN" ? (
+          <div className="flex flex-wrap gap-2">
+            {canEdit ? (
+              <Button onClick={() => setEditing(true)} variant="outline">
+                Uredi utakmicu
+              </Button>
+            ) : null}
+            {user?.primaryRole === "ADMIN" ? (
+              <Button
+                onClick={() => setArchiveOpen(true)}
+                variant={data.isArchived ? "outline" : "destructive"}
+              >
+                {data.isArchived ? "Vrati iz arhive" : "Arhiviraj"}
+              </Button>
+            ) : null}
+          </div>
         ) : null}
       </header>
       <Tabs defaultValue="overview">
@@ -128,6 +160,15 @@ export function MatchDetailPage() {
             </TabsContent>
           ))}
       </Tabs>
+      {editing ? (
+        <MatchEditDialog match={data} onClose={() => setEditing(false)} />
+      ) : null}
+      {archiveOpen ? (
+        <MatchArchiveDialog
+          match={data}
+          onClose={() => setArchiveOpen(false)}
+        />
+      ) : null}
     </div>
   );
 }

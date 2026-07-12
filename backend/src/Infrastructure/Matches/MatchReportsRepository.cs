@@ -7,8 +7,13 @@ namespace PlayerPerformance.Infrastructure.Matches;
 
 internal sealed class MatchReportsRepository(AppDbContext dbContext) : IMatchReportsRepository
 {
-    public async Task<MatchReportAggregate?> GetAggregateAsync(Guid reportId, CancellationToken ct) => await AggregateQuery().SingleOrDefaultAsync(x => x.Report.Id == reportId, ct);
-    public async Task<MatchReportAggregate?> GetByMatchAggregateAsync(Guid matchId, CancellationToken ct) => await AggregateQuery().SingleOrDefaultAsync(x => x.Report.MatchId == matchId, ct);
+    public async Task<MatchReportAggregate?> GetAggregateAsync(Guid reportId, CancellationToken ct) =>
+        await AggregateQuery(dbContext.MatchReports.Where(x => x.Id == reportId))
+            .SingleOrDefaultAsync(ct);
+
+    public async Task<MatchReportAggregate?> GetByMatchAggregateAsync(Guid matchId, CancellationToken ct) =>
+        await AggregateQuery(dbContext.MatchReports.Where(x => x.MatchId == matchId))
+            .SingleOrDefaultAsync(ct);
     public async Task<MatchReportReadModel?> GetReadByMatchAsync(Guid matchId, IReadOnlyCollection<Guid>? scope, CancellationToken ct) => await ReadQuery(scope).SingleOrDefaultAsync(x => x.Report.MatchId == matchId, ct);
     public async Task<PagedMatchReportReadModel> ListAsync(MatchReportListQuery query, IReadOnlyCollection<Guid>? scope, IReadOnlyCollection<MatchReportStatus> visibleStatuses, CancellationToken ct)
     {
@@ -32,6 +37,12 @@ internal sealed class MatchReportsRepository(AppDbContext dbContext) : IMatchRep
     public Task<bool> ExistsForMatchAsync(Guid matchId, CancellationToken ct) => dbContext.MatchReports.AnyAsync(x => x.MatchId == matchId, ct);
     public void Add(MatchReport report) => dbContext.MatchReports.Add(report);
     public Task SaveChangesAsync(CancellationToken ct) => dbContext.SaveChangesAsync(ct);
-    private IQueryable<MatchReportAggregate> AggregateQuery() => from report in dbContext.MatchReports join match in dbContext.Matches on report.MatchId equals match.Id select new MatchReportAggregate(report, match, dbContext.PlayerMatchAppearances.Count(x => x.MatchId == match.Id));
+    private IQueryable<MatchReportAggregate> AggregateQuery(IQueryable<MatchReport> reports) =>
+        from report in reports
+        join match in dbContext.Matches on report.MatchId equals match.Id
+        select new MatchReportAggregate(
+            report,
+            match,
+            dbContext.PlayerMatchAppearances.Count(x => x.MatchId == match.Id));
     private IQueryable<MatchReportReadModel> ReadQuery(IReadOnlyCollection<Guid>? scope) => from report in dbContext.MatchReports.AsNoTracking() join match in dbContext.Matches.AsNoTracking() on report.MatchId equals match.Id join team in dbContext.Teams.AsNoTracking() on match.TeamId equals team.Id join opponent in dbContext.Opponents.AsNoTracking() on match.OpponentId equals opponent.Id join competition in dbContext.Competitions.AsNoTracking() on match.CompetitionId equals competition.Id where scope == null || scope.Contains(match.TeamId) select new MatchReportReadModel(report, match, team.Name, opponent.Name, competition.Name);
 }

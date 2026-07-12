@@ -4,7 +4,7 @@ import {
   type ColumnDef,
   useReactTable,
 } from "@tanstack/react-table";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import {
   parseAsBoolean,
   parseAsInteger,
@@ -17,11 +17,9 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 import { routePaths } from "@/app/route-paths";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,7 +34,6 @@ import {
   EmptyHeader,
   EmptyTitle,
 } from "@/components/ui/empty";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -45,15 +42,20 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DatePicker } from "@/components/common/date-picker";
 import { ErrorState } from "@/components/common/error-state";
 import { FilterSelect } from "@/components/common/filter-select";
 import { LoadingState } from "@/components/common/loading-state";
 import { PageHeader } from "@/components/common/page-header";
 import { useSession } from "@/features/auth/hooks/use-session";
+import type { SessionUser } from "@/features/auth/types/session";
 import { settingsApi } from "@/features/settings/api";
 import { matchesApi } from "@/features/matches/api/matches-api";
+import {
+  MatchArchiveDialog,
+  MatchCreateDialog,
+  MatchEditDialog,
+} from "@/features/matches/components/match-dialogs";
 import type {
   MatchResponse,
   MatchStatus,
@@ -64,27 +66,26 @@ import {
 } from "@/features/matches/utils/display";
 import { formatUtcDateTime } from "@/lib/date-format";
 
-const statuses: MatchStatus[] = [
-  "SCHEDULED",
-  "PLAYED",
-  "POSTPONED",
-  "CANCELLED",
-];
-
 function canCreate(role: string | null | undefined) {
   return role === "ADMIN" || role === "DATA_OPERATOR";
 }
-function errorMessage(error: unknown) {
-  return error instanceof Error
-    ? error.message
-    : "Učitavanje nije uspjelo. Pokušajte ponovo.";
+function canEditMatch(user: SessionUser | null, match: MatchResponse) {
+  return (
+    user?.primaryRole === "ADMIN" ||
+    (user?.primaryRole === "DATA_OPERATOR" &&
+      (user.teamScope.type === "ALL" ||
+        user.teamScope.selectedTeamIds.includes(match.team.id)))
+  );
 }
 
 export function MatchesPage() {
   const navigate = useNavigate();
   const { user } = useSession();
-  const queryClient = useQueryClient();
+  const [creating, setCreating] = useState(false);
   const [editing, setEditing] = useState<MatchResponse | null>(null);
+  const [archiveTarget, setArchiveTarget] = useState<MatchResponse | null>(
+    null,
+  );
   const [filters, setFilters] = useQueryStates({
     seasonId: parseAsString,
     teamId: parseAsString,
@@ -122,17 +123,6 @@ export function MatchesPage() {
       return { seasons, teams, competitions, opponents };
     },
     retry: false,
-  });
-  const archive = useMutation({
-    mutationFn: (match: MatchResponse) =>
-      match.isArchived
-        ? matchesApi.restore(match.id)
-        : matchesApi.archive(match.id),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["matches"] });
-      toast.success("Stanje arhive je ažurirano.");
-    },
-    onError: (error) => toast.error(errorMessage(error)),
   });
   const change = (value: Partial<typeof filters>) =>
     void setFilters({ ...value, page: 1 });
@@ -218,13 +208,13 @@ export function MatchesPage() {
                 >
                   Otvori
                 </DropdownMenuItem>
-                {canCreate(user?.primaryRole) ? (
+                {canEditMatch(user, item) ? (
                   <DropdownMenuItem onClick={() => setEditing(item)}>
                     Uredi
                   </DropdownMenuItem>
                 ) : null}
                 {user?.primaryRole === "ADMIN" ? (
-                  <DropdownMenuItem onClick={() => archive.mutate(item)}>
+                  <DropdownMenuItem onClick={() => setArchiveTarget(item)}>
                     {item.isArchived ? "Vrati iz arhive" : "Arhiviraj"}
                   </DropdownMenuItem>
                 ) : null}
@@ -234,7 +224,7 @@ export function MatchesPage() {
         ),
       },
     ],
-    [archive, navigate, user?.primaryRole],
+    [navigate, user],
   );
   const table = useReactTable({
     data: matches.data?.items ?? [],
@@ -254,13 +244,7 @@ export function MatchesPage() {
         description="Raspored, rezultati i osnovni podaci o utakmicama."
         actions={
           canCreate(user?.primaryRole) ? (
-            <Button
-              onClick={() =>
-                toast.info(
-                  "Forma za novu utakmicu bit će dostupna u sljedećem ažuriranju.",
-                )
-              }
-            >
+            <Button onClick={() => setCreating(true)}>
               <Plus data-icon="inline-start" />
               Nova utakmica
             </Button>
@@ -268,7 +252,24 @@ export function MatchesPage() {
         }
       />
       {editing ? (
-        <MatchEditNotice match={editing} onClose={() => setEditing(null)} />
+        <MatchEditDialog match={editing} onClose={() => setEditing(null)} />
+      ) : null}
+      {creating && user ? (
+        <MatchCreateDialog
+          user={user}
+          onClose={() => setCreating(false)}
+          onCreated={(match) => {
+            setCreating(false);
+            toast.success("Utakmica je kreirana.");
+            navigate(routePaths.matchDetail(match.id));
+          }}
+        />
+      ) : null}
+      {archiveTarget ? (
+        <MatchArchiveDialog
+          match={archiveTarget}
+          onClose={() => setArchiveTarget(null)}
+        />
       ) : null}
       <section className="border-border bg-card grid gap-3 rounded-xl border p-4 sm:grid-cols-2 md:flex md:flex-wrap">
         <FilterSelect
@@ -481,198 +482,5 @@ export function MatchesPage() {
         </>
       )}
     </div>
-  );
-  return (
-    <div className="flex flex-col gap-6">
-      <header className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-        <div>
-          <h1 className="font-heading text-3xl">Utakmice</h1>
-          <p className="text-muted-foreground mt-2">
-            Raspored, rezultati i osnovni podaci o utakmicama.
-          </p>
-        </div>
-        {canCreate(user?.primaryRole) ? (
-          <Button
-            onClick={() =>
-              toast.info(
-                "Forma za novu utakmicu bit će dostupna u sljedećem ažuriranju.",
-              )
-            }
-          >
-            <Plus data-icon="inline-start" />
-            Nova utakmica
-          </Button>
-        ) : null}
-      </header>
-      <Tabs
-        value={filters.status ?? "all"}
-        onValueChange={(value) =>
-          change({ status: value === "all" ? null : value })
-        }
-      >
-        <TabsList>
-          <TabsTrigger value="all">Sve</TabsTrigger>
-          {statuses.map((status) => (
-            <TabsTrigger key={status} value={status}>
-              {matchStatusLabels[status]}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-      </Tabs>
-      <div className="flex flex-wrap gap-3">
-        <Input
-          aria-label="Datum od"
-          className="w-40"
-          type="date"
-          value={filters.dateFrom ?? ""}
-          onChange={(event) => change({ dateFrom: event.target.value || null })}
-        />
-        <Input
-          aria-label="Datum do"
-          className="w-40"
-          type="date"
-          value={filters.dateTo ?? ""}
-          onChange={(event) => change({ dateTo: event.target.value || null })}
-        />
-        <Button
-          aria-pressed={filters.archived}
-          onClick={() => change({ archived: !filters.archived })}
-          variant="outline"
-        >
-          Prikaži arhivirane
-        </Button>
-        {hasFilters ? (
-          <Button onClick={clear} variant="ghost">
-            Očisti filtere
-          </Button>
-        ) : null}
-      </div>
-      {matches.isLoading ? (
-        <Skeleton className="h-96 w-full" />
-      ) : matches.isError ? (
-        <Alert variant="destructive">
-          <AlertTitle>Učitavanje utakmica nije uspjelo</AlertTitle>
-          <AlertDescription className="flex items-center justify-between gap-3">
-            {errorMessage(matches.error)}
-            <Button onClick={() => void matches.refetch()} variant="outline">
-              Pokušaj ponovo
-            </Button>
-          </AlertDescription>
-        </Alert>
-      ) : page?.items.length === 0 ? (
-        <Empty>
-          <EmptyHeader>
-            <EmptyTitle>
-              {hasFilters ? "Nema rezultata" : "Nema utakmica"}
-            </EmptyTitle>
-            <EmptyDescription>
-              {hasFilters
-                ? "Nijedna utakmica ne odgovara trenutnim filterima."
-                : "Još nema unesenih utakmica."}
-            </EmptyDescription>
-          </EmptyHeader>
-          <EmptyContent>
-            {hasFilters ? (
-              <Button onClick={clear} variant="outline">
-                Očisti filtere
-              </Button>
-            ) : null}
-          </EmptyContent>
-        </Empty>
-      ) : (
-        <>
-          <div className="overflow-x-auto rounded-xl border">
-            <Table>
-              <TableHeader>
-                {table.getHeaderGroups().map((group) => (
-                  <TableRow key={group.id}>
-                    {group.headers.map((header) => (
-                      <TableHead key={header.id}>
-                        {flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
-                      </TableHead>
-                    ))}
-                  </TableRow>
-                ))}
-              </TableHeader>
-              <TableBody>
-                {table.getRowModel().rows.map((row) => (
-                  <TableRow
-                    className="cursor-pointer"
-                    key={row.id}
-                    onClick={() =>
-                      navigate(routePaths.matchDetail(row.original.id))
-                    }
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell
-                        key={cell.id}
-                        onClick={(event) => {
-                          if (cell.column.id === "actions")
-                            event.stopPropagation();
-                        }}
-                      >
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext(),
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-          <div className="flex items-center justify-between gap-3">
-            <p className="text-muted-foreground text-sm">
-              Stranica {page?.page ?? 1} od {page?.totalPages ?? 1} ·{" "}
-              {page?.totalCount ?? 0} ukupno
-            </p>
-            <div className="flex gap-2">
-              <Button
-                disabled={(page?.page ?? 1) <= 1}
-                onClick={() => change({ page: (page?.page ?? 2) - 1 })}
-                variant="outline"
-              >
-                Prethodna
-              </Button>
-              <Button
-                disabled={(page?.page ?? 1) >= (page?.totalPages ?? 1)}
-                onClick={() => change({ page: (page?.page ?? 0) + 1 })}
-                variant="outline"
-              >
-                Sljedeća
-              </Button>
-            </div>
-          </div>
-        </>
-      )}
-      {editing ? (
-        <MatchEditNotice match={editing!} onClose={() => setEditing(null)} />
-      ) : null}
-    </div>
-  );
-}
-
-function MatchEditNotice({
-  match,
-  onClose,
-}: {
-  match: MatchResponse;
-  onClose: () => void;
-}) {
-  return (
-    <Alert>
-      <AlertTitle>Uređivanje utakmice</AlertTitle>
-      <AlertDescription className="flex items-center justify-between gap-3">
-        Uređivanje za {match.team.name} protiv {match.opponent.name} uskoro će
-        biti dostupno.
-        <Button onClick={onClose} variant="outline">
-          Zatvori
-        </Button>
-      </AlertDescription>
-    </Alert>
   );
 }

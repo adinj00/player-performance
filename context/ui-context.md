@@ -30,7 +30,7 @@ Rules:
 - Internal code, API contracts, enum names, route names, filenames, and translation keys remain in English.
 - Display labels for internal statuses must be localized for the selected UI language. For example, `READY_FOR_REVIEW` is an internal status, not the final user-facing label.
 - User-entered content such as player names, staff names, team names, opponent names, venues, notes, and imported source values is displayed as entered and is not automatically translated.
-- Use `dd.MM.yyyy.` for date-only values and `dd.MM.yyyy. HH:mm` for date-time values in Bosnian UI. Keep API and database date/time values in their contract-required ISO/UTC form; formatting is display-only.
+- Use `dd.MM.yyyy.` for date-only values and `dd.MM.yyyy. HH:mm` for date-time values in Bosnian UI. Time-only values and time inputs use `HH:mm` in the 24-hour format with minute precision. Keep API and database date/time values in their contract-required ISO/UTC form; formatting is display-only.
 
 When localization infrastructure is implemented, new long-lived user-facing strings should be added through translation resources instead of being hardcoded directly in feature components.
 
