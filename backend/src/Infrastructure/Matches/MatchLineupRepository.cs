@@ -49,6 +49,26 @@ internal sealed class MatchLineupRepository(AppDbContext dbContext) : IMatchLine
         return ids.ToDictionary(x => x, x => eligible.Contains(x));
     }
 
+    public async Task<IReadOnlyList<EligibleLineupPlayerResponse>> GetEligiblePlayersAsync(Guid teamId, DateOnly matchDate, CancellationToken ct)
+    {
+        return await (from player in dbContext.Players.AsNoTracking()
+                      join assignment in dbContext.PlayerTeamAssignments.AsNoTracking() on player.Id equals assignment.PlayerId
+                      where player.Status != PlayerRecordStatus.ARCHIVED
+                            && assignment.TeamId == teamId
+                            && assignment.StartDate <= matchDate
+                            && (assignment.EndDate == null || assignment.EndDate >= matchDate)
+                      orderby player.LastName, player.FirstName, player.Id
+                      select new EligibleLineupPlayerResponse(
+                          player.Id,
+                          player.FirstName,
+                          player.LastName,
+                          player.PreferredName,
+                          player.Status,
+                          assignment.StartDate,
+                          assignment.EndDate))
+            .ToListAsync(ct);
+    }
+
     public void Add(MatchLineup lineup) => dbContext.MatchLineups.Add(lineup);
     public void AddEntry(MatchLineupEntry entry) => dbContext.MatchLineupEntries.Add(entry);
     public void AddAppearance(PlayerMatchAppearance appearance) => dbContext.PlayerMatchAppearances.Add(appearance);

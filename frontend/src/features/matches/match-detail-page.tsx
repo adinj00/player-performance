@@ -13,19 +13,14 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { matchesApi } from "@/features/matches/api/matches-api";
+import { LineupTab } from "@/features/matches/components/lineup-tab";
 import {
   locationLabels,
   matchStatusLabels,
 } from "@/features/matches/utils/display";
 import { formatUtcDateTime } from "@/lib/date-format";
 
-const futureTabs = [
-  "Sastav",
-  "Statistika",
-  "GPS / Fizički podaci",
-  "Video",
-  "Revizija",
-];
+const futureTabs = ["Statistika", "GPS / Fizički podaci", "Video", "Revizija"];
 
 export function MatchDetailPage() {
   const { matchId } = useParams();
@@ -73,6 +68,7 @@ export function MatchDetailPage() {
       <Tabs defaultValue="overview">
         <TabsList>
           <TabsTrigger value="overview">Pregled</TabsTrigger>
+          <TabsTrigger value="lineup">Sastav</TabsTrigger>
           {futureTabs.map((tab) => (
             <TabsTrigger key={tab} value={tab}>
               {tab}
@@ -106,6 +102,9 @@ export function MatchDetailPage() {
               <dd>{data.venue?.name ?? "Nije određeno"}</dd>
             </div>
           </dl>
+        </TabsContent>
+        <TabsContent value="lineup">
+          <LineupTab match={data} />
         </TabsContent>
         {futureTabs.map((tab) => (
           <TabsContent key={tab} value={tab}>

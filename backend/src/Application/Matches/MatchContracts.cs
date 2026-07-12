@@ -2,6 +2,7 @@ using FluentValidation;
 using PlayerPerformance.Domain.Common.Errors;
 using PlayerPerformance.Domain.Common.Results;
 using PlayerPerformance.Domain.Matches;
+using PlayerPerformance.Domain.Players;
 
 namespace PlayerPerformance.Application.Matches;
 
@@ -16,6 +17,7 @@ public sealed record SaveMatchLineupEntryRequest(Guid PlayerId, MatchLineupRole 
 public sealed record SaveMatchAppearanceRequest(Guid PlayerId, int MinutesPlayed);
 public sealed record SaveMatchSubstitutionRequest(Guid PlayerOutId, Guid PlayerInId, int Minute, int? StoppageTimeMinute, int Sequence);
 public sealed record MatchLineupPlayerResponse(Guid Id, string FirstName, string LastName, string? PreferredName);
+public sealed record EligibleLineupPlayerResponse(Guid Id, string FirstName, string LastName, string? PreferredName, PlayerRecordStatus Status, DateOnly AssignmentStartDate, DateOnly? AssignmentEndDate);
 public sealed record MatchLineupEntryResponse(Guid Id, MatchLineupPlayerResponse Player, MatchLineupRole Role);
 public sealed record MatchAppearanceResponse(Guid Id, Guid PlayerId, int MinutesPlayed);
 public sealed record MatchSubstitutionResponse(Guid Id, Guid PlayerOutId, Guid PlayerInId, int Minute, int? StoppageTimeMinute, int Sequence);
@@ -88,7 +90,7 @@ public sealed class SaveMatchLineupRequestValidator : AbstractValidator<SaveMatc
 public interface IMatchesService
 {
     Task<Result<PagedMatchListResponse>> ListAsync(MatchListQuery query, CancellationToken ct);
-    Task<MatchResponse?> GetAsync(Guid id, CancellationToken ct); Task<Result<MatchResponse>> CreateAsync(CreateMatchRequest request, CancellationToken ct);
+    Task<MatchResponse?> GetAsync(Guid id, CancellationToken ct); Task<Result<IReadOnlyList<EligibleLineupPlayerResponse>>> GetEligibleLineupPlayersAsync(Guid id, CancellationToken ct); Task<Result<MatchResponse>> CreateAsync(CreateMatchRequest request, CancellationToken ct);
     Task<Result<MatchResponse>> UpdateAsync(Guid id, UpdateMatchRequest request, CancellationToken ct);
     Task<Result<MatchResponse>> ArchiveAsync(Guid id, CancellationToken ct); Task<Result<MatchResponse>> RestoreAsync(Guid id, CancellationToken ct); Task<MatchLineupResponse?> GetLineupAsync(Guid id, CancellationToken ct); Task<Result<MatchLineupResponse>> SaveLineupAsync(Guid id, SaveMatchLineupRequest request, CancellationToken ct);
 }
@@ -110,6 +112,7 @@ public interface IMatchLineupRepository
 {
     Task<MatchLineupAggregate?> GetAsync(Guid matchId, CancellationToken ct); Task<MatchLineupReadModel?> GetReadAsync(Guid matchId, IReadOnlyCollection<Guid>? teamScope, CancellationToken ct);
     Task<IReadOnlyDictionary<Guid, bool>> GetNewPlayerEligibilityAsync(IReadOnlyCollection<Guid> playerIds, Guid teamId, DateOnly matchDate, CancellationToken ct);
+    Task<IReadOnlyList<EligibleLineupPlayerResponse>> GetEligiblePlayersAsync(Guid teamId, DateOnly matchDate, CancellationToken ct);
     void Add(MatchLineup lineup);
     void AddEntry(MatchLineupEntry entry);
     void AddAppearance(PlayerMatchAppearance appearance);

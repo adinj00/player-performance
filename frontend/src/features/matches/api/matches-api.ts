@@ -4,8 +4,12 @@ import { apiRequest } from "@/lib/api/api-client";
 import type {
   CreateMatchRequest,
   MatchListFilters,
+  MatchLineupResponse,
+  MatchReportResponse,
   MatchResponse,
   PagedMatches,
+  EligibleLineupPlayer,
+  SaveMatchLineupRequest,
   UpdateMatchRequest,
 } from "@/features/matches/types/match";
 
@@ -33,7 +37,7 @@ function query(filters: MatchListFilters) {
 
 async function mutate<T>(
   path: string,
-  method: "POST" | "PATCH",
+  method: "POST" | "PATCH" | "PUT",
   json?: unknown,
 ) {
   const csrf = await getCsrf();
@@ -47,6 +51,16 @@ async function mutate<T>(
 export const matchesApi = {
   list: (filters: MatchListFilters) => apiRequest<PagedMatches>(query(filters)),
   get: (id: string) => apiRequest<MatchResponse>(`/api/matches/${id}`),
+  getLineup: (id: string) =>
+    apiRequest<MatchLineupResponse>(`/api/matches/${id}/lineup`),
+  getEligibleLineupPlayers: (id: string) =>
+    apiRequest<EligibleLineupPlayer[]>(
+      `/api/matches/${id}/lineup/eligible-players`,
+    ),
+  getReport: (id: string) =>
+    apiRequest<MatchReportResponse>(`/api/matches/${id}/report`),
+  saveLineup: (id: string, request: SaveMatchLineupRequest) =>
+    mutate<MatchLineupResponse>(`/api/matches/${id}/lineup`, "PUT", request),
   create: (request: CreateMatchRequest) =>
     mutate<MatchResponse>("/api/matches", "POST", request),
   update: (id: string, request: UpdateMatchRequest) =>

@@ -81,6 +81,24 @@ internal sealed class MatchesService(IMatchesRepository repository, IMatchLineup
         return read is null ? null : ToLineupResponse(read);
     }
 
+    public async Task<Result<IReadOnlyList<EligibleLineupPlayerResponse>>> GetEligibleLineupPlayersAsync(Guid id, CancellationToken ct)
+    {
+        var access = await currentUserAccess.GetAsync(ct);
+        var aggregate = await lineupRepository.GetAsync(id, ct);
+        if (aggregate is null || !CanAccess(access, aggregate.Match.TeamId))
+            return Result<IReadOnlyList<EligibleLineupPlayerResponse>>.Failure(MatchErrors.NotFound);
+        if (!CanMutate(access))
+            return Result<IReadOnlyList<EligibleLineupPlayerResponse>>.Failure(MatchErrors.Forbidden);
+        if (aggregate.Match.IsArchived || aggregate.Match.Status == MatchStatus.CANCELLED)
+            return Result<IReadOnlyList<EligibleLineupPlayerResponse>>.Failure(MatchErrors.Conflict);
+
+        var players = await lineupRepository.GetEligiblePlayersAsync(
+            aggregate.Match.TeamId,
+            DateOnly.FromDateTime(aggregate.Match.KickoffAtUtc),
+            ct);
+        return Result<IReadOnlyList<EligibleLineupPlayerResponse>>.Success(players);
+    }
+
     public async Task<Result<MatchLineupResponse>> SaveLineupAsync(Guid id, SaveMatchLineupRequest request, CancellationToken ct)
     {
         if (id == Guid.Empty || !(await lineupValidator.ValidateAsync(request, ct)).IsValid)

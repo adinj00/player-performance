@@ -24,6 +24,7 @@ public sealed class FirstAdminBootstrapOptionsTests
         var options = new FirstAdminBootstrapOptions
         {
             Enabled = true,
+            Name = "Administrator",
             Email = email,
             TemporaryPassword = "Valid-temporary-password"
         };
@@ -40,6 +41,7 @@ public sealed class FirstAdminBootstrapOptionsTests
         var options = new FirstAdminBootstrapOptions
         {
             Enabled = true,
+            Name = "Administrator",
             Email = "admin@example.com"
         };
 
@@ -55,6 +57,7 @@ public sealed class FirstAdminBootstrapOptionsTests
         var options = new FirstAdminBootstrapOptions
         {
             Enabled = true,
+            Name = "Administrator",
             Email = "admin@example.com",
             TemporaryPassword = "Valid-temporary-password"
         };

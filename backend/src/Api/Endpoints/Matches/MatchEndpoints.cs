@@ -18,6 +18,7 @@ internal static class MatchEndpoints
         matches.MapGet("", ListAsync);
         matches.MapGet("/{matchId:guid}", GetAsync);
         matches.MapGet("/{matchId:guid}/lineup", GetLineupAsync);
+        matches.MapGet("/{matchId:guid}/lineup/eligible-players", GetEligibleLineupPlayersAsync);
         matches.MapPost("", CreateAsync);
         matches.MapPatch("/{matchId:guid}", UpdateAsync);
         matches.MapPut("/{matchId:guid}/lineup", SaveLineupAsync);
@@ -32,6 +33,7 @@ internal static class MatchEndpoints
     }
     private static async Task<Results<Ok<MatchResponse>, NotFound>> GetAsync(Guid matchId, IMatchesService service, CancellationToken ct) => (await service.GetAsync(matchId, ct)) is { } response ? TypedResults.Ok(response) : TypedResults.NotFound();
     private static async Task<Results<Ok<MatchLineupResponse>, NotFound>> GetLineupAsync(Guid matchId, IMatchesService service, CancellationToken ct) => (await service.GetLineupAsync(matchId, ct)) is { } response ? TypedResults.Ok(response) : TypedResults.NotFound();
+    private static async Task<IResult> GetEligibleLineupPlayersAsync(Guid matchId, IMatchesService service, HttpContext context, CancellationToken ct) => ToEligiblePlayersResult(await service.GetEligibleLineupPlayersAsync(matchId, ct), context);
     private static async Task<IResult> CreateAsync(HttpContext context, IAntiforgery antiforgery, CreateMatchRequest request, IMatchesService service, CancellationToken ct)
     {
         var failure = await AntiforgeryValidation.ValidateRequestAsync(context, antiforgery);
@@ -57,6 +59,7 @@ internal static class MatchEndpoints
     private static IResult ToCreated(Result<MatchResponse> result, HttpContext context) => result.IsSuccess ? TypedResults.Created($"/api/matches/{result.Value.Id}", result.Value) : Problem(result.Error, context);
     private static IResult ToResult(Result<MatchResponse> result, HttpContext context) => result.IsSuccess ? TypedResults.Ok(result.Value) : Problem(result.Error, context);
     private static IResult ToLineupResult(Result<MatchLineupResponse> result, HttpContext context) => result.IsSuccess ? TypedResults.Ok(result.Value) : Problem(result.Error, context);
+    private static IResult ToEligiblePlayersResult(Result<IReadOnlyList<EligibleLineupPlayerResponse>> result, HttpContext context) => result.IsSuccess ? TypedResults.Ok(result.Value) : Problem(result.Error, context);
     private static ProblemHttpResult Problem(Error error, HttpContext context)
     {
         var status = error.Code switch { "not_found" => StatusCodes.Status404NotFound, "forbidden" => StatusCodes.Status403Forbidden, "duplicate_match" or "match_conflict" or "report_workflow_locked" => StatusCodes.Status409Conflict, "validation_failed" or "invalid_references" => StatusCodes.Status422UnprocessableEntity, _ => StatusCodes.Status400BadRequest };

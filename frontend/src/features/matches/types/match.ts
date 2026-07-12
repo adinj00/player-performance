@@ -61,3 +61,72 @@ export interface UpdateMatchRequest extends Omit<CreateMatchRequest, "teamId"> {
   teamScore: number | null;
   opponentScore: number | null;
 }
+
+export type MatchLineupRole = "STARTER" | "SUBSTITUTE";
+
+export interface MatchLineupPlayer {
+  id: string;
+  firstName: string;
+  lastName: string;
+  preferredName: string | null;
+}
+
+export interface MatchLineupEntry {
+  id: string;
+  player: MatchLineupPlayer;
+  role: MatchLineupRole;
+}
+
+export interface MatchAppearance {
+  id: string;
+  playerId: string;
+  minutesPlayed: number;
+}
+
+export interface MatchSubstitution {
+  id: string;
+  playerOutId: string;
+  playerInId: string;
+  minute: number;
+  stoppageTimeMinute: number | null;
+  sequence: number;
+}
+
+export interface MatchLineupResponse {
+  matchId: string;
+  teamId: string;
+  matchStatus: MatchStatus;
+  isArchived: boolean;
+  formation: string | null;
+  captain: MatchLineupPlayer | null;
+  entries: MatchLineupEntry[];
+  appearances: MatchAppearance[];
+  substitutions: MatchSubstitution[];
+}
+
+export interface SaveMatchLineupRequest {
+  formation: string | null;
+  captainPlayerId: string | null;
+  entries: Array<{ playerId: string; role: MatchLineupRole }>;
+  appearances: Array<{ playerId: string; minutesPlayed: number }>;
+  substitutions: Array<{
+    playerOutId: string;
+    playerInId: string;
+    minute: number;
+    stoppageTimeMinute: number | null;
+    sequence: number;
+  }>;
+}
+
+export interface EligibleLineupPlayer extends MatchLineupPlayer {
+  status: "ACTIVE" | "ARCHIVED";
+  assignmentStartDate: string;
+  assignmentEndDate: string | null;
+}
+
+export interface MatchReportResponse {
+  id: string;
+  matchId: string;
+  status:
+    "DRAFT" | "READY_FOR_REVIEW" | "VERIFIED" | "NEEDS_CORRECTION" | "ARCHIVED";
+}

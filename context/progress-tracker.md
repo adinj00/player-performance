@@ -561,3 +561,17 @@ This file intentionally starts lightweight. It should become more detailed as bu
 - Settings navigation refinement: replaced the five route-link controls with controlled shadcn Tabs that retain the existing nested routes and browser navigation. Removed the redundant Matches-specific date-time formatting wrapper; the feature utility now owns only match domain labels and date/time conversion, while the shared formatter owns display formatting.
 - Responsive-navigation and date-range follow-up: Settings now uses a compact Select on mobile and tabs from tablet width upward, avoiding wrapped or scrollable navigation. The shared DatePicker accepts disabled-date rules; Matches date filters prevent selecting an invalid range and defensively omit a malformed range from the request.
 - Mobile filter refinement: Players, Users, and Matches filter panels no longer use horizontal scrolling or mobile flex wrapping. They use full-width stacked controls on phones, with compact flex layouts retained from the desktop breakpoint upward; search inputs occupy the first row naturally.
+
+## Unit 35: Lineup and Appearances UI
+
+- Status: complete. Manual browser verification remains dependent on a locally configured API/PostgreSQL session; automated coverage and all project quality gates pass.
+- Added `GET /api/matches/{matchId}/lineup/eligible-players`. It uses the match's immutable team and kickoff date, excludes archived players, returns deterministic compact candidate data, and limits access to admins or in-scope data operators. No migration was introduced.
+- Replaced the match-detail `Sastav` placeholder with lineup read mode and a React Hook Form/Zod atomic editor. It supports preliminary scheduled/postponed lineups, played-match captain/appearances/minutes/substitutions, role movement, duplicate prevention, manual non-negative minutes, ordered substitution sequences, report/lifecycle locks, server candidate selection, and focused query invalidation after a successful save.
+- The editor protects dirty close/cancel operations with an explicit discard dialog. Browser-level navigation is not intercepted; sheet/dialog dismissal is protected.
+- Added focused integration coverage for historical/current/future match-date eligibility, range boundaries, excluded archived and other-team players, admin access, read-only role denial, and safe missing-match behavior.
+- Verification passed: backend whitespace format and verify, zero-warning `dotnet build`, 61 unit tests, 29 integration tests, frontend Prettier format/check, frontend build, and frontend lint (warnings only: existing React Compiler compatibility notices plus React Hook Form watch usage in the new editor). `git diff --check` passed.
+
+## First-admin bootstrap configuration follow-up
+
+- Added `Bootstrap__FirstAdmin__Name=Administrator` to `backend/.env.example`. The initial bootstrap role handoff now uses this setting for the first administrator's staff display name, alongside the existing email and temporary-password settings. No migration is needed because `StaffAccessProfile.DisplayName` already exists.
+- Repaired the fresh-database migration ordering so the player table is created before player-team assignments. Recreated the dropped local PostgreSQL database, applied all migrations successfully, and started the API with bootstrap enabled; the first admin and `Administrator` staff profile were created from the local `.env` values.

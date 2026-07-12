@@ -12,7 +12,7 @@ using PlayerPerformance.Infrastructure.Persistence;
 namespace PlayerPerformance.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260711095718_AddPlayerTeamAssignments")]
+    [Migration("20260711120001_AddPlayerTeamAssignments")]
     partial class AddPlayerTeamAssignments
     {
         /// <inheritdoc />
