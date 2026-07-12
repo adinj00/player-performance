@@ -253,9 +253,9 @@ Dependencies: Unit 32, Unit 33, Unit 35, Unit 36.
 
 ### Unit 38: Audit Backend Foundation
 
-Add audit log entity, audit service abstraction, persistence, and audit coverage for already implemented critical mutations.
+Add append-only audit persistence, an Application-layer audit writer, safe semantic before/after change sets, atomic audit coverage for implemented staff-access/account, match-report workflow, and manual statistics mutations, plus authorized entity-history APIs for the Unit 39 UI.
 
-Dependencies: Unit 20, Unit 23, Unit 32.
+Dependencies: Unit 20, Unit 23, Unit 32, Unit 33.
 
 ### Unit 39: Audit UI Foundation
 
@@ -381,8 +381,8 @@ Dependencies: Unit 40, Unit 53.
 
 ## Next Immediate Unit
 
-The next implementation unit after Unit 36 should be:
+The next implementation unit after Unit 37 should be:
 
-**Unit 37: Match Report Review UI**
+**Unit 38: Audit Backend Foundation**
 
-Reason: the match detail now contains real lineup and tracking-level-aware statistics interfaces, while Unit 32 already provides the report lifecycle, permissions, list query, and backend-owned allowed actions. The next dependency-safe step is to add the central workflow queue and complete the `Revizija` tab so data operators can submit reports, analysts can request corrections or verify when permitted, and administrators can archive verified reports before audit persistence begins in Unit 38.
+Reason: staff access/account lifecycle, match-report workflow, manual statistics entry, and the complete visible review flow now exist. The next dependency-safe step is to make those important mutations durably auditable through append-only semantic records committed atomically with the business transaction, and to expose authorized report/user history queries before Unit 39 renders audit history in the UI.
