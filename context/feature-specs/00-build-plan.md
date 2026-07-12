@@ -245,9 +245,9 @@ Dependencies: Unit 32, Unit 33, Unit 35.
 
 ### Unit 37: Match Report Review UI
 
-Add submit for review, request correction, verify, archive/restore where allowed, backend-provided allowed action rendering, and workflow status display.
+Add a team-scope-aware report workflow queue and the real match `Revizija` tab with backend-provided allowed actions, readiness display, submit for review, request correction, verify, and terminal report archive behavior. Do not add restore because Unit 32 defines `ARCHIVED` as terminal in the current V1 workflow.
 
-Dependencies: Unit 32, Unit 36.
+Dependencies: Unit 32, Unit 33, Unit 35, Unit 36.
 
 ## Audit and Data Integrity
 
@@ -381,8 +381,8 @@ Dependencies: Unit 40, Unit 53.
 
 ## Next Immediate Unit
 
-The next implementation unit after Unit 35 should be:
+The next implementation unit after Unit 36 should be:
 
-**Unit 36: Manual Match Statistics UI**
+**Unit 37: Match Report Review UI**
 
-Reason: concrete match appearances and the `Sastav` interface now exist, while Unit 33 already provides tracking-level-aware atomic statistics APIs. The next dependency-safe step is to replace the `Statistika` placeholder with dense player and goalkeeper entry/read views. Because statistics are report-owned and no previous UI creates a report, this unit also includes only the minimal draft report initialization required before data entry; workflow transition actions remain in Unit 37.
+Reason: the match detail now contains real lineup and tracking-level-aware statistics interfaces, while Unit 32 already provides the report lifecycle, permissions, list query, and backend-owned allowed actions. The next dependency-safe step is to add the central workflow queue and complete the `Revizija` tab so data operators can submit reports, analysts can request corrections or verify when permitted, and administrators can archive verified reports before audit persistence begins in Unit 38.
