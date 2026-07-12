@@ -7,6 +7,7 @@ using PlayerPerformance.Domain.Settings;
 using PlayerPerformance.Domain.Teams;
 using PlayerPerformance.Domain.Players;
 using PlayerPerformance.Domain.Matches;
+using PlayerPerformance.Domain.Auditing;
 
 namespace PlayerPerformance.Infrastructure.Persistence;
 
@@ -30,6 +31,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options)
     public DbSet<MatchReport> MatchReports => Set<MatchReport>();
     public DbSet<PlayerMatchStats> PlayerMatchStats => Set<PlayerMatchStats>();
     public DbSet<GoalkeeperMatchStats> GoalkeeperMatchStats => Set<GoalkeeperMatchStats>();
+    public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

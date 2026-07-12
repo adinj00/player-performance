@@ -5,6 +5,8 @@ using PlayerPerformance.Application.Matches;
 using PlayerPerformance.Domain.Common.Errors;
 using PlayerPerformance.Domain.Common.Results;
 using PlayerPerformance.Domain.Matches;
+using PlayerPerformance.Application.Auditing;
+using PlayerPerformance.Domain.Auditing;
 
 namespace PlayerPerformance.Api.Endpoints.Matches;
 
@@ -18,6 +20,7 @@ internal static class MatchReportEndpoints
         var reports = endpoints.MapGroup("/api/match-reports").RequireAuthorization().WithTags("Match reports");
         reports.MapGet("", ListAsync);
         reports.MapGet("/{reportId:guid}/statistics", GetStatisticsAsync);
+        reports.MapGet("/{reportId:guid}/audit", GetAuditAsync);
         reports.MapPut("/{reportId:guid}/statistics", SaveStatisticsAsync);
         reports.MapPost("/{reportId:guid}/submit", SubmitAsync);
         reports.MapPost("/{reportId:guid}/verify", VerifyAsync);
@@ -38,6 +41,13 @@ internal static class MatchReportEndpoints
         return failure ?? ToResult(await service.SubmitAsync(reportId, ct), context);
     }
     private static async Task<IResult> GetStatisticsAsync(Guid reportId, IMatchStatisticsService service, CancellationToken ct) => (await service.GetAsync(reportId, ct)) is { } response ? TypedResults.Ok(response) : TypedResults.NotFound();
+    private static async Task<IResult> GetAuditAsync(Guid reportId, IMatchStatisticsService statistics, IAuditHistoryRepository audits, int page = 1, int pageSize = 25, string? action = null, DateTime? dateFrom = null, DateTime? dateTo = null, CancellationToken ct = default)
+    {
+        if (await statistics.GetAsync(reportId, ct) is null)
+            return TypedResults.NotFound();
+        var query = new AuditHistoryQuery(page, pageSize, action, dateFrom, dateTo);
+        return !AuditHistoryValidation.IsValid(query) ? TypedResults.BadRequest() : TypedResults.Ok(await audits.ListAsync(AuditEntityTypes.MatchReport, reportId, query, ct));
+    }
     private static async Task<IResult> SaveStatisticsAsync(Guid reportId, HttpContext context, IAntiforgery antiforgery, SaveMatchReportStatisticsRequest request, IMatchStatisticsService service, CancellationToken ct)
     {
         var failure = await AntiforgeryValidation.ValidateRequestAsync(context, antiforgery);

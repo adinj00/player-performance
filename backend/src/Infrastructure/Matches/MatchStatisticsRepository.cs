@@ -30,8 +30,8 @@ internal sealed class MatchStatisticsRepository(AppDbContext dbContext) : IMatch
         var goalkeeperStats = await dbContext.GoalkeeperMatchStats.AsNoTracking().Where(x => x.MatchReportId == reportId).ToListAsync(ct);
         return new(root.report, root.match, root.TrackingLevel, appearances, playerStats, goalkeeperStats);
     }
-    public void Add(PlayerMatchStats stats) => dbContext.PlayerMatchStats.Add(stats); 
-    public void Add(GoalkeeperMatchStats stats) => dbContext.GoalkeeperMatchStats.Add(stats); 
+    public void Add(PlayerMatchStats stats) => dbContext.PlayerMatchStats.Add(stats);
+    public void Add(GoalkeeperMatchStats stats) => dbContext.GoalkeeperMatchStats.Add(stats);
     public void Remove(GoalkeeperMatchStats stats) => dbContext.GoalkeeperMatchStats.Remove(stats);
     public async Task RemoveForAppearancesAsync(IReadOnlyCollection<Guid> appearanceIds, CancellationToken ct)
     {

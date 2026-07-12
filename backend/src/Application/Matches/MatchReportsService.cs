@@ -5,10 +5,12 @@ using PlayerPerformance.Application.Users;
 using PlayerPerformance.Domain.Common.Results;
 using PlayerPerformance.Domain.Matches;
 using PlayerPerformance.Domain.Staff;
+using PlayerPerformance.Application.Auditing;
+using PlayerPerformance.Domain.Auditing;
 
 namespace PlayerPerformance.Application.Matches;
 
-internal sealed class MatchReportsService(IMatchReportsRepository repository, IMatchesRepository matchesRepository, IMatchStatisticsService statisticsService, ICurrentUserAccess currentUserAccess, ISystemClock clock, IValidator<RequestCorrectionRequest> correctionValidator, IValidator<MatchReportListQuery> listValidator, IStaffUsersService staffUsersService) : IMatchReportsService, IMatchReportWorkflowGuard
+internal sealed class MatchReportsService(IMatchReportsRepository repository, IMatchesRepository matchesRepository, IMatchStatisticsService statisticsService, ICurrentUserAccess currentUserAccess, ISystemClock clock, IValidator<RequestCorrectionRequest> correctionValidator, IValidator<MatchReportListQuery> listValidator, IStaffUsersService staffUsersService, IAuditWriter auditWriter) : IMatchReportsService, IMatchReportWorkflowGuard
 {
     public async Task<Result<MatchReportResponse>> CreateAsync(Guid matchId, CancellationToken ct)
     {
@@ -24,6 +26,10 @@ internal sealed class MatchReportsService(IMatchReportsRepository repository, IM
             return Result<MatchReportResponse>.Failure(MatchReportErrors.Duplicate);
         var report = MatchReport.Create(Guid.NewGuid(), matchId, access.UserId!.Value, clock.UtcNow);
         repository.Add(report);
+        auditWriter.Add(AuditPayload.Create(access.UserId.Value, AuditActions.MatchReportCreated, AuditEntityTypes.MatchReport, report.Id, report.CreatedAtUtc, null, new
+        {
+            status = report.Status.ToString()
+        }, new { matchId }));
         await repository.SaveChangesAsync(ct);
         var read = await repository.GetReadByMatchAsync(matchId, null, ct);
         return Result<MatchReportResponse>.Success(await ToResponseAsync(read!, access, ct));
@@ -66,9 +72,20 @@ internal sealed class MatchReportsService(IMatchReportsRepository repository, IM
         var completeness = await statisticsService.EnsureSubmissionCompleteAsync(aggregate, ct);
         if (!completeness.IsSuccess)
             return Result<MatchReportResponse>.Failure(MatchReportErrors.Validation);
+        var priorStatus = aggregate.Report.Status;
         try
         { aggregate.Report.Submit(access.UserId!.Value, clock.UtcNow); }
         catch (InvalidOperationException) { return Result<MatchReportResponse>.Failure(MatchReportErrors.Conflict); }
+        auditWriter.Add(AuditPayload.Create(access.UserId.Value, AuditActions.MatchReportSubmitted, AuditEntityTypes.MatchReport, aggregate.Report.Id, aggregate.Report.UpdatedAtUtc, new
+        {
+            status = priorStatus.ToString()
+        }, new
+        {
+            status = aggregate.Report.Status.ToString()
+        }, new
+        {
+            matchId = aggregate.Match.Id
+        }));
         await repository.SaveChangesAsync(ct);
         var read = await repository.GetReadByMatchAsync(aggregate.Match.Id, null, ct);
         return Result<MatchReportResponse>.Success(await ToResponseAsync(read!, access, ct));
@@ -105,7 +122,31 @@ internal sealed class MatchReportsService(IMatchReportsRepository repository, IM
             return Result<MatchReportResponse>.Failure(MatchReportErrors.Conflict);
         try
         {
+            var priorStatus = aggregate.Report.Status;
             transition(aggregate.Report, access.UserId!.Value, clock.UtcNow, aggregate);
+            var action = aggregate.Report.Status switch
+            {
+                MatchReportStatus.VERIFIED => AuditActions.MatchReportVerified,
+                MatchReportStatus.NEEDS_CORRECTION => AuditActions.MatchReportCorrectionRequested,
+                MatchReportStatus.ARCHIVED => AuditActions.MatchReportArchived,
+                _ => throw new InvalidOperationException()
+            };
+            auditWriter.Add(AuditPayload.Create(access.UserId!.Value, action, AuditEntityTypes.MatchReport, aggregate.Report.Id, aggregate.Report.UpdatedAtUtc, new
+            {
+
+                status = priorStatus.ToString()
+            }, new
+            {
+                status = aggregate.Report.Status.ToString()
+            }, aggregate.Report.Status == MatchReportStatus.NEEDS_CORRECTION ? new
+            {
+
+                matchId = aggregate.Match.Id,
+                correctionReason = aggregate.Report.LastCorrectionReason
+            } : new
+            {
+                matchId = aggregate.Match.Id
+            }));
         }
         catch (ArgumentException)
         {

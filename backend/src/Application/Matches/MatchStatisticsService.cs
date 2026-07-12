@@ -4,10 +4,12 @@ using PlayerPerformance.Domain.Common.Results;
 using PlayerPerformance.Domain.Matches;
 using PlayerPerformance.Domain.Staff;
 using PlayerPerformance.Domain.Teams;
+using PlayerPerformance.Application.Auditing;
+using PlayerPerformance.Domain.Auditing;
 
 namespace PlayerPerformance.Application.Matches;
 
-internal sealed class MatchStatisticsService(IMatchStatisticsRepository repository, ICurrentUserAccess currentUserAccess, ISystemClock clock, IMatchStatisticsProfileService profiles) : IMatchStatisticsService
+internal sealed class MatchStatisticsService(IMatchStatisticsRepository repository, ICurrentUserAccess currentUserAccess, ISystemClock clock, IMatchStatisticsProfileService profiles, IAuditWriter auditWriter) : IMatchStatisticsService
 {
     public async Task<MatchReportStatisticsResponse?> GetAsync(Guid reportId, CancellationToken ct)
     {
@@ -41,6 +43,42 @@ internal sealed class MatchStatisticsService(IMatchStatisticsRepository reposito
         {
             return Result<MatchReportStatisticsResponse>.Failure(MatchStatisticsErrors.Validation);
         }
+        var previousTrackingLevel = aggregate.Report.AppliedTrackingLevel;
+        var previous = new
+        {
+            playerStatistics = aggregate.PlayerStatistics.Select(x => new
+            {
+                x.PlayerMatchAppearanceId,
+                x.Goals,
+                x.Assists,
+                x.YellowCards,
+                x.RedCards,
+                x.Shots,
+                x.ShotsOnTarget,
+                x.PassesAttempted,
+                x.PassesCompleted,
+                x.KeyPasses,
+                x.DuelsAttempted,
+                x.DuelsWon,
+                x.FoulsCommitted,
+                x.FoulsWon,
+                x.Offsides,
+                x.BallRecoveries,
+                x.PossessionLosses
+            }),
+            goalkeeperStatistics = aggregate.GoalkeeperStatistics.Select(x => new
+            {
+                x.PlayerMatchAppearanceId,
+                x.Saves,
+                x.GoalsConceded,
+                x.CleanSheet,
+                x.PenaltySaves
+            }),
+            appliedTrackingLevel = previousTrackingLevel?.ToString()
+        };
+        var requested = new { playerStatistics = request.PlayerStatistics, goalkeeperStatistics = request.GoalkeeperStatistics, appliedTrackingLevel = level.ToString() };
+        if (AuditPayload.Object(previous) == AuditPayload.Object(requested))
+            return Result<MatchReportStatisticsResponse>.Success((await GetAsync(reportId, ct))!);
         aggregate.Report.ApplyTrackingLevel(level, clock.UtcNow);
         var existing = aggregate.PlayerStatistics.ToDictionary(x => x.PlayerMatchAppearanceId);
         foreach (var row in request.PlayerStatistics)
@@ -71,6 +109,13 @@ internal sealed class MatchStatisticsService(IMatchStatisticsRepository reposito
                 repository.Add(entity);
             }
         }
+        auditWriter.Add(AuditPayload.Create(access.UserId!.Value, AuditActions.MatchReportStatisticsUpdated, AuditEntityTypes.MatchReport, aggregate.Report.Id, clock.UtcNow, previous, requested, new
+        {
+            matchId = aggregate.Match.Id,
+            appliedTrackingLevel = level.ToString(),
+            affectedPlayerAppearanceIds = request.PlayerStatistics.Select(x => x.PlayerMatchAppearanceId).Order().ToArray(),
+            affectedGoalkeeperAppearanceIds = request.GoalkeeperStatistics.Select(x => x.PlayerMatchAppearanceId).Order().ToArray()
+        }));
         await repository.SaveChangesAsync(ct);
         return Result<MatchReportStatisticsResponse>.Success((await GetAsync(reportId, ct))!);
     }

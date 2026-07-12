@@ -11,10 +11,13 @@ using PlayerPerformance.Domain.Teams;
 using PlayerPerformance.Domain.Users;
 using PlayerPerformance.Infrastructure.Identity;
 using PlayerPerformance.Infrastructure.Persistence;
+using PlayerPerformance.Application.Auditing;
+using PlayerPerformance.Application.Authorization;
+using PlayerPerformance.Domain.Auditing;
 
 namespace PlayerPerformance.Infrastructure.Staff;
 
-internal sealed class IdentityStaffUsersService(AppDbContext db, UserManager<ApplicationUser> users, ISystemClock clock) : IStaffUsersService
+internal sealed class IdentityStaffUsersService(AppDbContext db, UserManager<ApplicationUser> users, ISystemClock clock, IAuditWriter auditWriter, ICurrentUserAccess currentUserAccess) : IStaffUsersService
 {
     private const string InvitationProvider = "Default";
     private const string InvitationPurpose = "staff-invitation";
@@ -65,6 +68,15 @@ internal sealed class IdentityStaffUsersService(AppDbContext db, UserManager<App
             return Result<StaffInvitationCredentialResponse>.Failure(created.Errors.Any(x => x.Code.Contains("Duplicate", StringComparison.OrdinalIgnoreCase)) ? StaffUserErrors.DuplicateEmail : StaffUserErrors.Conflict);
         db.StaffAccessProfiles.Add(new StaffAccessProfile { UserId = user.Id, DisplayName = access.Name, PrimaryRole = access.Role, CanVerifyReports = access.Verify, CanImportData = access.Import, CanViewMedicalDetails = access.Medical, TeamScopeType = access.Scope, CreatedUtc = now, UpdatedUtc = now });
         AddScopes(user.Id, access.TeamIds, now);
+        auditWriter.Add(AuditPayload.Create((await currentUserAccess.GetAsync(ct)).UserId!.Value, AuditActions.StaffInvitationCreated, AuditEntityTypes.StaffUser, user.Id, now, null, new
+        {
+            displayName = access.Name,
+            email,
+            status = user.AccountStatus.ToString(),
+            primaryRole = access.Role.ToString(),
+            teamScopeType = access.Scope.ToString(),
+            selectedTeamIds = access.TeamIds.Order().ToArray()
+        }));
         await db.SaveChangesAsync(ct);
         await tx.CommitAsync(ct);
         var token = EncodeToken(await users.GenerateUserTokenAsync(user, InvitationProvider, InvitationPurpose));
@@ -78,7 +90,12 @@ internal sealed class IdentityStaffUsersService(AppDbContext db, UserManager<App
             return Result<StaffInvitationCredentialResponse>.Failure(StaffUserErrors.NotFound);
         if (user.AccountStatus != UserAccountStatus.INVITED)
             return Result<StaffInvitationCredentialResponse>.Failure(StaffUserErrors.Conflict);
-        await users.UpdateSecurityStampAsync(user);
+        await using var tx = await db.Database.BeginTransactionAsync(ct);
+        user.SecurityStamp = Guid.NewGuid().ToString("N");
+        user.UpdatedUtc = clock.UtcNow;
+        auditWriter.Add(AuditPayload.Create((await currentUserAccess.GetAsync(ct)).UserId!.Value, AuditActions.StaffInvitationReissued, AuditEntityTypes.StaffUser, user.Id, user.UpdatedUtc.Value.UtcDateTime, new { status = user.AccountStatus.ToString() }, new { status = user.AccountStatus.ToString() }));
+        await db.SaveChangesAsync(ct);
+        await tx.CommitAsync(ct);
         var token = EncodeToken(await users.GenerateUserTokenAsync(user, InvitationProvider, InvitationPurpose));
         return Result<StaffInvitationCredentialResponse>.Success(new((await GetAsync(userId, ct))!, token));
     }
@@ -90,8 +107,13 @@ internal sealed class IdentityStaffUsersService(AppDbContext db, UserManager<App
         var profile = await db.StaffAccessProfiles.SingleOrDefaultAsync(x => x.UserId == userId, ct);
         if (profile is null)
             return Result<StaffUserResponse>.Failure(StaffUserErrors.NotFound);
-        profile.DisplayName = request.DisplayName.Trim();
+        var previous = profile.DisplayName;
+        var next = request.DisplayName.Trim();
+        if (previous == next)
+            return Result<StaffUserResponse>.Success((await GetAsync(userId, ct))!);
+        profile.DisplayName = next;
         profile.UpdatedUtc = clock.UtcNow;
+        auditWriter.Add(AuditPayload.Create((await currentUserAccess.GetAsync(ct)).UserId!.Value, AuditActions.StaffProfileUpdated, AuditEntityTypes.StaffUser, userId, profile.UpdatedUtc.Value.UtcDateTime, new { displayName = previous }, new { displayName = next }));
         await db.SaveChangesAsync(ct);
         return Result<StaffUserResponse>.Success((await GetAsync(userId, ct))!);
     }
@@ -106,6 +128,26 @@ internal sealed class IdentityStaffUsersService(AppDbContext db, UserManager<App
             return Result<StaffUserResponse>.Failure(StaffUserErrors.NotFound);
         if (profile.PrimaryRole == StaffRole.ADMIN && access.Role != StaffRole.ADMIN && await IsFinalActiveAdminAsync(userId, ct))
             return Result<StaffUserResponse>.Failure(StaffUserErrors.Conflict);
+        var previous = new
+        {
+            primaryRole = profile.PrimaryRole.ToString(),
+            canVerifyReports = profile.CanVerifyReports,
+            canImportData = profile.CanImportData,
+            canViewMedicalDetails = profile.CanViewMedicalDetails,
+            teamScopeType = profile.TeamScopeType.ToString(),
+            selectedTeamIds = (await db.StaffTeamScopes.Where(x => x.UserId == userId).Select(x => x.TeamId).OrderBy(x => x).ToListAsync(ct)).ToArray()
+        };
+        var next = new
+        {
+            primaryRole = access.Role.ToString(),
+            canVerifyReports = access.Verify,
+            canImportData = access.Import,
+            canViewMedicalDetails = access.Medical,
+            teamScopeType = access.Scope.ToString(),
+            selectedTeamIds = access.TeamIds.Order().ToArray()
+        };
+        if (AuditPayload.Object(previous) == AuditPayload.Object(next))
+            return Result<StaffUserResponse>.Success((await GetAsync(userId, ct))!);
         profile.PrimaryRole = access.Role;
         profile.CanVerifyReports = access.Verify;
         profile.CanImportData = access.Import;
@@ -114,6 +156,7 @@ internal sealed class IdentityStaffUsersService(AppDbContext db, UserManager<App
         profile.UpdatedUtc = clock.UtcNow;
         db.StaffTeamScopes.RemoveRange(db.StaffTeamScopes.Where(x => x.UserId == userId));
         AddScopes(userId, access.TeamIds, clock.UtcNow);
+        auditWriter.Add(AuditPayload.Create((await currentUserAccess.GetAsync(ct)).UserId!.Value, AuditActions.StaffAccessReplaced, AuditEntityTypes.StaffUser, userId, profile.UpdatedUtc.Value.UtcDateTime, previous, next));
         await db.SaveChangesAsync(ct);
         return Result<StaffUserResponse>.Success((await GetAsync(userId, ct))!);
     }
@@ -129,7 +172,14 @@ internal sealed class IdentityStaffUsersService(AppDbContext db, UserManager<App
             return Result<StaffUserResponse>.Failure(StaffUserErrors.Conflict);
         user.AccountStatus = UserAccountStatus.DISABLED;
         user.UpdatedUtc = clock.UtcNow;
-        await users.UpdateSecurityStampAsync(user);
+        user.SecurityStamp = Guid.NewGuid().ToString("N");
+        auditWriter.Add(AuditPayload.Create((await currentUserAccess.GetAsync(ct)).UserId!.Value, AuditActions.StaffUserDisabled, AuditEntityTypes.StaffUser, userId, user.UpdatedUtc.Value.UtcDateTime, new
+        {
+            status = UserAccountStatus.ACTIVE.ToString()
+        }, new
+        {
+            status = user.AccountStatus.ToString()
+        }));
         await db.SaveChangesAsync(ct);
         return Result<StaffUserResponse>.Success((await GetAsync(userId, ct))!);
     }
@@ -140,8 +190,16 @@ internal sealed class IdentityStaffUsersService(AppDbContext db, UserManager<App
             return Result<StaffUserResponse>.Failure(StaffUserErrors.NotFound);
         if (user.AccountStatus != UserAccountStatus.DISABLED)
             return Result<StaffUserResponse>.Failure(StaffUserErrors.Conflict);
+        var priorStatus = user.AccountStatus;
         user.AccountStatus = string.IsNullOrEmpty(user.PasswordHash) ? UserAccountStatus.INVITED : UserAccountStatus.ACTIVE;
         user.UpdatedUtc = clock.UtcNow;
+        auditWriter.Add(AuditPayload.Create((await currentUserAccess.GetAsync(ct)).UserId!.Value, AuditActions.StaffUserReactivated, AuditEntityTypes.StaffUser, userId, user.UpdatedUtc.Value.UtcDateTime, new
+        {
+            status = priorStatus.ToString()
+        }, new
+        {
+            status = user.AccountStatus.ToString()
+        }));
         await db.SaveChangesAsync(ct);
         return Result<StaffUserResponse>.Success((await GetAsync(userId, ct))!);
     }
@@ -159,15 +217,23 @@ internal sealed class IdentityStaffUsersService(AppDbContext db, UserManager<App
         catch (FormatException) { return Result.Failure(StaffUserErrors.InvalidInvitation); }
         if (user is null || user.AccountStatus != UserAccountStatus.INVITED || !await users.VerifyUserTokenAsync(user, InvitationProvider, InvitationPurpose, token))
             return Result.Failure(StaffUserErrors.InvalidInvitation);
+        await using var tx = await db.Database.BeginTransactionAsync(ct);
         var password = await users.AddPasswordAsync(user, request.Password);
         if (!password.Succeeded)
             return Result.Failure(StaffUserErrors.InvalidInvitation);
         user.AccountStatus = UserAccountStatus.ACTIVE;
         user.RequiresPasswordChange = false;
         user.UpdatedUtc = clock.UtcNow;
-        await users.UpdateSecurityStampAsync(user);
+        user.SecurityStamp = Guid.NewGuid().ToString("N");
+        auditWriter.Add(AuditPayload.Create(user.Id, AuditActions.StaffInvitationAccepted, AuditEntityTypes.StaffUser, user.Id, user.UpdatedUtc.Value.UtcDateTime, new
+        {
+            status = UserAccountStatus.INVITED.ToString()
+        }, new { status = UserAccountStatus.ACTIVE.ToString() }));
         var update = await users.UpdateAsync(user);
-        return update.Succeeded ? Result.Success() : Result.Failure(StaffUserErrors.InvalidInvitation);
+        if (!update.Succeeded)
+            return Result.Failure(StaffUserErrors.InvalidInvitation);
+        await tx.CommitAsync(ct);
+        return Result.Success();
     }
 
     private async Task<bool> IsFinalActiveAdminAsync(Guid userId, CancellationToken ct) => await db.StaffAccessProfiles.Join(db.Users, p => p.UserId, u => u.Id, (p, u) => new { p, u }).CountAsync(x => x.p.PrimaryRole == StaffRole.ADMIN && x.u.AccountStatus == UserAccountStatus.ACTIVE, ct) == 1 && await db.StaffAccessProfiles.AnyAsync(x => x.UserId == userId && x.PrimaryRole == StaffRole.ADMIN, ct);

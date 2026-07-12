@@ -184,3 +184,9 @@ X-CSRF-TOKEN: {{csrfToken}}
 ### Archive a verified match report (admin)
 POST {{PlayerPerformance_Api_HostAddress}}/api/match-reports/00000000-0000-0000-0000-000000000001/archive
 X-CSRF-TOKEN: {{csrfToken}}
+
+### Read match-report audit history (report visibility applies)
+GET {{PlayerPerformance_Api_HostAddress}}/api/match-reports/00000000-0000-0000-0000-000000000001/audit?page=1&pageSize=25
+
+### Read staff-user audit history (admin only)
+GET {{PlayerPerformance_Api_HostAddress}}/api/users/00000000-0000-0000-0000-000000000001/audit?page=1&pageSize=25

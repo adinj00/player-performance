@@ -10,7 +10,18 @@ This file intentionally starts lightweight. It should become more detailed as bu
 
 ## Current Goal
 
-- Unit 28: Player Team Assignment Backend is complete; Unit 29 player UI remains next.
+- Unit 38: Audit Backend Foundation implementation is complete for the initial STAFF_USER and MATCH_REPORT scope; deferred audit areas remain intentionally out of scope.
+
+## In Progress
+
+- Unit 38 audit backend foundation:
+  - Added the append-only `AuditLog` domain entity, centralized stable `STAFF_USER` and `MATCH_REPORT` entity types, and initial staff/report/statistics action codes.
+  - Added `audit_logs` EF mapping with PostgreSQL `jsonb` payload columns, non-cascading actor FK, and entity/actor/action history indexes. The migration is not yet generated because the local API process is locking the API build outputs needed by EF tooling.
+  - Added safe structured audit contracts, writer/history repository, deterministic newest-first bounded history queries, and admin-only staff audit plus report-scoped audit routes. Audit payloads do not include invitation tokens, passwords, hashes, or Identity security metadata.
+  - Integrated initial staff invitation, reissue, acceptance, profile, access, disable/reactivate audit writes; report creation/workflow transitions; and report-level statistics-save audit writes through the shared DbContext.
+  - Generated `20260712220859_AddAuditBackendFoundation` under `backend/src/Infrastructure/Persistence/Migrations/` and applied it successfully to the configured local PostgreSQL database after stopping the locked API process.
+  - Verification passed: solution build (zero warnings/errors), 61 unit tests, 29 integration tests, `dotnet format ... whitespace --no-restore`, `dotnet format ... --verify-no-changes`, and `git diff --check`.
+  - Intentionally deferred: audit scopes for imports, medical, media, players, match metadata/lineups, GPS, login-email recovery, exports, and notifications; no global audit browser or mutation endpoints were added.
 
 ## Completed
 

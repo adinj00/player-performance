@@ -6,6 +6,8 @@ using PlayerPerformance.Application.Users;
 using PlayerPerformance.Domain.Common.Errors;
 using PlayerPerformance.Domain.Common.Results;
 using PlayerPerformance.Domain.Staff;
+using PlayerPerformance.Application.Auditing;
+using PlayerPerformance.Domain.Auditing;
 
 namespace PlayerPerformance.Api.Endpoints.Users;
 
@@ -16,6 +18,7 @@ internal static class StaffUserEndpoints
         var group = endpoints.MapGroup("/api/users").WithTags("Users").RequireAuthorization(StaffAuthorizationPolicies.AdminOnly);
         group.MapGet("", (string? search, StaffRole? role, string? status, TeamScopeType? scopeType, Guid? teamId, IStaffUsersService service, CancellationToken ct) => service.ListAsync(search, role, status, scopeType, teamId, ct));
         group.MapGet("/{userId:guid}", GetAsync);
+        group.MapGet("/{userId:guid}/audit", GetAuditAsync);
         group.MapPost("/invitations", CreateAsync);
         group.MapPost("/{userId:guid}/invitations/reissue", ReissueAsync);
         group.MapPatch("/{userId:guid}", UpdateAsync);
@@ -26,6 +29,13 @@ internal static class StaffUserEndpoints
         return endpoints;
     }
     private static async Task<IResult> GetAsync(Guid userId, IStaffUsersService service, CancellationToken ct) => (await service.GetAsync(userId, ct)) is { } user ? TypedResults.Ok(user) : TypedResults.NotFound();
+    private static async Task<IResult> GetAuditAsync(Guid userId, IStaffUsersService users, IAuditHistoryRepository audits, int page = 1, int pageSize = 25, string? action = null, DateTime? dateFrom = null, DateTime? dateTo = null, CancellationToken ct = default)
+    {
+        if (await users.GetAsync(userId, ct) is null)
+            return TypedResults.NotFound();
+        var query = new AuditHistoryQuery(page, pageSize, action, dateFrom, dateTo);
+        return !AuditHistoryValidation.IsValid(query) ? TypedResults.BadRequest() : TypedResults.Ok(await audits.ListAsync(AuditEntityTypes.StaffUser, userId, query, ct));
+    }
     private static async Task<IResult> CreateAsync(HttpContext c, IAntiforgery a, CreateStaffInvitationRequest r, IStaffUsersService s, CancellationToken ct)
     {
         var f = await AntiforgeryValidation.ValidateRequestAsync(c, a);

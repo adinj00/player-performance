@@ -19,6 +19,8 @@ using PlayerPerformance.Application.Players;
 using PlayerPerformance.Infrastructure.Players;
 using PlayerPerformance.Application.Matches;
 using PlayerPerformance.Infrastructure.Matches;
+using PlayerPerformance.Application.Auditing;
+using PlayerPerformance.Infrastructure.Auditing;
 
 namespace PlayerPerformance.Infrastructure;
 
@@ -51,6 +53,9 @@ public static class DependencyInjection
         services.AddScoped<IMatchReportsRepository, MatchReportsRepository>();
         services.AddScoped<IMatchStatisticsRepository, MatchStatisticsRepository>();
         services.AddScoped<IMatchStatisticsCleanup, MatchStatisticsRepository>();
+        services.AddScoped<AuditStore>();
+        services.AddScoped<IAuditWriter>(provider => provider.GetRequiredService<AuditStore>());
+        services.AddScoped<IAuditHistoryRepository>(provider => provider.GetRequiredService<AuditStore>());
         services.AddScoped<IStaffUsersService, IdentityStaffUsersService>();
         services.AddScoped<TeamStartupInitializer>();
 

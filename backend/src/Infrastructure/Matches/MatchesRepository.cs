@@ -51,13 +51,13 @@ internal sealed class MatchesRepository(AppDbContext dbContext) : IMatchesReposi
     }
 
     private IQueryable<MatchProjection> ReadQuery(IQueryable<Match> matches) => from match in matches
-        join season in dbContext.Seasons.AsNoTracking() on match.SeasonId equals season.Id
-        join competition in dbContext.Competitions.AsNoTracking() on match.CompetitionId equals competition.Id
-        join team in dbContext.Teams.AsNoTracking() on match.TeamId equals team.Id
-        join opponent in dbContext.Opponents.AsNoTracking() on match.OpponentId equals opponent.Id
-        join venue in dbContext.Venues.AsNoTracking() on match.VenueId equals venue.Id into venues
-        from venue in venues.DefaultIfEmpty()
-        select new MatchProjection(match, season.Name, competition.Name, team.Name, opponent.Name, venue == null ? null : venue.Name);
+                                                                                join season in dbContext.Seasons.AsNoTracking() on match.SeasonId equals season.Id
+                                                                                join competition in dbContext.Competitions.AsNoTracking() on match.CompetitionId equals competition.Id
+                                                                                join team in dbContext.Teams.AsNoTracking() on match.TeamId equals team.Id
+                                                                                join opponent in dbContext.Opponents.AsNoTracking() on match.OpponentId equals opponent.Id
+                                                                                join venue in dbContext.Venues.AsNoTracking() on match.VenueId equals venue.Id into venues
+                                                                                from venue in venues.DefaultIfEmpty()
+                                                                                select new MatchProjection(match, season.Name, competition.Name, team.Name, opponent.Name, venue == null ? null : venue.Name);
     private static MatchReadModel ToReadModel(MatchProjection x) => new(x.Match, x.SeasonName, x.CompetitionName, x.TeamName, x.OpponentName, x.VenueName);
     private sealed record MatchProjection(Match Match, string SeasonName, string CompetitionName, string TeamName, string OpponentName, string? VenueName);
 }
