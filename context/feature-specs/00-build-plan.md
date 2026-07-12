@@ -233,9 +233,9 @@ Dependencies: Unit 19, Unit 26, Unit 30.
 
 ### Unit 35: Lineup and Appearances UI
 
-Add match lineup editor, appearances/minutes UI, substitution handling, and validation feedback.
+Add the authoritative match-date eligible-player query, then build the match lineup editor, appearances/minutes UI, ordered substitution handling, workflow-lock behavior, and validation feedback using the atomic Unit 31 lineup contract.
 
-Dependencies: Unit 31, Unit 34.
+Dependencies: Unit 31, Unit 32, Unit 34.
 
 ### Unit 36: Manual Match Statistics UI
 
@@ -381,8 +381,8 @@ Dependencies: Unit 40, Unit 53.
 
 ## Next Immediate Unit
 
-The next implementation unit after Unit 33 should be:
+The next implementation unit after Unit 34 should be:
 
-**Unit 34: Matches UI Foundation**
+**Unit 35: Lineup and Appearances UI**
 
-Reason: match metadata, concrete appearances, report workflow, and tracking-level-aware statistics now exist on the backend. The next dependency-safe step is to build the real Matches list, filters, create/edit flows, lifecycle actions, and reusable detail shell before lineup, report, and statistics interfaces are added in Units 35–37.
+Reason: the Matches list and detail shell now exist, and the backend already owns atomic lineup/participation persistence. The next dependency-safe step is to replace the `Sastav` placeholder with a real permission-aware editor and view. This unit also adds the narrowly scoped match-date eligible-player query required to avoid incorrectly selecting players from current assignments for historical or future fixtures.
