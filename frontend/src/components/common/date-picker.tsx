@@ -1,5 +1,5 @@
 import { CalendarIcon } from "lucide-react";
-import { useState } from "react";
+import { useState, type ComponentProps } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -8,6 +8,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { formatDate } from "@/lib/date-format";
 
 interface DatePickerProps {
   id: string;
@@ -15,6 +17,8 @@ interface DatePickerProps {
   onChange: (value: string) => void;
   placeholder?: string;
   disabled?: boolean;
+  disabledDates?: ComponentProps<typeof Calendar>["disabled"];
+  className?: string;
   "aria-invalid"?: boolean;
 }
 
@@ -34,6 +38,8 @@ export function DatePicker({
   onChange,
   placeholder = "Odaberite datum",
   disabled,
+  disabledDates,
+  className,
   "aria-invalid": ariaInvalid,
 }: DatePickerProps) {
   const [open, setOpen] = useState(false);
@@ -45,26 +51,21 @@ export function DatePicker({
           <Button
             id={id}
             variant="outline"
-            className="w-full justify-start font-normal"
+            className={cn("w-full justify-start font-normal", className)}
             disabled={disabled}
             aria-invalid={ariaInvalid}
           />
         }
       >
         <CalendarIcon data-icon="inline-start" />
-        {selected
-          ? new Intl.DateTimeFormat("bs-BA", {
-              day: "2-digit",
-              month: "2-digit",
-              year: "numeric",
-            }).format(selected)
-          : placeholder}
+        {selected ? formatDate(value!) : placeholder}
       </PopoverTrigger>
       <PopoverContent align="start" className="w-auto overflow-hidden p-0">
         <Calendar
           mode="single"
           selected={selected}
           defaultMonth={selected}
+          disabled={disabledDates}
           onSelect={(date) => {
             if (date) {
               onChange(toIso(date));

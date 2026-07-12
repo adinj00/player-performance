@@ -1,4 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
+import { NuqsAdapter } from "nuqs/adapters/react-router/v7";
 import { useEffect } from "react";
 import {
   BrowserRouter,
@@ -24,6 +25,7 @@ import { sessionQueryKey } from "@/features/auth/hooks/use-session";
 import { DashboardPage } from "@/pages/dashboard-page";
 import { ImportsPage } from "@/pages/imports-page";
 import { MatchesPage } from "@/pages/matches-page";
+import { MatchDetailPage } from "@/features/matches";
 import { MedicalPage } from "@/pages/medical-page";
 import { MediaPage } from "@/pages/media-page";
 import { PlayersPage } from "@/pages/players-page";
@@ -76,84 +78,90 @@ function PasswordChangeRequiredSignalHandler() {
 export function AppRoutes() {
   return (
     <BrowserRouter>
-      <PasswordChangeRequiredSignalHandler />
-      <Routes>
-        <Route
-          path={routePaths.signIn}
-          element={
-            <PublicAuthRoute>
-              <SignInPage />
-            </PublicAuthRoute>
-          }
-        />
-        <Route
-          path={routePaths.acceptInvitation}
-          element={<AcceptInvitationPage />}
-        />
-        <Route
-          path={routePaths.forgotPassword}
-          element={
-            <PublicAuthRoute>
-              <AuthUnavailablePage
-                title="Povrat lozinke"
-                description="Prikaz za povrat lozinke je spreman, ali backend podrška još nije implementirana."
+      <NuqsAdapter>
+        <PasswordChangeRequiredSignalHandler />
+        <Routes>
+          <Route
+            path={routePaths.signIn}
+            element={
+              <PublicAuthRoute>
+                <SignInPage />
+              </PublicAuthRoute>
+            }
+          />
+          <Route
+            path={routePaths.acceptInvitation}
+            element={<AcceptInvitationPage />}
+          />
+          <Route
+            path={routePaths.forgotPassword}
+            element={
+              <PublicAuthRoute>
+                <AuthUnavailablePage
+                  title="Povrat lozinke"
+                  description="Prikaz za povrat lozinke je spreman, ali backend podrška još nije implementirana."
+                />
+              </PublicAuthRoute>
+            }
+          />
+          <Route
+            path={routePaths.resetPassword}
+            element={
+              <PublicAuthRoute>
+                <AuthUnavailablePage
+                  title="Postavljanje nove lozinke"
+                  description="Forma za postavljanje nove lozinke bit će dostupna nakon što backend uvede sigurni reset tok."
+                />
+              </PublicAuthRoute>
+            }
+          />
+          <Route
+            path={routePaths.changePassword}
+            element={
+              <ChangePasswordRoute>
+                <ChangePasswordPage />
+              </ChangePasswordRoute>
+            }
+          />
+          <Route element={<ProtectedAppShell />}>
+            <Route path={routePaths.dashboard} element={<DashboardPage />} />
+            <Route path={routePaths.matches} element={<MatchesPage />} />
+            <Route path="/matches/:matchId" element={<MatchDetailPage />} />
+            <Route path={routePaths.players} element={<PlayersPage />} />
+            <Route path="/players/:playerId" element={<PlayerDetailPage />} />
+            <Route
+              path={routePaths.trainingGps}
+              element={<TrainingGpsPage />}
+            />
+            <Route path={routePaths.imports} element={<ImportsPage />} />
+            <Route path={routePaths.teams} element={<TeamsPage />} />
+            <Route path={routePaths.medical} element={<MedicalPage />} />
+            <Route path={routePaths.media} element={<MediaPage />} />
+            <Route path={routePaths.users} element={<UsersPage />} />
+            <Route path={routePaths.settings} element={<SettingsLayout />}>
+              <Route
+                index
+                element={<Navigate to={routePaths.settingsSeasons} replace />}
               />
-            </PublicAuthRoute>
-          }
-        />
-        <Route
-          path={routePaths.resetPassword}
-          element={
-            <PublicAuthRoute>
-              <AuthUnavailablePage
-                title="Postavljanje nove lozinke"
-                description="Forma za postavljanje nove lozinke bit će dostupna nakon što backend uvede sigurni reset tok."
+              <Route path="seasons" element={<SeasonsSettingsPage />} />
+              <Route
+                path="competitions"
+                element={<NamedSettingsPage resource="competitions" />}
               />
-            </PublicAuthRoute>
-          }
-        />
-        <Route
-          path={routePaths.changePassword}
-          element={
-            <ChangePasswordRoute>
-              <ChangePasswordPage />
-            </ChangePasswordRoute>
-          }
-        />
-        <Route element={<ProtectedAppShell />}>
-          <Route path={routePaths.dashboard} element={<DashboardPage />} />
-          <Route path={routePaths.matches} element={<MatchesPage />} />
-          <Route path={routePaths.players} element={<PlayersPage />} />
-          <Route path="/players/:playerId" element={<PlayerDetailPage />} />
-          <Route path={routePaths.trainingGps} element={<TrainingGpsPage />} />
-          <Route path={routePaths.imports} element={<ImportsPage />} />
-          <Route path={routePaths.teams} element={<TeamsPage />} />
-          <Route path={routePaths.medical} element={<MedicalPage />} />
-          <Route path={routePaths.media} element={<MediaPage />} />
-          <Route path={routePaths.users} element={<UsersPage />} />
-          <Route path={routePaths.settings} element={<SettingsLayout />}>
-            <Route
-              index
-              element={<Navigate to={routePaths.settingsSeasons} replace />}
-            />
-            <Route path="seasons" element={<SeasonsSettingsPage />} />
-            <Route
-              path="competitions"
-              element={<NamedSettingsPage resource="competitions" />}
-            />
-            <Route path="teams" element={<TeamsSettingsPage />} />
-            <Route
-              path="venues"
-              element={<NamedSettingsPage resource="venues" />}
-            />
-            <Route
-              path="opponents"
-              element={<NamedSettingsPage resource="opponents" />}
-            />
+              <Route path="teams" element={<TeamsSettingsPage />} />
+              <Route
+                path="venues"
+                element={<NamedSettingsPage resource="venues" />}
+              />
+              <Route
+                path="opponents"
+                element={<NamedSettingsPage resource="opponents" />}
+              />
+            </Route>
           </Route>
-        </Route>
-        <Route path="*" element={<NotFoundPage />} />
-      </Routes>
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </NuqsAdapter>
     </BrowserRouter>
   );
 }

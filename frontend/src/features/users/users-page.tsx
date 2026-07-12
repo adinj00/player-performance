@@ -376,19 +376,20 @@ export function UsersPage() {
           </Button>
         }
       />
-      <section className="border-border bg-card flex flex-nowrap items-center gap-3 overflow-x-auto rounded-xl border p-4">
+      <section className="border-border bg-card grid gap-3 rounded-xl border p-4 md:flex md:flex-wrap">
         <Input
           aria-label="Pretraži korisnike"
           value={filters.q}
           onChange={(e) => updateFilters({ q: e.target.value })}
           placeholder="Pretraži ime ili e-mail"
-          className="w-64 shrink-0"
+          className="w-full md:w-64"
         />
         <FilterSelect
           label="Uloge"
           emptyLabel="Sve uloge"
           value={filters.role}
           options={roleLabels}
+          className="w-full md:w-40"
           onChange={(role) => updateFilters({ role })}
         />
         <FilterSelect
@@ -396,6 +397,7 @@ export function UsersPage() {
           emptyLabel="Svi statusi"
           value={filters.status}
           options={statusLabels}
+          className="w-full md:w-40"
           onChange={(status) => updateFilters({ status })}
         />
         <FilterSelect
@@ -403,6 +405,7 @@ export function UsersPage() {
           emptyLabel="Svi pristupi"
           value={filters.scope}
           options={scopeLabels}
+          className="w-full md:w-48"
           onChange={(scope) => updateFilters({ scope })}
         />
       </section>

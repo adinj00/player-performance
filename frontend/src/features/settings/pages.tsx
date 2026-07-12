@@ -15,6 +15,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { isApiError } from "@/lib/api/api-client";
+import { formatDate } from "@/lib/date-format";
 
 import {
   ArchivedFilter,
@@ -35,11 +36,6 @@ import {
   type Season,
   type Team,
 } from "./types";
-
-function dateOnly(value: string) {
-  const [year, month, day] = value.split("-");
-  return year && month && day ? `${day}.${month}.${year}.` : value;
-}
 
 function ResourceFrame({
   children,
@@ -136,8 +132,8 @@ export function SeasonsSettingsPage() {
               {query.data?.map((item) => (
                 <TableRow key={item.id}>
                   <TableCell className="font-medium">{item.name}</TableCell>
-                  <TableCell>{dateOnly(item.startDate)}</TableCell>
-                  <TableCell>{dateOnly(item.endDate)}</TableCell>
+                  <TableCell>{formatDate(item.startDate)}</TableCell>
+                  <TableCell>{formatDate(item.endDate)}</TableCell>
                   <TableCell>
                     <Badge variant={item.isArchived ? "secondary" : "outline"}>
                       {item.isArchived ? "Arhivirana" : "Aktivna"}

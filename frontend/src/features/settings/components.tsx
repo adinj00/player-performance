@@ -1,8 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Archive, ArrowDown, ArrowUp, RotateCcw } from "lucide-react";
 import {
-  NavLink,
   Outlet,
+  useLocation,
   useNavigate,
   useSearchParams,
 } from "react-router-dom";
@@ -41,9 +41,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useSession } from "@/features/auth/hooks/use-session";
 import { isApiError } from "@/lib/api/api-client";
-import { cn } from "@/lib/utils";
 
 import { settingsNavigation } from "./settings-navigation";
 import {
@@ -55,6 +55,10 @@ import {
 export function SettingsLayout() {
   const { user } = useSession();
   const navigate = useNavigate();
+  const location = useLocation();
+  const activeSettingsLabel =
+    settingsNavigation.find(([, path]) => path === location.pathname)?.[0] ??
+    "Postavke";
   if (user?.primaryRole !== "ADMIN") {
     return (
       <ErrorState
@@ -74,27 +78,40 @@ export function SettingsLayout() {
         title="Postavke"
         description="Upravljajte osnovnim podacima koji se koriste kroz sistem."
       />
-      <nav
-        aria-label="Navigacija postavki"
-        className="border-border flex gap-2 overflow-x-auto border-b pb-3"
+      <div className="md:hidden">
+        <Select
+          value={location.pathname}
+          onValueChange={(path) => {
+            if (path) navigate(path);
+          }}
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue>{activeSettingsLabel}</SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              {settingsNavigation.map(([label, path]) => (
+                <SelectItem key={path} value={path}>
+                  {label}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+      </div>
+      <Tabs
+        className="hidden md:flex"
+        value={location.pathname}
+        onValueChange={(path) => navigate(path)}
       >
-        {settingsNavigation.map(([label, path]) => (
-          <NavLink
-            key={path}
-            to={path}
-            className={({ isActive }) =>
-              cn(
-                "focus-visible:ring-ring/50 rounded-lg px-3 py-2 text-sm whitespace-nowrap focus-visible:ring-3 focus-visible:outline-none",
-                isActive
-                  ? "bg-primary text-primary-foreground font-medium"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground",
-              )
-            }
-          >
-            {label}
-          </NavLink>
-        ))}
-      </nav>
+        <TabsList aria-label="Navigacija postavki">
+          {settingsNavigation.map(([label, path]) => (
+            <TabsTrigger key={path} value={path}>
+              {label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
       <Outlet />
     </div>
   );

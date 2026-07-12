@@ -55,6 +55,7 @@ import {
 import { useSession } from "@/features/auth/hooks/use-session";
 import { settingsApi } from "@/features/settings/api";
 import { isApiError } from "@/lib/api/api-client";
+import { formatDate } from "@/lib/date-format";
 import { playersApi } from "./api";
 import {
   assignmentTimingLabels,
@@ -155,9 +156,9 @@ export function PlayersPage() {
           ) : null
         }
       />
-      <section className="border-border bg-card flex flex-nowrap gap-3 overflow-x-auto rounded-xl border p-4">
+      <section className="border-border bg-card grid gap-3 rounded-xl border p-4 md:flex md:flex-wrap">
         <Input
-          className="w-64 shrink-0"
+          className="w-full md:w-64"
           aria-label="Pretraži igrače"
           value={filters.search}
           onChange={(e) =>
@@ -174,6 +175,7 @@ export function PlayersPage() {
           emptyLabel="Sve"
           value={filters.status}
           options={playerStatusLabels}
+          className="w-full md:w-40"
           onChange={(v) =>
             setFilters((current) => ({
               ...current,
@@ -189,7 +191,7 @@ export function PlayersPage() {
           options={Object.fromEntries(
             (teams.data ?? []).map((team) => [team.id, team.name]),
           )}
-          className="w-48"
+          className="w-full md:w-48"
           onChange={(value) =>
             setFilters((current) => ({
               ...current,
@@ -272,7 +274,11 @@ export function PlayersPage() {
                     <TableCell>
                       <Memberships items={p.currentAssignments} />
                     </TableCell>
-                    <TableCell>{p.dateOfBirth ?? "Nije uneseno"}</TableCell>
+                    <TableCell>
+                      {p.dateOfBirth
+                        ? formatDate(p.dateOfBirth)
+                        : "Nije uneseno"}
+                    </TableCell>
                     {admin && (
                       <TableCell onClick={(e) => e.stopPropagation()}>
                         <Menu
@@ -631,7 +637,10 @@ export function PlayerDetailPage() {
             label="Preferirano ime"
             value={p.preferredName ?? "Nije uneseno"}
           />
-          <Info label="Datum rođenja" value={p.dateOfBirth ?? "Nije uneseno"} />
+          <Info
+            label="Datum rođenja"
+            value={p.dateOfBirth ? formatDate(p.dateOfBirth) : "Nije uneseno"}
+          />
           <Info label="Status" value={playerStatusLabels[p.status]} />
         </dl>
       </section>
@@ -671,8 +680,10 @@ export function PlayerDetailPage() {
                 {history.data?.map((a) => (
                   <TableRow key={a.id}>
                     <TableCell className="font-medium">{a.teamName}</TableCell>
-                    <TableCell>{a.startDate}</TableCell>
-                    <TableCell>{a.endDate ?? "U toku"}</TableCell>
+                    <TableCell>{formatDate(a.startDate)}</TableCell>
+                    <TableCell>
+                      {a.endDate ? formatDate(a.endDate) : "U toku"}
+                    </TableCell>
                     <TableCell>
                       <Badge variant="secondary">
                         {assignmentTimingLabels[a.timingState]}

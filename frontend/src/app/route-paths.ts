@@ -19,6 +19,7 @@ export const routePaths = {
   changePassword: "/change-password",
   acceptInvitation: "/accept-invitation",
   matches: "/matches",
+  matchDetail: (matchId: string) => `/matches/${matchId}`,
   players: "/players",
   trainingGps: "/training-gps",
   imports: "/imports",
