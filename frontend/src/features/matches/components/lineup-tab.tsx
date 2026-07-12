@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowDown, ArrowUp, Pencil, Plus, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { useFieldArray, useForm } from "react-hook-form";
+import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -338,7 +338,7 @@ function LineupEditor({
   const [discardOpen, setDiscardOpen] = useState(false);
   const [pendingRemoval, setPendingRemoval] = useState<number | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const values = form.watch();
+  const values = useWatch({ control: form.control }) as LineupForm;
   const playerMap = useMemo(
     () =>
       new Map<string, MatchLineupPlayer>([
@@ -525,99 +525,109 @@ function LineupEditor({
           }
         }}
       >
-        <DialogContent className="max-w-5xl">
-          <DialogHeader>
+        <DialogContent className="flex max-h-[calc(100dvh-2rem)] flex-col gap-0 overflow-hidden p-0 sm:max-w-4xl">
+          <DialogHeader className="shrink-0 border-b px-4 py-4 pr-12 sm:px-6">
             <DialogTitle>Uredi sastav</DialogTitle>
             <DialogDescription>
               Promjene se čuvaju jednom atomskom radnjom.
             </DialogDescription>
           </DialogHeader>
           <form
-            className="max-h-[70vh] overflow-y-auto pr-1"
+            className="flex min-h-0 flex-1 flex-col overflow-hidden"
             onSubmit={form.handleSubmit(submit)}
           >
-            <FieldGroup>
-              <FormErrorSummary errors={submitError} />
-              <Field>
-                <FieldLabel htmlFor="formation">Formacija</FieldLabel>
-                <Input
-                  id="formation"
-                  placeholder="npr. 4-3-3"
-                  {...form.register("formation")}
-                />
-              </Field>
-              <LineupEditorList
-                title="Početni sastav"
-                role="STARTER"
-                fields={entries.fields}
-                values={values.entries}
-                playerMap={playerMap}
-                candidates={candidates.data ?? []}
-                selectedIds={selectedIds}
-                onAdd={addPlayer}
-                onRemove={removePlayer}
-                onMove={moveEntry}
-                onRoleChange={(index, role) =>
-                  form.setValue(`entries.${index}.role`, role, {
-                    shouldDirty: true,
-                  })
-                }
-              />
-              <LineupEditorList
-                title="Klupa"
-                role="SUBSTITUTE"
-                fields={entries.fields}
-                values={values.entries}
-                playerMap={playerMap}
-                candidates={candidates.data ?? []}
-                selectedIds={selectedIds}
-                onAdd={addPlayer}
-                onRemove={removePlayer}
-                onMove={moveEntry}
-                onRoleChange={(index, role) =>
-                  form.setValue(`entries.${index}.role`, role, {
-                    shouldDirty: true,
-                  })
-                }
-              />
-              <Field>
-                <FieldLabel>Kapiten</FieldLabel>
-                <Select
-                  value={values.captainPlayerId || null}
-                  onValueChange={(value) =>
-                    form.setValue("captainPlayerId", value ?? "", {
+            <div className="no-scrollbar min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-6">
+              <FieldGroup>
+                <FormErrorSummary errors={submitError} />
+                <Field>
+                  <FieldLabel htmlFor="formation">Formacija</FieldLabel>
+                  <Input
+                    id="formation"
+                    placeholder="npr. 4-3-3"
+                    {...form.register("formation")}
+                  />
+                </Field>
+                <LineupEditorList
+                  title="Početni sastav"
+                  role="STARTER"
+                  fields={entries.fields}
+                  values={values.entries}
+                  playerMap={playerMap}
+                  candidates={candidates.data ?? []}
+                  selectedIds={selectedIds}
+                  onAdd={addPlayer}
+                  onRemove={removePlayer}
+                  onMove={moveEntry}
+                  onRoleChange={(index, role) =>
+                    form.setValue(`entries.${index}.role`, role, {
                       shouldDirty: true,
                     })
                   }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Odaberite kapitena" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      {starters.map((entry) => (
-                        <SelectItem key={entry.playerId} value={entry.playerId}>
-                          {playerMap.get(entry.playerId)
-                            ? playerName(playerMap.get(entry.playerId)!)
-                            : "Igrač"}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </Field>
-              {lineup.matchStatus === "PLAYED" ? (
-                <PlayedFields
-                  form={form}
-                  substitutions={substitutions}
-                  values={values}
-                  playerMap={playerMap}
-                  starters={starters}
-                  appearances={appearances}
                 />
-              ) : null}
-            </FieldGroup>
-            <DialogFooter>
+                <LineupEditorList
+                  title="Klupa"
+                  role="SUBSTITUTE"
+                  fields={entries.fields}
+                  values={values.entries}
+                  playerMap={playerMap}
+                  candidates={candidates.data ?? []}
+                  selectedIds={selectedIds}
+                  onAdd={addPlayer}
+                  onRemove={removePlayer}
+                  onMove={moveEntry}
+                  onRoleChange={(index, role) =>
+                    form.setValue(`entries.${index}.role`, role, {
+                      shouldDirty: true,
+                    })
+                  }
+                />
+                <Field>
+                  <FieldLabel>Kapiten</FieldLabel>
+                  <Select
+                    value={values.captainPlayerId || null}
+                    onValueChange={(value) =>
+                      form.setValue("captainPlayerId", value ?? "", {
+                        shouldDirty: true,
+                      })
+                    }
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Odaberite kapitena">
+                        {values.captainPlayerId &&
+                        playerMap.get(values.captainPlayerId)
+                          ? playerName(playerMap.get(values.captainPlayerId)!)
+                          : "Odaberite kapitena"}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {starters.map((entry) => (
+                          <SelectItem
+                            key={entry.playerId}
+                            value={entry.playerId}
+                          >
+                            {playerMap.get(entry.playerId)
+                              ? playerName(playerMap.get(entry.playerId)!)
+                              : "Igrač"}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </Field>
+                {lineup.matchStatus === "PLAYED" ? (
+                  <PlayedFields
+                    form={form}
+                    substitutions={substitutions}
+                    values={values}
+                    playerMap={playerMap}
+                    starters={starters}
+                    appearances={appearances}
+                  />
+                ) : null}
+              </FieldGroup>
+            </div>
+            <DialogFooter className="mx-0 mb-0 shrink-0 rounded-none px-4 py-3 sm:px-6">
               <Button
                 type="button"
                 variant="outline"
@@ -976,8 +986,12 @@ function PlayerSelect({
       value={value || null}
       onValueChange={(next) => onChange(next ?? "")}
     >
-      <SelectTrigger>
-        <SelectValue placeholder="Odaberite igrača" />
+      <SelectTrigger className="w-full">
+        <SelectValue placeholder="Odaberite igrača">
+          {value && playerMap.get(value)
+            ? playerName(playerMap.get(value)!)
+            : "Odaberite igrača"}
+        </SelectValue>
       </SelectTrigger>
       <SelectContent>
         <SelectGroup>

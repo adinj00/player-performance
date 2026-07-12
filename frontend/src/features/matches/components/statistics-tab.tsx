@@ -327,6 +327,8 @@ function Editor({
     ],
     [data.appearances, data.enabledPlayerFields, editing, form, playerFields],
   );
+  // TanStack Table creates a mutable table instance; React Compiler must not memoize it.
+  // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data: players,
     columns,

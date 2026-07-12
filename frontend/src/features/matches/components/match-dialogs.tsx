@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 
 import { DatePicker } from "@/components/common/date-picker";
@@ -202,6 +202,7 @@ export function MatchCreateDialog({
       locationType: "HOME",
     },
   });
+  const values = useWatch({ control: form.control }) as CreateValues;
   const mutation = useMutation({
     mutationFn: (values: CreateValues) =>
       matchesApi.create({
@@ -261,7 +262,7 @@ export function MatchCreateDialog({
                 <SelectField
                   id="seasonId"
                   label="Sezona"
-                  value={form.watch("seasonId")}
+                  value={values.seasonId}
                   onChange={(value) =>
                     form.setValue("seasonId", value, { shouldValidate: true })
                   }
@@ -272,7 +273,7 @@ export function MatchCreateDialog({
                 <SelectField
                   id="competitionId"
                   label="Takmičenje"
-                  value={form.watch("competitionId")}
+                  value={values.competitionId}
                   onChange={(value) =>
                     form.setValue("competitionId", value, {
                       shouldValidate: true,
@@ -285,7 +286,7 @@ export function MatchCreateDialog({
                 <SelectField
                   id="teamId"
                   label="Selekcija"
-                  value={form.watch("teamId")}
+                  value={values.teamId}
                   onChange={(value) =>
                     form.setValue("teamId", value, { shouldValidate: true })
                   }
@@ -296,7 +297,7 @@ export function MatchCreateDialog({
                 <SelectField
                   id="opponentId"
                   label="Protivnik"
-                  value={form.watch("opponentId")}
+                  value={values.opponentId}
                   onChange={(value) =>
                     form.setValue("opponentId", value, { shouldValidate: true })
                   }
@@ -307,7 +308,7 @@ export function MatchCreateDialog({
                 <SelectField
                   id="venueId"
                   label="Mjesto"
-                  value={form.watch("venueId")}
+                  value={values.venueId}
                   onChange={(value) => form.setValue("venueId", value)}
                   options={[
                     { id: "", name: "Nije određeno" },
@@ -319,7 +320,7 @@ export function MatchCreateDialog({
                 <SelectField
                   id="locationType"
                   label="Lokacija"
-                  value={form.watch("locationType")}
+                  value={values.locationType}
                   onChange={(value) =>
                     form.setValue(
                       "locationType",
@@ -338,7 +339,7 @@ export function MatchCreateDialog({
                   <FieldLabel>Datum početka</FieldLabel>
                   <DatePicker
                     id="create-match-date"
-                    value={form.watch("date")}
+                    value={values.date}
                     onChange={(value) =>
                       form.setValue("date", value, { shouldValidate: true })
                     }
@@ -442,6 +443,7 @@ export function MatchEditDialog({
       opponentScore: match.opponentScore?.toString() ?? "",
     });
   }, [form, match]);
+  const values = useWatch({ control: form.control }) as EditValues;
   const mutation = useMutation({
     mutationFn: (values: EditValues) =>
       matchesApi.update(match.id, {
@@ -473,7 +475,7 @@ export function MatchEditDialog({
         refreshMatches(queryClient, match.id);
     },
   });
-  const selectedStatus = form.watch("status");
+  const selectedStatus = values.status;
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
       <DialogContent
@@ -497,7 +499,7 @@ export function MatchEditDialog({
                 <SelectField
                   id="seasonId"
                   label="Sezona"
-                  value={form.watch("seasonId")}
+                  value={values.seasonId}
                   onChange={(value) =>
                     form.setValue("seasonId", value, { shouldValidate: true })
                   }
@@ -508,7 +510,7 @@ export function MatchEditDialog({
                 <SelectField
                   id="competitionId"
                   label="Takmičenje"
-                  value={form.watch("competitionId")}
+                  value={values.competitionId}
                   onChange={(value) =>
                     form.setValue("competitionId", value, {
                       shouldValidate: true,
@@ -521,7 +523,7 @@ export function MatchEditDialog({
                 <SelectField
                   id="opponentId"
                   label="Protivnik"
-                  value={form.watch("opponentId")}
+                  value={values.opponentId}
                   onChange={(value) =>
                     form.setValue("opponentId", value, { shouldValidate: true })
                   }
@@ -532,7 +534,7 @@ export function MatchEditDialog({
                 <SelectField
                   id="venueId"
                   label="Mjesto"
-                  value={form.watch("venueId")}
+                  value={values.venueId}
                   onChange={(value) => form.setValue("venueId", value)}
                   options={[
                     { id: "", name: "Nije određeno" },
@@ -545,7 +547,7 @@ export function MatchEditDialog({
                   <FieldLabel>Datum početka</FieldLabel>
                   <DatePicker
                     id="match-date"
-                    value={form.watch("date")}
+                    value={values.date}
                     onChange={(value) =>
                       form.setValue("date", value, { shouldValidate: true })
                     }
@@ -584,7 +586,7 @@ export function MatchEditDialog({
                 <SelectField
                   id="locationType"
                   label="Lokacija"
-                  value={form.watch("locationType")}
+                  value={values.locationType}
                   onChange={(value) =>
                     form.setValue(
                       "locationType",

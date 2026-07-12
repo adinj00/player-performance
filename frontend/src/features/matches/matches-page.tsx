@@ -226,6 +226,8 @@ export function MatchesPage() {
     ],
     [navigate, user],
   );
+  // TanStack Table creates a mutable table instance; React Compiler must not memoize it.
+  // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data: matches.data?.items ?? [],
     columns: columns.map(({ cell, ...column }) => ({

@@ -7,7 +7,7 @@ import {
   useSearchParams,
 } from "react-router-dom";
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 
 import { routePaths } from "@/app/route-paths";
@@ -218,6 +218,7 @@ export function SettingFormDialog({
       );
     }
   }, [form, initial, open]);
+  const values = useWatch({ control: form.control }) as FormValues;
   const field = (name: keyof FormValues) =>
     form.formState.errors[name]?.message as string | undefined;
   return (
@@ -255,7 +256,7 @@ export function SettingFormDialog({
                   <DatePicker
                     id="start-date"
                     aria-invalid={Boolean(field("startDate"))}
-                    value={form.watch("startDate")}
+                    value={values.startDate}
                     onChange={(value) =>
                       form.setValue("startDate", value, {
                         shouldValidate: true,
@@ -269,7 +270,7 @@ export function SettingFormDialog({
                   <DatePicker
                     id="end-date"
                     aria-invalid={Boolean(field("endDate"))}
-                    value={form.watch("endDate")}
+                    value={values.endDate}
                     onChange={(value) =>
                       form.setValue("endDate", value, {
                         shouldValidate: true,
@@ -284,7 +285,7 @@ export function SettingFormDialog({
               <Field data-invalid={Boolean(field("trackingLevel"))}>
                 <FieldLabel>Nivo praćenja</FieldLabel>
                 <Select
-                  value={form.watch("trackingLevel") as TeamTrackingLevel}
+                  value={values.trackingLevel as TeamTrackingLevel}
                   onValueChange={(value) =>
                     form.setValue("trackingLevel", value as TeamTrackingLevel)
                   }
@@ -293,7 +294,7 @@ export function SettingFormDialog({
                     <SelectValue>
                       {
                         trackingLevelLabels[
-                          form.watch("trackingLevel") as TeamTrackingLevel
+                          values.trackingLevel as TeamTrackingLevel
                         ]
                       }
                     </SelectValue>
@@ -311,11 +312,7 @@ export function SettingFormDialog({
                   </SelectContent>
                 </Select>
                 <FieldDescription>
-                  {
-                    trackingLevelHelp[
-                      form.watch("trackingLevel") as TeamTrackingLevel
-                    ]
-                  }{" "}
+                  {trackingLevelHelp[values.trackingLevel as TeamTrackingLevel]}{" "}
                   Nivo određuje budući obim dostupnih podataka i tokova rada.
                 </FieldDescription>
               </Field>

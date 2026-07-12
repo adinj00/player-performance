@@ -572,6 +572,8 @@ This file intentionally starts lightweight. It should become more detailed as bu
 ## Unit 35: Lineup and Appearances UI
 
 - Status: complete. Manual browser verification remains dependent on a locally configured API/PostgreSQL session; automated coverage and all project quality gates pass.
+- Lineup-editor usability follow-up: widened the responsive dialog at the desktop breakpoint, separated its scrollable form body from a persistent shadcn dialog footer, and render selected player names rather than GUID values for captain and substitution selectors.
+- Match-detail responsive-navigation and lint follow-up: its section selector now follows the Settings mobile Select/desktop Tabs pattern. Replaced direct React Hook Form watches with `useWatch` in affected components and documented the two necessary TanStack Table React Compiler opt-outs.
 - Added `GET /api/matches/{matchId}/lineup/eligible-players`. It uses the match's immutable team and kickoff date, excludes archived players, returns deterministic compact candidate data, and limits access to admins or in-scope data operators. No migration was introduced.
 - Replaced the match-detail `Sastav` placeholder with lineup read mode and a React Hook Form/Zod atomic editor. It supports preliminary scheduled/postponed lineups, played-match captain/appearances/minutes/substitutions, role movement, duplicate prevention, manual non-negative minutes, ordered substitution sequences, report/lifecycle locks, server candidate selection, and focused query invalidation after a successful save.
 - The editor protects dirty close/cancel operations with an explicit discard dialog. Browser-level navigation is not intercepted; sheet/dialog dismissal is protected.

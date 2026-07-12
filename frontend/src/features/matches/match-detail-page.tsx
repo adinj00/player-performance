@@ -13,6 +13,14 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { matchesApi } from "@/features/matches/api/matches-api";
 import {
@@ -28,13 +36,26 @@ import {
 } from "@/features/matches/utils/display";
 import { formatUtcDateTime } from "@/lib/date-format";
 
-const futureTabs = ["Statistika", "GPS / Fizički podaci", "Video", "Revizija"];
+const matchTabs = [
+  { value: "overview", label: "Pregled" },
+  { value: "lineup", label: "Sastav" },
+  { value: "statistics", label: "Statistika" },
+  { value: "physical", label: "GPS / Fizički podaci" },
+  { value: "video", label: "Video" },
+  { value: "audit", label: "Revizija" },
+] as const;
+
+const futureTabs = matchTabs.filter(
+  (tab) => !["overview", "lineup", "statistics"].includes(tab.value),
+);
 
 export function MatchDetailPage() {
   const { matchId } = useParams();
   const { user } = useSession();
   const [editing, setEditing] = useState(false);
   const [archiveOpen, setArchiveOpen] = useState(false);
+  const [activeTab, setActiveTab] =
+    useState<(typeof matchTabs)[number]["value"]>("overview");
   const match = useQuery({
     queryKey: ["match", matchId],
     queryFn: () => matchesApi.get(matchId!),
@@ -98,18 +119,42 @@ export function MatchDetailPage() {
           </div>
         ) : null}
       </header>
-      <Tabs defaultValue="overview">
-        <TabsList>
-          <TabsTrigger value="overview">Pregled</TabsTrigger>
-          <TabsTrigger value="lineup">Sastav</TabsTrigger>
-          <TabsTrigger value="statistics">Statistika</TabsTrigger>
-          {futureTabs
-            .filter((tab) => tab !== "Statistika")
-            .map((tab) => (
-              <TabsTrigger key={tab} value={tab}>
-                {tab}
-              </TabsTrigger>
-            ))}
+      <Tabs
+        value={activeTab}
+        onValueChange={(tab) => setActiveTab(tab as typeof activeTab)}
+      >
+        <div className="md:hidden">
+          <Select
+            value={activeTab}
+            onValueChange={(tab) => {
+              if (tab) setActiveTab(tab as typeof activeTab);
+            }}
+          >
+            <SelectTrigger
+              aria-label="Odaberite sadržaj utakmice"
+              className="w-full"
+            >
+              <SelectValue>
+                {matchTabs.find((tab) => tab.value === activeTab)?.label}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                {matchTabs.map((tab) => (
+                  <SelectItem key={tab.value} value={tab.value}>
+                    {tab.label}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
+        <TabsList aria-label="Sadržaj utakmice" className="hidden md:flex">
+          {matchTabs.map((tab) => (
+            <TabsTrigger key={tab.value} value={tab.value}>
+              {tab.label}
+            </TabsTrigger>
+          ))}
         </TabsList>
         <TabsContent value="overview">
           <dl className="grid gap-4 rounded-xl border p-5 sm:grid-cols-2">
@@ -145,20 +190,16 @@ export function MatchDetailPage() {
         <TabsContent value="statistics">
           <StatisticsTab match={data} />
         </TabsContent>
-        {futureTabs
-          .filter((tab) => tab !== "Statistika")
-          .map((tab) => (
-            <TabsContent key={tab} value={tab}>
-              <Empty>
-                <EmptyHeader>
-                  <EmptyTitle>{tab}</EmptyTitle>
-                  <EmptyDescription>
-                    Ovaj dio još nije dostupan.
-                  </EmptyDescription>
-                </EmptyHeader>
-              </Empty>
-            </TabsContent>
-          ))}
+        {futureTabs.map((tab) => (
+          <TabsContent key={tab.value} value={tab.value}>
+            <Empty>
+              <EmptyHeader>
+                <EmptyTitle>{tab.label}</EmptyTitle>
+                <EmptyDescription>Ovaj dio još nije dostupan.</EmptyDescription>
+              </EmptyHeader>
+            </Empty>
+          </TabsContent>
+        ))}
       </Tabs>
       {editing ? (
         <MatchEditDialog match={data} onClose={() => setEditing(false)} />

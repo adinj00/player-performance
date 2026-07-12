@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { MoreHorizontal, Plus } from "lucide-react";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 import { z } from "zod";
 import { EmptyState } from "@/components/common/empty-state";
@@ -800,9 +800,8 @@ function AssignmentDialog({
     onSuccess: saved,
   });
   const teamError = form.formState.errors.teamId?.message;
-  const selectedTeam = teams.data?.find(
-    (team) => team.id === form.watch("teamId"),
-  );
+  const selectedTeamId = useWatch({ control: form.control, name: "teamId" });
+  const selectedTeam = teams.data?.find((team) => team.id === selectedTeamId);
   return (
     <Dialog open onOpenChange={(o) => !o && close()}>
       <DialogContent>
@@ -820,7 +819,7 @@ function AssignmentDialog({
             <Field data-invalid={Boolean(teamError)}>
               <FieldLabel>Selekcija</FieldLabel>
               <Select
-                value={form.watch("teamId")}
+                value={selectedTeamId ?? ""}
                 onValueChange={(v) =>
                   form.setValue("teamId", v ?? "", { shouldValidate: true })
                 }
