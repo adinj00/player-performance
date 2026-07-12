@@ -21,6 +21,10 @@ using PlayerPerformance.Application.Matches;
 using PlayerPerformance.Infrastructure.Matches;
 using PlayerPerformance.Application.Auditing;
 using PlayerPerformance.Infrastructure.Auditing;
+using PlayerPerformance.Application.Files;
+using PlayerPerformance.Infrastructure.Files;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 
 namespace PlayerPerformance.Infrastructure;
 
@@ -28,11 +32,24 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(
         this IServiceCollection services,
-        IConfiguration configuration)
+        IConfiguration configuration) =>
+        services.AddInfrastructure(configuration, new DevelopmentHostEnvironment());
+
+    public static IServiceCollection AddInfrastructure(
+        this IServiceCollection services,
+        IConfiguration configuration,
+        IHostEnvironment environment)
     {
         var connectionString = GetRequiredDefaultConnectionString(configuration);
 
         services.AddSingleton<ISystemClock, SystemClock>();
+
+        services.AddSingleton<IValidateOptions<FileStorageOptions>, FileStorageOptionsValidator>();
+        services
+            .AddOptions<FileStorageOptions>()
+            .Bind(configuration.GetSection(FileStorageOptions.SectionName))
+            .ValidateOnStart();
+        services.AddSingleton<IFileStorage, LocalFileStorage>();
 
         services
             .AddOptions<FirstAdminBootstrapOptions>()
@@ -109,5 +126,13 @@ public static class DependencyInjection
         }
 
         return connectionString;
+    }
+
+    private sealed class DevelopmentHostEnvironment : IHostEnvironment
+    {
+        public string EnvironmentName { get; set; } = Environments.Development;
+        public string ApplicationName { get; set; } = "PlayerPerformance";
+        public string ContentRootPath { get; set; } = AppContext.BaseDirectory;
+        public Microsoft.Extensions.FileProviders.IFileProvider ContentRootFileProvider { get; set; } = new Microsoft.Extensions.FileProviders.NullFileProvider();
     }
 }

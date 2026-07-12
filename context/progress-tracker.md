@@ -10,7 +10,7 @@ This file intentionally starts lightweight. It should become more detailed as bu
 
 ## Current Goal
 
-- Unit 39: Audit UI Foundation is implemented for the initial STAFF_USER and MATCH_REPORT scope. It provides only entity-scoped audit surfaces: report-review nested history and an admin-only staff Sheet; no global browser, export, rollback, or unaudited-module coverage was added. Initial Unit 38 action labels, safe unknown-action/value fallbacks, URL-backed filters/pagination, staff team-name resolution, and lineup-resolved statistics presentation are included. Verification passed: frontend format, format check, lint, build, and `git diff --check`; no approved frontend test foundation exists.
+- Unit 40: File Storage Abstraction is complete. It adds provider-neutral storage contracts, opaque key generation, a Development-only local streaming adapter, stored-file metadata and migration, with no public file routes or frontend changes.
 
 ## In Progress
 
@@ -24,6 +24,13 @@ This file intentionally starts lightweight. It should become more detailed as bu
   - Intentionally deferred: audit scopes for imports, medical, media, players, match metadata/lineups, GPS, login-email recovery, exports, and notifications; no global audit browser or mutation endpoints were added.
 
 ## Completed
+
+- Unit 40 completed:
+  - Added `IFileStorage`, opaque server-side key generation/validation, filename normalization, safe storage result categories, and explicit compensation-delete support. Upload streams remain caller-owned; read streams are caller-disposed.
+  - Added the Development-only `LocalFileStorage` adapter with contained path resolution, asynchronous streaming to internal temporary files, actual-byte counting, zero/oversize rejection, no overwrite, cleanup, idempotent delete, and no paths/URLs exposed through the contract. The isolated `Testing` environment is permitted only for the test host's temporary storage root.
+  - Added metadata-only `StoredFile` persistence with archive metadata, strict user foreign keys, unique storage keys, positive-size/archive-consistency constraints, and EF migration `20260712232513_AddFileStorageAbstraction`; `dotnet ef database update` applied it successfully to local PostgreSQL.
+  - Added safe Local development configuration examples and Git ignore protection. No public storage endpoints, static-file exposure, media/import records, provider SDKs, or frontend changes were introduced.
+  - Verification passed: whitespace formatting and verification, zero-warning solution build, 79 unit tests, 29 integration tests, and `git diff --check`. Storage tests use unique system temporary roots; the test factory configuration is per-host to avoid process-environment races.
 
 - Unit 28 completed:
   - Added the persistent `PlayerTeamAssignment` model with immutable player/team identity, required `DateOnly` start date, optional inclusive `DateOnly` end date, and UTC created/updated timestamps. Current/upcoming/past timing state is derived from the approved clock and is never persisted.

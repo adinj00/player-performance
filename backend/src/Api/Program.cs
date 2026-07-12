@@ -30,7 +30,7 @@ builder.Services
     .ValidateOnStart();
 
 builder.Services.AddApplication();
-builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddInfrastructure(builder.Configuration, builder.Environment);
 builder.Services.AddApiAuthentication(builder.Environment);
 builder.Services.AddApiCors(builder.Configuration);
 builder.Services.AddStaffAuthorization();

@@ -4,6 +4,7 @@ using PlayerPerformance.Application.Settings;
 using PlayerPerformance.Application.Teams;
 using PlayerPerformance.Application.Players;
 using PlayerPerformance.Application.Matches;
+using PlayerPerformance.Application.Files;
 
 namespace PlayerPerformance.Application;
 
@@ -21,6 +22,7 @@ public static class DependencyInjection
         services.AddScoped<IMatchReportWorkflowGuard, MatchReportsService>();
         services.AddSingleton<IMatchStatisticsProfileService, MatchStatisticsProfileService>();
         services.AddScoped<IMatchStatisticsService, MatchStatisticsService>();
+        services.AddSingleton<IFileStorageKeyGenerator, FileStorageKeyGenerator>();
 
         return services;
     }

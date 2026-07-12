@@ -17,6 +17,7 @@ namespace PlayerPerformance.IntegrationTests;
 public class TestApplicationFactory : WebApplicationFactory<Program>
 {
     private readonly string inMemoryDatabaseName = $"player-performance-tests-{Guid.NewGuid():N}";
+    private readonly string fileStorageRoot = Path.Combine(Path.GetTempPath(), "player-performance-integration-storage", Guid.NewGuid().ToString("N"));
 
     protected virtual bool UseInMemoryDatabase => false;
     public TestApplicationFactory()
@@ -31,6 +32,9 @@ public class TestApplicationFactory : WebApplicationFactory<Program>
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment("Testing");
+        builder.UseSetting("FileStorage:Provider", "Local");
+        builder.UseSetting("FileStorage:LocalRootPath", fileStorageRoot);
+        builder.UseSetting("FileStorage:MaxObjectSizeBytes", "1024");
         builder.ConfigureLogging(logging => logging.ClearProviders());
         builder.ConfigureServices(services =>
         {
@@ -97,6 +101,10 @@ public class TestApplicationFactory : WebApplicationFactory<Program>
             Environment.SetEnvironmentVariable("PlayerPerformance__ServiceName", null);
             Environment.SetEnvironmentVariable("PlayerPerformance__FrontendOrigin", null);
             Environment.SetEnvironmentVariable("ConnectionStrings__DefaultConnection", null);
+            if (Directory.Exists(fileStorageRoot))
+            {
+                Directory.Delete(fileStorageRoot, true);
+            }
         }
 
         base.Dispose(disposing);
