@@ -11,6 +11,8 @@ import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
+import { parseAsInteger, parseAsString, useQueryStates } from "nuqs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -40,13 +42,153 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { matchesApi } from "@/features/matches/api/matches-api";
 import { useSession } from "@/features/auth/hooks/use-session";
-import type { MatchResponse } from "@/features/matches/types/match";
+import type {
+  MatchLineupResponse,
+  MatchResponse,
+} from "@/features/matches/types/match";
+import {
+  isKnownStatisticField,
+  statisticFieldRegistry,
+} from "@/features/matches/utils/statistics";
+import { asAuditRecord } from "@/features/audit/types";
 import {
   hasReportAction,
   reportStatusLabels,
 } from "@/features/matches/utils/reports";
 import { isApiError } from "@/lib/api/api-client";
 import { formatUtcDateTime } from "@/lib/date-format";
+import {
+  AuditError,
+  AuditFilterBar,
+  AuditHistory,
+  AuditLoading,
+  AuditPagination,
+  getMatchReportAudit,
+} from "@/features/audit";
+
+const reportAuditLabels = {
+  MATCH_REPORT_CREATED: "Izvještaj je kreiran",
+  MATCH_REPORT_SUBMITTED: "Izvještaj je poslan na pregled",
+  MATCH_REPORT_VERIFIED: "Izvještaj je verificiran",
+  MATCH_REPORT_CORRECTION_REQUESTED: "Zatražena je korekcija",
+  MATCH_REPORT_ARCHIVED: "Izvještaj je arhiviran",
+  MATCH_REPORT_STATISTICS_UPDATED: "Statistika je ažurirana",
+};
+const reportAuditFields = {
+  status: "Status",
+  appliedTrackingLevel: "Nivo praćenja",
+  playerStatistics: "Statistika igrača",
+  goalkeeperStatistics: "Statistika golmana",
+};
+
+function ReportAudit({
+  reportId,
+  lineup,
+}: {
+  reportId: string;
+  lineup: MatchLineupResponse | undefined;
+}) {
+  const playersByAppearance = new Map(
+    lineup?.appearances.map((appearance) => [
+      appearance.id,
+      (() => {
+        const player = lineup.entries.find(
+          (entry) => entry.player.id === appearance.playerId,
+        )?.player;
+        return player
+          ? player.preferredName || `${player.firstName} ${player.lastName}`
+          : `Nastup (${appearance.id})`;
+      })(),
+    ]),
+  );
+  const formatStatistics = (value: unknown) =>
+    Array.isArray(value)
+      ? value
+          .map((row) => {
+            const source = asAuditRecord(row);
+            if (!source) return "Nepodržan red statistike";
+            const appearanceId =
+              typeof source.playerMatchAppearanceId === "string"
+                ? source.playerMatchAppearanceId
+                : "";
+            const values = Object.entries(source)
+              .filter(([key]) => key !== "playerMatchAppearanceId")
+              .map(
+                ([key, item]) =>
+                  `${isKnownStatisticField(key) ? statisticFieldRegistry[key].label : key}: ${item === null ? "Nije postavljeno" : item === true ? "Da" : item === false ? "Ne" : String(item)}`,
+              )
+              .join(", ");
+            return `${playersByAppearance.get(appearanceId) ?? `Nastup (${appearanceId || "nepoznat"})`}: ${values}`;
+          })
+          .join("; ")
+      : undefined;
+  const [filters, setFilters] = useQueryStates({
+    auditAction: parseAsString,
+    auditFrom: parseAsString,
+    auditTo: parseAsString,
+    auditPage: parseAsInteger.withDefault(1),
+  });
+  const audit = useQuery({
+    queryKey: ["match-report-audit", reportId, filters],
+    queryFn: () =>
+      getMatchReportAudit(reportId, {
+        action: filters.auditAction,
+        dateFrom: filters.auditFrom,
+        dateTo: filters.auditTo,
+        page: filters.auditPage,
+      }),
+    retry: false,
+  });
+  return (
+    <section className="flex flex-col gap-4 rounded-xl border p-5">
+      <div>
+        <h2 className="font-heading text-lg">Historija promjena</h2>
+        <p className="text-muted-foreground text-sm">
+          Audit zapisi su prikazani najnoviji prvo.
+        </p>
+      </div>
+      <AuditFilterBar
+        actions={reportAuditLabels}
+        value={{
+          action: filters.auditAction,
+          dateFrom: filters.auditFrom,
+          dateTo: filters.auditTo,
+        }}
+        onChange={(next) =>
+          void setFilters({
+            auditAction: next.action,
+            auditFrom: next.dateFrom,
+            auditTo: next.dateTo,
+            auditPage: 1,
+          })
+        }
+      />
+      {audit.isLoading ? (
+        <AuditLoading />
+      ) : audit.isError ? (
+        <AuditError retry={() => void audit.refetch()} />
+      ) : (
+        <>
+          <AuditHistory
+            data={audit.data}
+            labels={reportAuditLabels}
+            fields={reportAuditFields}
+            expectedEntityType="MATCH_REPORT"
+            formatValue={(key, value) =>
+              key === "playerStatistics" || key === "goalkeeperStatistics"
+                ? formatStatistics(value)
+                : undefined
+            }
+          />
+          <AuditPagination
+            data={audit.data!}
+            onPage={(page) => void setFilters({ auditPage: page })}
+          />
+        </>
+      )}
+    </section>
+  );
+}
 
 const correctionSchema = z.object({
   reason: z
@@ -101,6 +243,9 @@ export function ReportReviewTab({
     resolver: zodResolver(correctionSchema),
     defaultValues: { reason: "" },
   });
+  const [reviewState, setReviewState] = useQueryStates({
+    reviewView: parseAsString.withDefault("workflow"),
+  });
   const refresh = async () => {
     await Promise.all([
       queryClient.invalidateQueries({ queryKey: ["match-report", match.id] }),
@@ -110,6 +255,7 @@ export function ReportReviewTab({
       }),
       queryClient.invalidateQueries({ queryKey: ["match-lineup", match.id] }),
       queryClient.invalidateQueries({ queryKey: ["match", match.id] }),
+      queryClient.invalidateQueries({ queryKey: ["match-report-audit"] }),
     ]);
   };
   const transition = useMutation({
@@ -185,11 +331,33 @@ export function ReportReviewTab({
     );
   }
   const data = report.data;
+  if (reviewState.reviewView === "audit")
+    return (
+      <Tabs
+        value="audit"
+        onValueChange={(reviewView) => void setReviewState({ reviewView })}
+      >
+        <TabsList>
+          <TabsTrigger value="workflow">Tok izvještaja</TabsTrigger>
+          <TabsTrigger value="audit">Historija promjena</TabsTrigger>
+        </TabsList>
+        <ReportAudit reportId={data.id} lineup={lineup.data} />
+      </Tabs>
+    );
   const canEdit = hasReportAction(data.allowedActions, "EDIT");
   const pending = transition.isPending || correction.isPending;
   const readinessFailed = lineup.isError || statistics.isError;
   return (
     <div className="flex flex-col gap-4">
+      <Tabs
+        value="workflow"
+        onValueChange={(reviewView) => void setReviewState({ reviewView })}
+      >
+        <TabsList>
+          <TabsTrigger value="workflow">Tok izvještaja</TabsTrigger>
+          <TabsTrigger value="audit">Historija promjena</TabsTrigger>
+        </TabsList>
+      </Tabs>
       <section className="border-border bg-card grid gap-4 rounded-xl border p-5 md:grid-cols-2">
         <div className="flex flex-col gap-2">
           <p className="text-muted-foreground text-sm">Status izvještaja</p>

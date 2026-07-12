@@ -10,7 +10,7 @@ This file intentionally starts lightweight. It should become more detailed as bu
 
 ## Current Goal
 
-- Unit 38: Audit Backend Foundation implementation is complete for the initial STAFF_USER and MATCH_REPORT scope; deferred audit areas remain intentionally out of scope.
+- Unit 39: Audit UI Foundation is implemented for the initial STAFF_USER and MATCH_REPORT scope. It provides only entity-scoped audit surfaces: report-review nested history and an admin-only staff Sheet; no global browser, export, rollback, or unaudited-module coverage was added. Initial Unit 38 action labels, safe unknown-action/value fallbacks, URL-backed filters/pagination, staff team-name resolution, and lineup-resolved statistics presentation are included. Verification passed: frontend format, format check, lint, build, and `git diff --check`; no approved frontend test foundation exists.
 
 ## In Progress
 

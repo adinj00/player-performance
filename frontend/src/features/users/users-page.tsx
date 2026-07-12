@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useNavigate } from "react-router-dom";
+import { parseAsInteger, parseAsString, useQueryStates } from "nuqs";
 import { routePaths } from "@/app/route-paths";
 import { EmptyState } from "@/components/common/empty-state";
 import { ErrorState } from "@/components/common/error-state";
@@ -37,6 +38,13 @@ import {
   FieldSet,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -68,6 +76,128 @@ import {
   type TeamScopeType,
 } from "@/features/users/types";
 import { isApiError } from "@/lib/api/api-client";
+import {
+  AuditError,
+  AuditFilterBar,
+  AuditHistory,
+  AuditLoading,
+  AuditPagination,
+  getStaffUserAudit,
+} from "@/features/audit";
+
+const staffAuditLabels = {
+  STAFF_INVITATION_CREATED: "Poziv je kreiran",
+  STAFF_INVITATION_REISSUED: "Poziv je ponovo izdat",
+  STAFF_INVITATION_ACCEPTED: "Poziv je prihvaćen",
+  STAFF_PROFILE_UPDATED: "Profil je ažuriran",
+  STAFF_ACCESS_REPLACED: "Pristup je zamijenjen",
+  STAFF_USER_DISABLED: "Korisnik je onemogućen",
+  STAFF_USER_REACTIVATED: "Korisnik je reaktiviran",
+};
+const staffAuditFields = {
+  displayName: "Ime",
+  status: "Status",
+  primaryRole: "Uloga",
+  canVerifyReports: "Može verifikovati izvještaje",
+  canImportData: "Može importovati podatke",
+  canViewMedicalDetails: "Može pregledati medicinske detalje",
+  teamScopeType: "Obim timova",
+  selectedTeamIds: "Odabrane selekcije",
+};
+
+function StaffAuditSheet({
+  staff,
+  onClose,
+  onForbidden,
+  teams,
+}: {
+  staff: StaffUserResponse;
+  onClose: () => void;
+  onForbidden: () => void;
+  teams: Awaited<ReturnType<typeof api.listTeams>>;
+}) {
+  const [filters, setFilters] = useQueryStates({
+    auditAction: parseAsString,
+    auditFrom: parseAsString,
+    auditTo: parseAsString,
+    auditPage: parseAsInteger.withDefault(1),
+  });
+  const audit = useQuery({
+    queryKey: ["staff-user-audit", staff.id, filters],
+    queryFn: () =>
+      getStaffUserAudit(staff.id, {
+        action: filters.auditAction,
+        dateFrom: filters.auditFrom,
+        dateTo: filters.auditTo,
+        page: filters.auditPage,
+      }),
+    retry: false,
+  });
+  useEffect(() => {
+    if (audit.isError && isApiError(audit.error) && audit.error.status === 403)
+      onForbidden();
+  }, [audit.error, audit.isError, onForbidden]);
+  return (
+    <Sheet open onOpenChange={(open) => !open && onClose()}>
+      <SheetContent className="w-full overflow-x-hidden data-[side=right]:sm:max-w-xl">
+        <SheetHeader>
+          <SheetTitle>Historija promjena korisnika</SheetTitle>
+          <SheetDescription>
+            Trenutno stanje: {staff.displayName} · {statusLabels[staff.status]}
+          </SheetDescription>
+        </SheetHeader>
+        <div className="flex min-w-0 flex-col gap-4 overflow-y-auto px-4 pb-4">
+          <AuditFilterBar
+            actions={staffAuditLabels}
+            value={{
+              action: filters.auditAction,
+              dateFrom: filters.auditFrom,
+              dateTo: filters.auditTo,
+            }}
+            onChange={(next) =>
+              void setFilters({
+                auditAction: next.action,
+                auditFrom: next.dateFrom,
+                auditTo: next.dateTo,
+                auditPage: 1,
+              })
+            }
+            compact
+          />
+          {audit.isLoading ? (
+            <AuditLoading />
+          ) : audit.isError ? (
+            <AuditError retry={() => void audit.refetch()} />
+          ) : (
+            <>
+              <AuditHistory
+                data={audit.data}
+                labels={staffAuditLabels}
+                fields={staffAuditFields}
+                expectedEntityType="STAFF_USER"
+                formatValue={(key, value) =>
+                  key === "selectedTeamIds" && Array.isArray(value)
+                    ? value
+                        .map(
+                          (id) =>
+                            teams.find((team) => team.id === id)?.name ??
+                            `Nepoznata selekcija (${String(id)})`,
+                        )
+                        .join(", ") || "Nije postavljeno"
+                    : undefined
+                }
+              />
+              <AuditPagination
+                data={audit.data!}
+                onPage={(page) => void setFilters({ auditPage: page })}
+              />
+            </>
+          )}
+        </div>
+      </SheetContent>
+    </Sheet>
+  );
+}
 
 const roles = Object.keys(roleLabels) as StaffRole[];
 const schema = z
@@ -255,7 +385,7 @@ function AccessFields({
   );
 }
 export function UsersPage() {
-  const { user, isLoading: sessionLoading } = useSession();
+  const { user, isLoading: sessionLoading, refetchSession } = useSession();
   const navigate = useNavigate();
   const qc = useQueryClient();
   const [filters, setFilters] = useState({
@@ -264,6 +394,13 @@ export function UsersPage() {
     status: null as string | null,
     scope: null as string | null,
     team: null as string | null,
+  });
+  const [auditState, setAuditState] = useQueryStates({
+    auditUser: parseAsString,
+    auditAction: parseAsString,
+    auditFrom: parseAsString,
+    auditTo: parseAsString,
+    auditPage: parseAsInteger.withDefault(1),
   });
   const updateFilters = (updates: Partial<typeof filters>) => {
     setFilters((current) => ({ ...current, ...updates }));
@@ -302,6 +439,9 @@ export function UsersPage() {
     kind: "disable" | "reactivate" | "reissue";
     staff: StaffUserResponse;
   } | null>(null);
+  const auditStaff =
+    staff.data?.find((candidate) => candidate.id === auditState.auditUser) ??
+    null;
 
   useEffect(() => {
     if (!isSetupLinkCopied) {
@@ -315,7 +455,10 @@ export function UsersPage() {
     return () => window.clearTimeout(timeoutId);
   }, [isSetupLinkCopied]);
   const invalidate = async () => {
-    await qc.invalidateQueries({ queryKey: ["users"] });
+    await Promise.all([
+      qc.invalidateQueries({ queryKey: ["users"] }),
+      qc.invalidateQueries({ queryKey: ["staff-user-audit"] }),
+    ]);
   };
   const create = useMutation({
     mutationFn: api.createInvitation,
@@ -501,6 +644,19 @@ export function UsersPage() {
                           <DropdownMenuItem onClick={() => setEditing(s)}>
                             Uredi
                           </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() =>
+                              void setAuditState({
+                                auditUser: s.id,
+                                auditAction: null,
+                                auditFrom: null,
+                                auditTo: null,
+                                auditPage: 1,
+                              })
+                            }
+                          >
+                            Historija promjena
+                          </DropdownMenuItem>
                           {s.status === "INVITED" ? (
                             <DropdownMenuItem
                               onClick={() =>
@@ -545,6 +701,31 @@ export function UsersPage() {
           error={create.error ? message(create.error) : null}
           onClose={() => setInvite(false)}
           onSubmit={(v) => create.mutate(v)}
+        />
+      ) : null}
+      {auditStaff ? (
+        <StaffAuditSheet
+          staff={auditStaff}
+          onClose={() =>
+            void setAuditState({
+              auditUser: null,
+              auditAction: null,
+              auditFrom: null,
+              auditTo: null,
+              auditPage: 1,
+            })
+          }
+          onForbidden={() => {
+            void setAuditState({
+              auditUser: null,
+              auditAction: null,
+              auditFrom: null,
+              auditTo: null,
+              auditPage: 1,
+            });
+            void refetchSession();
+          }}
+          teams={teams.data ?? []}
         />
       ) : null}
       {editing ? (
