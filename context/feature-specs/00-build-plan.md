@@ -259,9 +259,9 @@ Dependencies: Unit 20, Unit 23, Unit 32, Unit 33.
 
 ### Unit 39: Audit UI Foundation
 
-Add audit history display for authorized users on relevant detail pages, starting with match reports and user/account changes.
+Add entity-specific, authorized audit history UI: a paginated `Historija promjena` view inside match report review and an admin-only staff-user audit Sheet, with semantic before/after rendering, action/date filters, safe unknown-value handling, and no global audit browser.
 
-Dependencies: Unit 19, Unit 38.
+Dependencies: Unit 24, Unit 37, Unit 38.
 
 ## Media and File Storage
 
@@ -381,8 +381,8 @@ Dependencies: Unit 40, Unit 53.
 
 ## Next Immediate Unit
 
-The next implementation unit after Unit 37 should be:
+The next implementation unit after Unit 38 should be:
 
-**Unit 38: Audit Backend Foundation**
+**Unit 39: Audit UI Foundation**
 
-Reason: staff access/account lifecycle, match-report workflow, manual statistics entry, and the complete visible review flow now exist. The next dependency-safe step is to make those important mutations durably auditable through append-only semantic records committed atomically with the business transaction, and to expose authorized report/user history queries before Unit 39 renders audit history in the UI.
+Reason: append-only semantic audit records and authorized report/user history endpoints now exist. The next dependency-safe step is to render those histories where authorized staff already work: inside match report review and staff administration. This keeps audit context entity-specific and understandable before media/file-storage work begins in Unit 40.
