@@ -267,7 +267,7 @@ Dependencies: Unit 24, Unit 37, Unit 38.
 
 ### Unit 40: File Storage Abstraction
 
-Add Application-layer file storage abstraction, local development adapter, storage metadata model, and safe upload configuration without production provider lock-in.
+Add provider-neutral Application file-storage contracts, opaque storage keys, streaming local-development storage, persistent `StoredFile` metadata, safe size/path/configuration rules, and compensation support without public file endpoints or production provider lock-in.
 
 Dependencies: Unit 12, Unit 13, Unit 20.
 
@@ -381,8 +381,8 @@ Dependencies: Unit 40, Unit 53.
 
 ## Next Immediate Unit
 
-The next implementation unit after Unit 38 should be:
+The next implementation unit after Unit 39 should be:
 
-**Unit 39: Audit UI Foundation**
+**Unit 40: File Storage Abstraction**
 
-Reason: append-only semantic audit records and authorized report/user history endpoints now exist. The next dependency-safe step is to render those histories where authorized staff already work: inside match report review and staff administration. This keeps audit context entity-specific and understandable before media/file-storage work begins in Unit 40.
+Reason: the core staff, match-report, statistics, and audit workflows are now complete, and the next planned modules require durable large-file handling. The dependency-safe next step is to establish provider-neutral storage contracts, safe local-development streaming, persistent metadata, configuration validation, and compensation behavior before Unit 41 introduces media assets and authorized media operations.
