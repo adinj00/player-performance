@@ -38,6 +38,9 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options)
     public DbSet<MediaItem> MediaItems => Set<MediaItem>();
     public DbSet<MediaAsset> MediaAssets => Set<MediaAsset>();
     public DbSet<ExternalMediaReference> ExternalMediaReferences => Set<ExternalMediaReference>();
+    public DbSet<MediaMatchLink> MediaMatchLinks => Set<MediaMatchLink>();
+    public DbSet<MediaMatchReportLink> MediaMatchReportLinks => Set<MediaMatchReportLink>();
+    public DbSet<MediaPlayerLink> MediaPlayerLinks => Set<MediaPlayerLink>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

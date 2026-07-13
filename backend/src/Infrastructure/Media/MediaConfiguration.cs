@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using PlayerPerformance.Domain.Files;
 using PlayerPerformance.Domain.Media;
 using PlayerPerformance.Domain.Teams;
+using PlayerPerformance.Domain.Matches;
+using PlayerPerformance.Domain.Players;
 using PlayerPerformance.Infrastructure.Identity;
 namespace PlayerPerformance.Infrastructure.Media;
 
@@ -59,5 +61,49 @@ internal sealed class ExternalMediaReferenceConfiguration : IEntityTypeConfigura
         b.Property(x => x.ProviderLabel).HasColumnName("provider_label").HasMaxLength(ExternalMediaReference.ProviderLabelMaxLength);
         b.HasIndex(x => x.MediaItemId).IsUnique();
         b.HasOne<MediaItem>().WithOne().HasForeignKey<ExternalMediaReference>(x => x.MediaItemId).OnDelete(DeleteBehavior.Restrict);
+    }
+}
+
+internal abstract class MediaLinkConfiguration<TLink> : IEntityTypeConfiguration<TLink> where TLink : MediaLink
+{
+    public virtual void Configure(EntityTypeBuilder<TLink> b)
+    {
+        b.HasKey(x => x.Id);
+        b.Property(x => x.MediaItemId).HasColumnName("media_item_id");
+        b.Property(x => x.LinkedByUserId).HasColumnName("linked_by_user_id");
+        b.Property(x => x.LinkedAtUtc).HasColumnName("linked_at_utc");
+        b.Property(x => x.UnlinkedByUserId).HasColumnName("unlinked_by_user_id");
+        b.Property(x => x.UnlinkedAtUtc).HasColumnName("unlinked_at_utc");
+        b.HasOne<MediaItem>().WithMany().HasForeignKey(x => x.MediaItemId).OnDelete(DeleteBehavior.Restrict);
+        b.HasOne<ApplicationUser>().WithMany().HasForeignKey(x => x.LinkedByUserId).OnDelete(DeleteBehavior.Restrict);
+        b.HasOne<ApplicationUser>().WithMany().HasForeignKey(x => x.UnlinkedByUserId).OnDelete(DeleteBehavior.Restrict);
+    }
+}
+
+internal sealed class MediaMatchLinkConfiguration : MediaLinkConfiguration<MediaMatchLink>
+{
+    public override void Configure(EntityTypeBuilder<MediaMatchLink> b)
+    {
+        base.Configure(b); b.ToTable("media_match_links"); b.Property(x => x.MatchId).HasColumnName("match_id");
+        b.HasIndex(x => new { x.MatchId, x.UnlinkedAtUtc }); b.HasIndex(x => new { x.MediaItemId, x.MatchId, x.UnlinkedAtUtc }).IsUnique().HasFilter("unlinked_at_utc IS NULL");
+        b.HasOne<Match>().WithMany().HasForeignKey(x => x.MatchId).OnDelete(DeleteBehavior.Restrict);
+    }
+}
+internal sealed class MediaMatchReportLinkConfiguration : MediaLinkConfiguration<MediaMatchReportLink>
+{
+    public override void Configure(EntityTypeBuilder<MediaMatchReportLink> b)
+    {
+        base.Configure(b); b.ToTable("media_match_report_links"); b.Property(x => x.MatchReportId).HasColumnName("match_report_id");
+        b.HasIndex(x => new { x.MatchReportId, x.UnlinkedAtUtc }); b.HasIndex(x => new { x.MediaItemId, x.MatchReportId, x.UnlinkedAtUtc }).IsUnique().HasFilter("unlinked_at_utc IS NULL");
+        b.HasOne<MatchReport>().WithMany().HasForeignKey(x => x.MatchReportId).OnDelete(DeleteBehavior.Restrict);
+    }
+}
+internal sealed class MediaPlayerLinkConfiguration : MediaLinkConfiguration<MediaPlayerLink>
+{
+    public override void Configure(EntityTypeBuilder<MediaPlayerLink> b)
+    {
+        base.Configure(b); b.ToTable("media_player_links"); b.Property(x => x.PlayerId).HasColumnName("player_id");
+        b.HasIndex(x => new { x.PlayerId, x.UnlinkedAtUtc }); b.HasIndex(x => new { x.MediaItemId, x.PlayerId, x.UnlinkedAtUtc }).IsUnique().HasFilter("unlinked_at_utc IS NULL");
+        b.HasOne<Player>().WithMany().HasForeignKey(x => x.PlayerId).OnDelete(DeleteBehavior.Restrict);
     }
 }
