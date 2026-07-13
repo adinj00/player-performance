@@ -14,6 +14,8 @@ This file intentionally starts lightweight. It should become more detailed as bu
 
 ## In Progress
 
+- Unit 42 media UI foundation is blocked pending completion of its Unit 41 backend dependency. The current backend has no streamed uploaded-media creation or authorized content endpoint, no explicit match/report/player link persistence or mutation endpoints, and no link summaries/filter contracts. Consequently, the required capabilities and authoritative link-candidate queries cannot be implemented from a shared Unit 41 upload allowlist or link/workflow model without duplicating or inventing those semantics. No Unit 42 UI shell, unsupported client contract, migration, or simulated attachment behavior was added. Resume Unit 42 after Unit 41 supplies the required uploaded-media, content, explicit-link, and workflow-lock foundations; then implement the two Unit 42 read endpoints, `/media`, and match/player attachment surfaces against those real contracts.
+
 - Unit 41 media backend foundation:
   - Added the shared `MediaItem` aggregate with immutable team/source type, `UPLOADED_FILE`/`EXTERNAL_REFERENCE` source types, `VIDEO`/`IMAGE`/`DOCUMENT`/`OTHER` categories, bounded shared metadata, and explicit active/archive lifecycle metadata.
   - Added one-to-one `MediaAsset`/`ExternalMediaReference` persistence model, safe HTTP(S)-only external URL validation (including credential rejection), team-scoped catalog/detail reads, external-reference creation, metadata correction, and administrator-only archive/restore operations.
@@ -32,6 +34,8 @@ This file intentionally starts lightweight. It should become more detailed as bu
   - Intentionally deferred: audit scopes for imports, medical, media, players, match metadata/lineups, GPS, login-email recovery, exports, and notifications; no global audit browser or mutation endpoints were added.
 
 ## Completed
+
+- Unit 41 implementation update (pending its focused integration suite): streamed uploaded-media creation and authenticated content streaming are implemented through Unit 40; explicit match, report, and player link lifecycle records, workflow-aware mutation guards, media audit history, and link candidates are implemented. Backend regression verification passed with 87 unit and 29 integration tests; the generated media-link migration is present. The Unit 42 frontend remains intentionally removed until Unit 41’s focused endpoint coverage and final database update are completed.
 
 - Unit 40 completed:
   - Added `IFileStorage`, opaque server-side key generation/validation, filename normalization, safe storage result categories, and explicit compensation-delete support. Upload streams remain caller-owned; read streams are caller-disposed.
