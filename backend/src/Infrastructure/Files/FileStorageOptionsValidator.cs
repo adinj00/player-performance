@@ -35,6 +35,11 @@ public sealed class FileStorageOptionsValidator(IHostEnvironment environment) : 
         try
         {
             var resolvedRoot = Path.GetFullPath(options.LocalRootPath, environment.ContentRootPath);
+            var webRoot = Path.GetFullPath("wwwroot", environment.ContentRootPath);
+            if (IsSameOrChildPath(resolvedRoot, webRoot) || IsFrontendPublicDirectory(resolvedRoot))
+            {
+                return ValidateOptionsResult.Fail("The local file storage root cannot be a publicly served directory.");
+            }
             Directory.CreateDirectory(resolvedRoot);
             options.ResolvedLocalRootPath = resolvedRoot.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
             return ValidateOptionsResult.Success;
@@ -43,5 +48,19 @@ public sealed class FileStorageOptionsValidator(IHostEnvironment environment) : 
         {
             return ValidateOptionsResult.Fail("The local file storage root cannot be created or accessed.");
         }
+    }
+
+    private static bool IsSameOrChildPath(string candidate, string root)
+    {
+        var relative = Path.GetRelativePath(root, candidate);
+        return relative == "." || (!Path.IsPathRooted(relative) && relative != ".." && !relative.StartsWith($"..{Path.DirectorySeparatorChar}", StringComparison.Ordinal));
+    }
+
+    private static bool IsFrontendPublicDirectory(string path)
+    {
+        var segments = path.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        return segments.Length >= 2
+            && string.Equals(segments[^2], "frontend", StringComparison.OrdinalIgnoreCase)
+            && string.Equals(segments[^1], "public", StringComparison.OrdinalIgnoreCase);
     }
 }

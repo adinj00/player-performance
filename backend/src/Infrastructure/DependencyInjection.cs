@@ -23,6 +23,8 @@ using PlayerPerformance.Application.Auditing;
 using PlayerPerformance.Infrastructure.Auditing;
 using PlayerPerformance.Application.Files;
 using PlayerPerformance.Infrastructure.Files;
+using PlayerPerformance.Application.Media;
+using PlayerPerformance.Infrastructure.Media;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 
@@ -50,6 +52,8 @@ public static class DependencyInjection
             .Bind(configuration.GetSection(FileStorageOptions.SectionName))
             .ValidateOnStart();
         services.AddSingleton<IFileStorage, LocalFileStorage>();
+        services.AddSingleton<IValidateOptions<MediaOptions>, MediaOptionsValidator>();
+        services.AddOptions<MediaOptions>().Bind(configuration.GetSection(MediaOptions.SectionName)).ValidateOnStart();
 
         services
             .AddOptions<FirstAdminBootstrapOptions>()
@@ -74,6 +78,7 @@ public static class DependencyInjection
         services.AddScoped<IAuditWriter>(provider => provider.GetRequiredService<AuditStore>());
         services.AddScoped<IAuditHistoryRepository>(provider => provider.GetRequiredService<AuditStore>());
         services.AddScoped<IStaffUsersService, IdentityStaffUsersService>();
+        services.AddScoped<IMediaService, MediaService>();
         services.AddScoped<TeamStartupInitializer>();
 
         services.AddDbContext<AppDbContext>(options =>

@@ -258,7 +258,7 @@ PostgreSQL is the relational source of truth for structured data:
 - Matches, lineups, substitutions, appearances, and reports.
 - Player, goalkeeper, team, GPS, and availability metrics.
 - Import jobs, validation results, mapping metadata, and import history.
-- Media metadata and storage keys.
+- Media metadata. `StoredFile` holds storage metadata only; owning modules reference it explicitly. Media uses explicit match, report, and player link records rather than generic linked-entity columns, and future imports will reference original stored files through explicit foreign keys.
 - Audit logs.
 - System settings.
 

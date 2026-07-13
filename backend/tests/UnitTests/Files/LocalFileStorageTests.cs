@@ -61,6 +61,33 @@ public sealed class LocalFileStorageTests : IDisposable
         Assert.True(second.IsSuccess);
     }
 
+    [Fact]
+    public async Task Write_ShouldRejectDeclaredOversizeAndCancellationWithoutCreatingFinalObject()
+    {
+        var storage = CreateStorage(3);
+        await using var oversized = new MemoryStream([1, 2, 3, 4]);
+        using var cancelled = new CancellationTokenSource();
+        cancelled.Cancel();
+
+        var early = await storage.WriteAsync(new FileStorageWriteRequest(oversized, "objects/2026/07/early", 4), CancellationToken.None);
+        var cancellation = await storage.WriteAsync(new FileStorageWriteRequest(new MemoryStream([1]), "objects/2026/07/cancelled", 1), cancelled.Token);
+
+        Assert.Equal("file_storage.objecttoolarge", early.Error.Code);
+        Assert.Equal("file_storage.operationcancelled", cancellation.Error.Code);
+        Assert.False(File.Exists(Path.Combine(rootPath, "objects", "2026", "07", "early")));
+        Assert.False(File.Exists(Path.Combine(rootPath, "objects", "2026", "07", "cancelled")));
+        Assert.Empty(Directory.Exists(Path.Combine(rootPath, ".temporary")) ? [] : Directory.EnumerateFiles(Path.Combine(rootPath, ".temporary"), "*", SearchOption.AllDirectories));
+    }
+
+    [Fact]
+    public async Task OpenRead_ShouldReturnSafeMissingObjectFailure()
+    {
+        var result = await CreateStorage(10).OpenReadAsync("objects/2026/07/missing", CancellationToken.None);
+
+        Assert.True(result.IsFailure);
+        Assert.Equal("file_storage.objectnotfound", result.Error.Code);
+    }
+
     public void Dispose()
     {
         if (Directory.Exists(rootPath))

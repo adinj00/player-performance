@@ -9,6 +9,7 @@ using PlayerPerformance.Domain.Players;
 using PlayerPerformance.Domain.Matches;
 using PlayerPerformance.Domain.Auditing;
 using PlayerPerformance.Domain.Files;
+using PlayerPerformance.Domain.Media;
 
 namespace PlayerPerformance.Infrastructure.Persistence;
 
@@ -34,6 +35,9 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options)
     public DbSet<GoalkeeperMatchStats> GoalkeeperMatchStats => Set<GoalkeeperMatchStats>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
     public DbSet<StoredFile> StoredFiles => Set<StoredFile>();
+    public DbSet<MediaItem> MediaItems => Set<MediaItem>();
+    public DbSet<MediaAsset> MediaAssets => Set<MediaAsset>();
+    public DbSet<ExternalMediaReference> ExternalMediaReferences => Set<ExternalMediaReference>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

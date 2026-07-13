@@ -14,6 +14,14 @@ This file intentionally starts lightweight. It should become more detailed as bu
 
 ## In Progress
 
+- Unit 41 media backend foundation:
+  - Added the shared `MediaItem` aggregate with immutable team/source type, `UPLOADED_FILE`/`EXTERNAL_REFERENCE` source types, `VIDEO`/`IMAGE`/`DOCUMENT`/`OTHER` categories, bounded shared metadata, and explicit active/archive lifecycle metadata.
+  - Added one-to-one `MediaAsset`/`ExternalMediaReference` persistence model, safe HTTP(S)-only external URL validation (including credential rejection), team-scoped catalog/detail reads, external-reference creation, metadata correction, and administrator-only archive/restore operations.
+  - Added `MEDIA_ITEM` audit entity support and created/updated/archived/restored semantic actions. Audit payloads intentionally contain only safe metadata and never storage keys or raw file data.
+  - Added `Media__MaxUploadSizeBytes` validation against Unit 40 storage limits (with a safe 512 MiB default) and migration `20260713063758_AddMediaBackendFoundation` generated through `dotnet ef`.
+  - Architecture documentation now explicitly describes `StoredFile` as storage metadata only, with owning-module foreign keys instead of generic linked-entity columns.
+  - Remaining before completion: streamed multipart asset creation/content delivery, explicit match/report/player link histories and workflow locks, media audit-history endpoint, focused tests, database update and full formatting/test verification.
+
 - Unit 38 audit backend foundation:
   - Added the append-only `AuditLog` domain entity, centralized stable `STAFF_USER` and `MATCH_REPORT` entity types, and initial staff/report/statistics action codes.
   - Added `audit_logs` EF mapping with PostgreSQL `jsonb` payload columns, non-cascading actor FK, and entity/actor/action history indexes. The migration is not yet generated because the local API process is locking the API build outputs needed by EF tooling.
@@ -30,7 +38,8 @@ This file intentionally starts lightweight. It should become more detailed as bu
   - Added the Development-only `LocalFileStorage` adapter with contained path resolution, asynchronous streaming to internal temporary files, actual-byte counting, zero/oversize rejection, no overwrite, cleanup, idempotent delete, and no paths/URLs exposed through the contract. The isolated `Testing` environment is permitted only for the test host's temporary storage root.
   - Added metadata-only `StoredFile` persistence with archive metadata, strict user foreign keys, unique storage keys, positive-size/archive-consistency constraints, and EF migration `20260712232513_AddFileStorageAbstraction`; `dotnet ef database update` applied it successfully to local PostgreSQL.
   - Added safe Local development configuration examples and Git ignore protection. No public storage endpoints, static-file exposure, media/import records, provider SDKs, or frontend changes were introduced.
-  - Verification passed: whitespace formatting and verification, zero-warning solution build, 79 unit tests, 29 integration tests, and `git diff --check`. Storage tests use unique system temporary roots; the test factory configuration is per-host to avoid process-environment races.
+  - Unit 40 was re-audited against its feature specification on 2026-07-13. Added configuration protection against roots under `wwwroot` or `frontend/public`, plus focused tests for declared-size rejection, cancellation cleanup, missing-object reads, and Development/Production/public-root options validation.
+  - Verification passed: whitespace formatting and verification, zero-warning solution build, 87 unit tests, 29 integration tests, and `git diff --check`. Storage tests use unique system temporary roots; the test factory configuration is per-host to avoid process-environment races. Local filesystem symlink traversal remains platform-dependent and is not intentionally supported; the adapter never creates symlinks and retains normalized-path containment checks.
 
 - Unit 28 completed:
   - Added the persistent `PlayerTeamAssignment` model with immutable player/team identity, required `DateOnly` start date, optional inclusive `DateOnly` end date, and UTC created/updated timestamps. Current/upcoming/past timing state is derived from the approved clock and is never persisted.
