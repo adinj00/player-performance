@@ -279,9 +279,9 @@ Dependencies: Unit 23, Unit 28, Unit 32, Unit 38, Unit 40.
 
 ### Unit 42: Media UI Foundation
 
-Add media library, upload/reference dialogs, entity attachment UI, and safe empty/error states.
+Add the team-scoped `Medijateka`, runtime upload capabilities, streamed upload progress, uploaded/external media detail and lifecycle UI, authoritative link-candidate search, and explicit match/report/player attachment surfaces, including real match and player media sections.
 
-Dependencies: Unit 19, Unit 41.
+Dependencies: Unit 29, Unit 34, Unit 37, Unit 41.
 
 ## Imports and GPS Data
 
@@ -381,8 +381,8 @@ Dependencies: Unit 40, Unit 53.
 
 ## Next Immediate Unit
 
-The next implementation unit after Unit 40 should be:
+The next implementation unit after Unit 41 should be:
 
-**Unit 41: Media Backend Foundation**
+**Unit 42: Media UI Foundation**
 
-Reason: provider-neutral storage, safe local streaming, stored-file metadata, and compensation behavior now exist. The next dependency-safe step is to introduce the authorized media catalog, uploaded and external source records, explicit links to existing football entities, lifecycle rules, and secure content access before Unit 42 builds the media library and attachment UI.
+Reason: the backend now provides a secure team-scoped media catalog, streamed upload/content operations, explicit match/report/player links, lifecycle controls, and audit-ready mutations. The next dependency-safe step is to build the `Medijateka`, upload/external-reference dialogs, media detail and preview surfaces, and contextual match/player attachment workflows before import jobs begin using the same file-storage foundation in Unit 43.
