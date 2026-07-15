@@ -287,9 +287,9 @@ Dependencies: Unit 29, Unit 34, Unit 37, Unit 41.
 
 ### Unit 43: Import Workflow Backend Foundation
 
-Add import job model, upload metadata, statuses, preview/validation/confirmation flow skeleton, and audit-ready original file retention.
+Add persistent team-scoped import jobs, streamed CSV/XLSX source retention, backend-owned statuses and allowed actions, preview/validation result persistence, processor registries, safe processing leases, explicit confirmation contracts, cancellation, source download, and semantic audit coverage without adding parser packages or vendor mappings.
 
-Dependencies: Unit 38, Unit 40.
+Dependencies: Unit 23, Unit 30, Unit 38, Unit 40.
 
 ### Unit 44: Import UI Foundation
 
@@ -381,8 +381,8 @@ Dependencies: Unit 40, Unit 53.
 
 ## Next Immediate Unit
 
-The next implementation unit after Unit 41 should be:
+The next implementation unit after Unit 42 should be:
 
-**Unit 42: Media UI Foundation**
+**Unit 43: Import Workflow Backend Foundation**
 
-Reason: the backend now provides a secure team-scoped media catalog, streamed upload/content operations, explicit match/report/player links, lifecycle controls, and audit-ready mutations. The next dependency-safe step is to build the `Medijateka`, upload/external-reference dialogs, media detail and preview surfaces, and contextual match/player attachment workflows before import jobs begin using the same file-storage foundation in Unit 43.
+Reason: media and import source files now share a secure provider-neutral storage foundation, while the application already has team-scope authorization and semantic audit infrastructure. The next dependency-safe step is to establish persistent import jobs, original-file retention, backend-owned workflow states, processor contracts, preview/validation persistence, explicit confirmation safety, and cancellation before Unit 44 builds the import screens and Unit 45 introduces real CSV/XLSX readers.
