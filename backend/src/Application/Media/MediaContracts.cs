@@ -6,7 +6,7 @@ namespace PlayerPerformance.Application.Media;
 public sealed record CreateExternalMediaReferenceRequest(Guid TeamId, MediaCategory Category, string? Title, string? Description, string? Url, string? ProviderLabel);
 public sealed record UpdateMediaRequest(MediaCategory Category, string? Title, string? Description, string? Url, string? ProviderLabel);
 public sealed record CreateMediaAssetRequest(Guid TeamId, MediaCategory Category, string? Title, string? Description, string? OriginalFileName, string? ContentType, long? DeclaredLength, Stream Content);
-public sealed record MediaListQuery(Guid? TeamId = null, MediaSourceType? SourceType = null, MediaCategory? Category = null, string? Search = null, bool IncludeArchived = false, int Page = 1, int PageSize = 25);
+public sealed record MediaListQuery(Guid? TeamId = null, MediaSourceType? SourceType = null, MediaCategory? Category = null, string? Search = null, bool IncludeArchived = false, int Page = 1, int PageSize = 25, MediaLinkTargetType? LinkedTargetType = null, Guid? LinkedTargetId = null);
 public sealed record MediaSourceResponse(MediaSourceType SourceType, string? OriginalFileName, string? ContentType, long? SizeBytes, string? Url, string? ProviderLabel);
 public sealed record MediaResponse(Guid Id, Guid TeamId, string TeamName, MediaSourceType SourceType, MediaCategory Category, string Title, string? Description, MediaSourceResponse Source, Guid CreatedByUserId, DateTime CreatedAtUtc, DateTime UpdatedAtUtc, bool IsArchived, DateTime? ArchivedAtUtc);
 public sealed record PagedMediaResponse(IReadOnlyList<MediaResponse> Items, int Page, int PageSize, int TotalCount, int TotalPages);

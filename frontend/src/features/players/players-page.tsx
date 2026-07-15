@@ -53,6 +53,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useSession } from "@/features/auth/hooks/use-session";
+import { MediaLinksSection } from "@/features/media";
 import { settingsApi } from "@/features/settings/api";
 import { isApiError } from "@/lib/api/api-client";
 import { formatDate } from "@/lib/date-format";
@@ -709,6 +710,7 @@ export function PlayerDetailPage() {
           </div>
         )}
       </section>
+      <MediaLinksSection targetId={playerId} targetType="PLAYER" />
       {add && (
         <AssignmentDialog
           playerId={playerId}

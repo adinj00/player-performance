@@ -28,6 +28,8 @@ internal sealed class MediaService(AppDbContext db, ICurrentUserAccess current, 
             return Result<PagedMediaResponse>.Failure(Forbidden);
         if (q.Page < 1 || q.PageSize is < 1 or > 100 || q.Search?.Length > 200)
             return Result<PagedMediaResponse>.Failure(Validation);
+        if (q.LinkedTargetType.HasValue != q.LinkedTargetId.HasValue)
+            return Result<PagedMediaResponse>.Failure(Validation);
         if (q.TeamId.HasValue && !await teamAccess.CanAccessAsync(q.TeamId.Value, ct))
             return Result<PagedMediaResponse>.Failure(Forbidden);
         if (q.IncludeArchived && !a.IsAdmin)
@@ -44,6 +46,14 @@ internal sealed class MediaService(AppDbContext db, ICurrentUserAccess current, 
             var z = q.Search.Trim().ToUpper();
             s = s.Where(x => x.Title.ToUpper().Contains(z) || (x.Description != null && x.Description.ToUpper().Contains(z)));
         }
+        if (q.LinkedTargetType.HasValue)
+            s = q.LinkedTargetType.Value switch
+            {
+                MediaLinkTargetType.MATCH => s.Where(x => db.MediaMatchLinks.Any(link => link.MediaItemId == x.Id && link.MatchId == q.LinkedTargetId && link.UnlinkedAtUtc == null)),
+                MediaLinkTargetType.MATCH_REPORT => s.Where(x => db.MediaMatchReportLinks.Any(link => link.MediaItemId == x.Id && link.MatchReportId == q.LinkedTargetId && link.UnlinkedAtUtc == null)),
+                MediaLinkTargetType.PLAYER => s.Where(x => db.MediaPlayerLinks.Any(link => link.MediaItemId == x.Id && link.PlayerId == q.LinkedTargetId && link.UnlinkedAtUtc == null)),
+                _ => s.Where(_ => false)
+            };
         var total = await s.CountAsync(ct);
         var ids = await s.OrderByDescending(x => x.CreatedAtUtc).ThenBy(x => x.Id).Skip((q.Page - 1) * q.PageSize).Take(q.PageSize).Select(x => x.Id).ToListAsync(ct);
         var items = new List<MediaResponse>();
@@ -93,8 +103,23 @@ internal sealed class MediaService(AppDbContext db, ICurrentUserAccess current, 
     public async Task<Result<MediaResponse>> CreateAssetAsync(CreateMediaAssetRequest r, CancellationToken ct)
     {
         var a = await current.GetAsync(ct);
-        if (!CanMutate(a) || !await teamAccess.CanAccessAsync(r.TeamId, ct))
-            return Result<MediaResponse>.Failure(Forbidden);
+        var canMutate = CanMutate(a);
+        var canAccessTeam = await teamAccess.CanAccessAsync(r.TeamId, ct);
+        if (!canMutate || !canAccessTeam)
+        {
+            logger.LogWarning(
+                "Media asset upload denied for user {UserId}. Active: {IsActive}; access profile: {HasAccessProfile}; role: {PrimaryRole}; administrator: {IsAdmin}; team: {TeamId}; team access: {CanAccessTeam}.",
+                a.UserId,
+                a.IsActive,
+                a.HasAccessProfile,
+                a.PrimaryRole,
+                a.IsAdmin,
+                r.TeamId,
+                canAccessTeam);
+            return Result<MediaResponse>.Failure(!canMutate
+                ? new Error("forbidden", "Only administrators and data operators can upload media.")
+                : new Error("forbidden", "You do not have access to the selected team."));
+        }
         var normalized = FileMetadataValidation.NormalizeOriginalFileName(r.OriginalFileName);
         if (normalized.IsFailure || r.Content is null || r.DeclaredLength is <= 0 || r.DeclaredLength > options.Value.MaxUploadSizeBytes || !FileMetadataValidation.IsValidContentType(r.ContentType) || !MediaUploadRules.IsAllowed(r.Category, normalized.IsSuccess ? normalized.Value : string.Empty, r.ContentType ?? string.Empty))
             return Result<MediaResponse>.Failure(Validation);
@@ -265,32 +290,54 @@ internal sealed class MediaService(AppDbContext db, ICurrentUserAccess current, 
             return Result<PagedMediaLinkCandidatesResponse>.Failure(NotFound);
         if (item.IsArchived || !CanMutate(a) || !await teamAccess.CanAccessAsync(item.TeamId, ct))
             return Result<PagedMediaLinkCandidatesResponse>.Failure(Forbidden);
-        var items = new List<MediaLinkCandidateResponse>();
-        if (type == MediaLinkTargetType.PLAYER)
-            items = await (from p in db.Players.AsNoTracking() where p.Status != PlayerRecordStatus.ARCHIVED && db.PlayerTeamAssignments.Any(x => x.PlayerId == p.Id && x.TeamId == item.TeamId) && !db.MediaPlayerLinks.Any(x => x.MediaItemId == mediaId && x.PlayerId == p.Id && x.UnlinkedAtUtc == null) orderby p.LastName, p.FirstName select new MediaLinkCandidateResponse(p.Id, type, p.FirstName + " " + p.LastName, item.TeamId.ToString(), p.Status.ToString())).ToListAsync(ct);
+        var term = search?.Trim().ToUpper();
+        IReadOnlyList<MediaLinkCandidateResponse>? items = type switch
+        {
+            MediaLinkTargetType.MATCH => (await (from match in db.Matches.AsNoTracking()
+                                                 join opponent in db.Opponents.AsNoTracking() on match.OpponentId equals opponent.Id
+                                                 where match.TeamId == item.TeamId && !match.IsArchived && match.Status != MatchStatus.CANCELLED
+                                                       && !db.MediaMatchLinks.Any(x => x.MediaItemId == mediaId && x.MatchId == match.Id && x.UnlinkedAtUtc == null)
+                                                       && !db.MatchReports.Any(x => x.MatchId == match.Id && (x.Status == MatchReportStatus.READY_FOR_REVIEW || x.Status == MatchReportStatus.VERIFIED || x.Status == MatchReportStatus.ARCHIVED))
+                                                       && (string.IsNullOrEmpty(term) || opponent.Name.ToUpper().Contains(term) || match.Round != null && match.Round.ToUpper().Contains(term))
+                                                 orderby match.KickoffAtUtc descending
+                                                 select new { match.Id, OpponentName = opponent.Name, match.KickoffAtUtc, match.Round, match.Status }).ToListAsync(ct))
+                .Select(candidate => new MediaLinkCandidateResponse(candidate.Id, type, candidate.OpponentName, candidate.KickoffAtUtc.ToString("dd.MM.yyyy.") + (candidate.Round == null ? string.Empty : " · " + candidate.Round), candidate.Status.ToString()))
+                .ToList(),
+            MediaLinkTargetType.MATCH_REPORT => (await (from report in db.MatchReports.AsNoTracking()
+                                                        join match in db.Matches.AsNoTracking() on report.MatchId equals match.Id
+                                                        join opponent in db.Opponents.AsNoTracking() on match.OpponentId equals opponent.Id
+                                                        where match.TeamId == item.TeamId && !match.IsArchived && (report.Status == MatchReportStatus.DRAFT || report.Status == MatchReportStatus.NEEDS_CORRECTION)
+                                                              && !db.MediaMatchReportLinks.Any(x => x.MediaItemId == mediaId && x.MatchReportId == report.Id && x.UnlinkedAtUtc == null)
+                                                              && (string.IsNullOrEmpty(term) || opponent.Name.ToUpper().Contains(term) || match.Round != null && match.Round.ToUpper().Contains(term))
+                                                        orderby match.KickoffAtUtc descending
+                                                        select new { report.Id, OpponentName = opponent.Name, match.KickoffAtUtc, match.Round, report.Status }).ToListAsync(ct))
+                .Select(candidate => new MediaLinkCandidateResponse(candidate.Id, type, candidate.OpponentName, candidate.KickoffAtUtc.ToString("dd.MM.yyyy.") + (candidate.Round == null ? string.Empty : " · " + candidate.Round), candidate.Status.ToString()))
+                .ToList(),
+            MediaLinkTargetType.PLAYER => await (from player in db.Players.AsNoTracking()
+                                                 where player.Status != PlayerRecordStatus.ARCHIVED && db.PlayerTeamAssignments.Any(x => x.PlayerId == player.Id && x.TeamId == item.TeamId)
+                                                       && !db.MediaPlayerLinks.Any(x => x.MediaItemId == mediaId && x.PlayerId == player.Id && x.UnlinkedAtUtc == null)
+                                                       && (string.IsNullOrEmpty(term) || player.FirstName.ToUpper().Contains(term) || player.LastName.ToUpper().Contains(term) || player.PreferredName != null && player.PreferredName.ToUpper().Contains(term))
+                                                 orderby player.LastName, player.FirstName
+                                                 select new MediaLinkCandidateResponse(player.Id, type, player.FirstName + " " + player.LastName, string.Empty, player.Status.ToString())).ToListAsync(ct),
+            _ => null
+        };
+        if (items is null)
+            return Result<PagedMediaLinkCandidatesResponse>.Failure(Validation);
         return Result<PagedMediaLinkCandidatesResponse>.Success(new(items.Skip((page - 1) * pageSize).Take(pageSize).ToList(), page, pageSize, items.Count, (int)Math.Ceiling(items.Count / (double)pageSize)));
     }
     private async Task<MediaResponse?> ReadAsync(Guid id, CancellationToken ct)
     {
-        var row = await (from m in db.MediaItems.AsNoTracking()
-                         join t in db.Teams.AsNoTracking() on m.TeamId equals t.Id
-                         join asset0 in db.MediaAssets.AsNoTracking() on m.Id equals asset0.MediaItemId into assets
-                         from asset in assets.DefaultIfEmpty()
-                         join f0 in db.StoredFiles.AsNoTracking() on asset.StoredFileId equals f0.Id into files
-                         from f in files.DefaultIfEmpty()
-                         join ext0 in db.ExternalMediaReferences.AsNoTracking() on m.Id equals ext0.MediaItemId into exts
-                         from ext in exts.DefaultIfEmpty()
-                         where m.Id == id
-                         select new
-                         {
-                             m,
-                             t,
-                             asset,
-                             f,
-                             ext
-                         }).SingleOrDefaultAsync(ct);
-        if (row is null)
+        var item = await db.MediaItems.AsNoTracking().SingleOrDefaultAsync(item => item.Id == id, ct);
+        if (item is null)
             return null;
-        return new(row.m.Id, row.m.TeamId, row.t.Name, row.m.SourceType, row.m.Category, row.m.Title, row.m.Description, new(row.m.SourceType, row.f == null ? null : row.f.OriginalFileName, row.f == null ? null : row.f.ContentType, row.f == null ? null : row.f.SizeBytes, row.ext == null ? null : row.ext.Url, row.ext == null ? null : row.ext.ProviderLabel), row.m.CreatedByUserId, row.m.CreatedAtUtc, row.m.UpdatedAtUtc, row.m.IsArchived, row.m.ArchivedAtUtc);
+        var teamName = await db.Teams.AsNoTracking().Where(team => team.Id == item.TeamId).Select(team => team.Name).SingleOrDefaultAsync(ct);
+        if (teamName is null)
+            return null;
+        var asset = await db.MediaAssets.AsNoTracking().SingleOrDefaultAsync(value => value.MediaItemId == item.Id, ct);
+        var stored = asset is null
+            ? null
+            : await db.StoredFiles.AsNoTracking().SingleOrDefaultAsync(value => value.Id == asset.StoredFileId, ct);
+        var external = await db.ExternalMediaReferences.AsNoTracking().SingleOrDefaultAsync(value => value.MediaItemId == item.Id, ct);
+        return new(item.Id, item.TeamId, teamName, item.SourceType, item.Category, item.Title, item.Description, new(item.SourceType, stored?.OriginalFileName, stored?.ContentType, stored?.SizeBytes, external?.Url, external?.ProviderLabel), item.CreatedByUserId, item.CreatedAtUtc, item.UpdatedAtUtc, item.IsArchived, item.ArchivedAtUtc);
     }
 }

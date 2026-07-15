@@ -485,7 +485,7 @@ Media must support uploaded files and external references.
 
 Common actions:
 
-- Upload media.
+- Upload media. The match-detail tab uses the visible label `Mediji` (while retaining the `video` URL key for compatibility).
 - Add external link.
 - Filter by type, linked entity, team, and season.
 - Attach media to match, training session, player, import job, or report where relevant.

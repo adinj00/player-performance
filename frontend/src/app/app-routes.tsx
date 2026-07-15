@@ -27,7 +27,7 @@ import { ImportsPage } from "@/pages/imports-page";
 import { MatchesPage } from "@/pages/matches-page";
 import { MatchDetailPage, MatchReportsPage } from "@/features/matches";
 import { MedicalPage } from "@/pages/medical-page";
-import { MediaPage } from "@/pages/media-page";
+import { MediaPage } from "@/features/media";
 import { PlayersPage } from "@/pages/players-page";
 import { PlayerDetailPage } from "@/features/players";
 import { TeamsPage } from "@/pages/teams-page";

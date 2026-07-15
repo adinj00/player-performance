@@ -39,6 +39,7 @@ import { useSession } from "@/features/auth/hooks/use-session";
 import { LineupTab } from "@/features/matches/components/lineup-tab";
 import { StatisticsTab } from "@/features/matches/components/statistics-tab";
 import { ReportReviewTab } from "@/features/matches/components/report-review-tab";
+import { MediaLinksSection } from "@/features/media";
 import {
   locationLabels,
   matchStatusLabels,
@@ -50,7 +51,7 @@ const matchTabs = [
   { value: "lineup", label: "Sastav" },
   { value: "statistics", label: "Statistika" },
   { value: "physical", label: "GPS / Fizički podaci" },
-  { value: "video", label: "Video" },
+  { value: "video", label: "Mediji" },
   { value: "audit", label: "Revizija" },
 ] as const;
 
@@ -222,6 +223,9 @@ export function MatchDetailPage() {
         <TabsContent value="statistics">
           <StatisticsTab match={data} />
         </TabsContent>
+        <TabsContent value="video">
+          <MatchMediaTab matchId={data.id} />
+        </TabsContent>
         <TabsContent value="audit">
           <ReportReviewTab
             match={data}
@@ -231,7 +235,7 @@ export function MatchDetailPage() {
           />
         </TabsContent>
         {futureTabs
-          .filter((tab) => tab.value !== "audit")
+          .filter((tab) => tab.value !== "audit" && tab.value !== "video")
           .map((tab) => (
             <TabsContent key={tab.value} value={tab.value}>
               <Empty>
@@ -252,6 +256,30 @@ export function MatchDetailPage() {
         <MatchArchiveDialog
           match={data}
           onClose={() => setArchiveOpen(false)}
+        />
+      ) : null}
+    </div>
+  );
+}
+
+function MatchMediaTab({ matchId }: { matchId: string }) {
+  const report = useQuery({
+    queryKey: ["match", matchId, "report"],
+    queryFn: () => matchesApi.getReport(matchId),
+    retry: false,
+  });
+  return (
+    <div className="flex flex-col gap-6">
+      <MediaLinksSection
+        targetId={matchId}
+        targetType="MATCH"
+        title="Mediji utakmice"
+      />
+      {report.data ? (
+        <MediaLinksSection
+          targetId={report.data.id}
+          targetType="MATCH_REPORT"
+          title="Mediji izvještaja"
         />
       ) : null}
     </div>

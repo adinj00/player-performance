@@ -84,8 +84,11 @@ internal sealed class MediaMatchLinkConfiguration : MediaLinkConfiguration<Media
 {
     public override void Configure(EntityTypeBuilder<MediaMatchLink> b)
     {
-        base.Configure(b); b.ToTable("media_match_links"); b.Property(x => x.MatchId).HasColumnName("match_id");
-        b.HasIndex(x => new { x.MatchId, x.UnlinkedAtUtc }); b.HasIndex(x => new { x.MediaItemId, x.MatchId, x.UnlinkedAtUtc }).IsUnique().HasFilter("unlinked_at_utc IS NULL");
+        base.Configure(b);
+        b.ToTable("media_match_links");
+        b.Property(x => x.MatchId).HasColumnName("match_id");
+        b.HasIndex(x => new { x.MatchId, x.UnlinkedAtUtc });
+        b.HasIndex(x => new { x.MediaItemId, x.MatchId, x.UnlinkedAtUtc }).IsUnique().HasFilter("unlinked_at_utc IS NULL");
         b.HasOne<Match>().WithMany().HasForeignKey(x => x.MatchId).OnDelete(DeleteBehavior.Restrict);
     }
 }
@@ -93,8 +96,11 @@ internal sealed class MediaMatchReportLinkConfiguration : MediaLinkConfiguration
 {
     public override void Configure(EntityTypeBuilder<MediaMatchReportLink> b)
     {
-        base.Configure(b); b.ToTable("media_match_report_links"); b.Property(x => x.MatchReportId).HasColumnName("match_report_id");
-        b.HasIndex(x => new { x.MatchReportId, x.UnlinkedAtUtc }); b.HasIndex(x => new { x.MediaItemId, x.MatchReportId, x.UnlinkedAtUtc }).IsUnique().HasFilter("unlinked_at_utc IS NULL");
+        base.Configure(b);
+        b.ToTable("media_match_report_links");
+        b.Property(x => x.MatchReportId).HasColumnName("match_report_id");
+        b.HasIndex(x => new { x.MatchReportId, x.UnlinkedAtUtc });
+        b.HasIndex(x => new { x.MediaItemId, x.MatchReportId, x.UnlinkedAtUtc }).IsUnique().HasFilter("unlinked_at_utc IS NULL");
         b.HasOne<MatchReport>().WithMany().HasForeignKey(x => x.MatchReportId).OnDelete(DeleteBehavior.Restrict);
     }
 }
@@ -102,8 +108,11 @@ internal sealed class MediaPlayerLinkConfiguration : MediaLinkConfiguration<Medi
 {
     public override void Configure(EntityTypeBuilder<MediaPlayerLink> b)
     {
-        base.Configure(b); b.ToTable("media_player_links"); b.Property(x => x.PlayerId).HasColumnName("player_id");
-        b.HasIndex(x => new { x.PlayerId, x.UnlinkedAtUtc }); b.HasIndex(x => new { x.MediaItemId, x.PlayerId, x.UnlinkedAtUtc }).IsUnique().HasFilter("unlinked_at_utc IS NULL");
+        base.Configure(b);
+        b.ToTable("media_player_links");
+        b.Property(x => x.PlayerId).HasColumnName("player_id");
+        b.HasIndex(x => new { x.PlayerId, x.UnlinkedAtUtc });
+        b.HasIndex(x => new { x.MediaItemId, x.PlayerId, x.UnlinkedAtUtc }).IsUnique().HasFilter("unlinked_at_utc IS NULL");
         b.HasOne<Player>().WithMany().HasForeignKey(x => x.PlayerId).OnDelete(DeleteBehavior.Restrict);
     }
 }

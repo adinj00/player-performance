@@ -178,7 +178,7 @@ export const navigationGroups: NavigationGroupDefinition[] = [
         path: routePaths.medical,
         icon: HeartPulse,
       },
-      { label: "Medijska biblioteka", path: routePaths.media, icon: Film },
+      { label: "Medijateka", path: routePaths.media, icon: Film },
     ],
   },
   {

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Net.Http.Headers;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using PlayerPerformance.Api.Authentication;
 using PlayerPerformance.Application.Media;
 using PlayerPerformance.Domain.Common.Errors;
@@ -14,6 +15,8 @@ namespace PlayerPerformance.Api.Endpoints.Media;
 
 internal static class MediaEndpoints
 {
+    private static readonly JsonSerializerOptions MultipartJsonOptions = CreateMultipartJsonOptions();
+
     public static IEndpointRouteBuilder MapMediaEndpoints(this IEndpointRouteBuilder endpoints)
     {
         var media = endpoints.MapGroup("/api/media").RequireAuthorization().WithTags("Media");
@@ -32,7 +35,7 @@ internal static class MediaEndpoints
         media.MapDelete("/{mediaId:guid}/{targetType}/{targetId:guid}", UnlinkAsync);
         return endpoints;
     }
-    private static async Task<IResult> ListAsync(IMediaService s, HttpContext h, CancellationToken ct, Guid? teamId = null, MediaSourceType? sourceType = null, MediaCategory? category = null, string? search = null, bool includeArchived = false, int page = 1, int pageSize = 25) => ToResult(await s.ListAsync(new(teamId, sourceType, category, search, includeArchived, page, pageSize), ct), h);
+    private static async Task<IResult> ListAsync(IMediaService s, HttpContext h, CancellationToken ct, Guid? teamId = null, MediaSourceType? sourceType = null, MediaCategory? category = null, string? search = null, bool includeArchived = false, int page = 1, int pageSize = 25, MediaLinkTargetType? linkedTargetType = null, Guid? linkedTargetId = null) => ToResult(await s.ListAsync(new(teamId, sourceType, category, search, includeArchived, page, pageSize, linkedTargetType, linkedTargetId), ct), h);
     private static IResult GetCapabilities(Microsoft.Extensions.Options.IOptions<PlayerPerformance.Infrastructure.Media.MediaOptions> options) => TypedResults.Ok(new
     {
         maxUploadSizeBytes = options.Value.MaxUploadSizeBytes,
@@ -45,13 +48,13 @@ internal static class MediaEndpoints
         externalReferenceCategories = Enum.GetValues<MediaCategory>()
     });
     private static async Task<IResult> GetAsync(Guid mediaId, IMediaService s, CancellationToken ct) => (await s.GetAsync(mediaId, ct)) is { } r ? TypedResults.Ok(r) : TypedResults.NotFound();
-    private static async Task<IResult> ContentAsync(Guid mediaId, bool download, IMediaService s, HttpContext h, CancellationToken ct)
+    private static async Task<IResult> ContentAsync(Guid mediaId, IMediaService s, HttpContext h, CancellationToken ct, bool download = false)
     {
         var result = await s.OpenContentAsync(mediaId, ct);
         if (result.IsFailure)
             return Problem(result.Error, h);
         h.Response.Headers.Append("X-Content-Type-Options", "nosniff");
-        return Results.File(result.Value.Content, result.Value.ContentType, result.Value.OriginalFileName, enableRangeProcessing: result.Value.Content.CanSeek, lastModified: null, entityTag: null);
+        return Results.File(result.Value.Content, result.Value.ContentType, download ? result.Value.OriginalFileName : null, enableRangeProcessing: result.Value.Content.CanSeek, lastModified: null, entityTag: null);
     }
     private static async Task<IResult> AuditAsync(Guid mediaId, IMediaService s, IAuditHistoryRepository audits, int page = 1, int pageSize = 25, string? action = null, DateTime? dateFrom = null, DateTime? dateTo = null, CancellationToken ct = default)
     {
@@ -79,9 +82,17 @@ internal static class MediaEndpoints
             return TypedResults.BadRequest();
         if (metadata.Body.CanSeek && metadata.Body.Length > 64 * 1024)
             return TypedResults.BadRequest();
-        var request = await JsonSerializer.DeserializeAsync<MediaAssetMetadata>(metadata.Body, cancellationToken: ct);
+        MediaAssetMetadata? request;
+        try
+        {
+            request = await JsonSerializer.DeserializeAsync<MediaAssetMetadata>(metadata.Body, MultipartJsonOptions, ct);
+        }
+        catch (JsonException)
+        {
+            return TypedResults.BadRequest();
+        }
         var file = await reader.ReadNextSectionAsync(ct);
-        if (request is null || file?.ContentDisposition is null || !ContentDispositionHeaderValue.TryParse(file.ContentDisposition, out var fileDisposition) || string.IsNullOrWhiteSpace(fileDisposition!.FileName.Value) || await reader.ReadNextSectionAsync(ct) is not null)
+        if (request is null || file?.ContentDisposition is null || !ContentDispositionHeaderValue.TryParse(file.ContentDisposition, out var fileDisposition) || string.IsNullOrWhiteSpace(fileDisposition!.FileName.Value))
             return TypedResults.BadRequest();
         var name = HeaderUtilities.RemoveQuotes(fileDisposition.FileName).Value;
         return ToCreated(await s.CreateAssetAsync(new(request.TeamId, request.Category, request.Title, request.Description, name, file.ContentType, h.Request.ContentLength, file.Body), ct), h);
@@ -112,6 +123,12 @@ internal static class MediaEndpoints
         return fail ?? ToResult(await s.UnlinkAsync(mediaId, targetType, targetId, ct), h);
     }
     private static IResult ToCreated(Result<MediaResponse> r, HttpContext h) => r.IsSuccess ? TypedResults.Created($"/api/media/{r.Value.Id}", r.Value) : Problem(r.Error, h);
+    private static JsonSerializerOptions CreateMultipartJsonOptions()
+    {
+        var options = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+        options.Converters.Add(new JsonStringEnumConverter());
+        return options;
+    }
     private static IResult ToResult(Result r, HttpContext h) => r.IsSuccess ? TypedResults.NoContent() : Problem(r.Error, h);
     private static IResult ToResult<T>(Result<T> r, HttpContext h) => r.IsSuccess ? TypedResults.Ok(r.Value) : Problem(r.Error, h);
     private static IResult Problem(Error e, HttpContext h) => TypedResults.Problem(new ProblemDetails
