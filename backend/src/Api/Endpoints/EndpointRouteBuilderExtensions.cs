@@ -7,6 +7,7 @@ using PlayerPerformance.Api.Endpoints.Users;
 using PlayerPerformance.Api.Endpoints.Players;
 using PlayerPerformance.Api.Endpoints.Matches;
 using PlayerPerformance.Api.Endpoints.Media;
+using PlayerPerformance.Api.Endpoints.Imports;
 
 internal static class EndpointRouteBuilderExtensions
 {
@@ -21,6 +22,7 @@ internal static class EndpointRouteBuilderExtensions
         endpoints.MapMatchEndpoints();
         endpoints.MapMatchReportEndpoints();
         endpoints.MapMediaEndpoints();
+        endpoints.MapImportEndpoints();
 
         if (environment.IsEnvironment("Testing"))
         {

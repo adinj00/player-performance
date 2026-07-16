@@ -10,6 +10,7 @@ using PlayerPerformance.Domain.Matches;
 using PlayerPerformance.Domain.Auditing;
 using PlayerPerformance.Domain.Files;
 using PlayerPerformance.Domain.Media;
+using PlayerPerformance.Domain.Imports;
 
 namespace PlayerPerformance.Infrastructure.Persistence;
 
@@ -41,6 +42,10 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options)
     public DbSet<MediaMatchLink> MediaMatchLinks => Set<MediaMatchLink>();
     public DbSet<MediaMatchReportLink> MediaMatchReportLinks => Set<MediaMatchReportLink>();
     public DbSet<MediaPlayerLink> MediaPlayerLinks => Set<MediaPlayerLink>();
+    public DbSet<ImportJob> ImportJobs => Set<ImportJob>();
+    public DbSet<ImportPreviewColumn> ImportPreviewColumns => Set<ImportPreviewColumn>();
+    public DbSet<ImportPreviewRow> ImportPreviewRows => Set<ImportPreviewRow>();
+    public DbSet<ImportValidationIssue> ImportValidationIssues => Set<ImportValidationIssue>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

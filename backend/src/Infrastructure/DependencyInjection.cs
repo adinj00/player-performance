@@ -27,6 +27,8 @@ using PlayerPerformance.Application.Media;
 using PlayerPerformance.Infrastructure.Media;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
+using PlayerPerformance.Application.Imports;
+using PlayerPerformance.Infrastructure.Imports;
 
 namespace PlayerPerformance.Infrastructure;
 
@@ -54,6 +56,8 @@ public static class DependencyInjection
         services.AddSingleton<IFileStorage, LocalFileStorage>();
         services.AddSingleton<IValidateOptions<MediaOptions>, MediaOptionsValidator>();
         services.AddOptions<MediaOptions>().Bind(configuration.GetSection(MediaOptions.SectionName)).ValidateOnStart();
+        services.AddSingleton<IValidateOptions<ImportOptions>, ImportOptionsValidator>();
+        services.AddOptions<ImportOptions>().Bind(configuration.GetSection(ImportOptions.SectionName)).ValidateOnStart();
 
         services
             .AddOptions<FirstAdminBootstrapOptions>()
@@ -79,6 +83,8 @@ public static class DependencyInjection
         services.AddScoped<IAuditHistoryRepository>(provider => provider.GetRequiredService<AuditStore>());
         services.AddScoped<IStaffUsersService, IdentityStaffUsersService>();
         services.AddScoped<IMediaService, MediaService>();
+        services.AddSingleton<IImportProcessorRegistry, ImportProcessorRegistry>();
+        services.AddScoped<IImportService, ImportService>();
         services.AddScoped<TeamStartupInitializer>();
 
         services.AddDbContext<AppDbContext>(options =>
