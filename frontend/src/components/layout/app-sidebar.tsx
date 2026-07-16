@@ -14,10 +14,14 @@ export function AppSidebar({ className, onNavigate }: AppSidebarProps) {
   const groups = navigationGroups
     .map((group) => ({
       ...group,
-      items: group.items.filter(
-        (item) =>
-          (item.path !== "/users" && item.path !== "/settings") ||
-          (!isLoading && user?.primaryRole === "ADMIN"),
+      items: group.items.filter((item) =>
+        item.path === "/imports"
+          ? !isLoading &&
+            (user?.primaryRole === "ADMIN" ||
+              (user?.primaryRole === "DATA_OPERATOR" &&
+                user.permissions.canImportData))
+          : (item.path !== "/users" && item.path !== "/settings") ||
+            (!isLoading && user?.primaryRole === "ADMIN"),
       ),
     }))
     .filter((group) => group.items.length > 0);

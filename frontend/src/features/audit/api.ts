@@ -31,3 +31,7 @@ export function getMatchReportAudit(reportId: string, filters: AuditFilters) {
 export function getStaffUserAudit(userId: string, filters: AuditFilters) {
   return history(`/api/users/${userId}/audit`, filters);
 }
+
+export function getImportAudit(importJobId: string, filters: AuditFilters) {
+  return history(`/api/imports/${importJobId}/audit`, filters);
+}

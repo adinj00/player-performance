@@ -13,7 +13,8 @@ interface FilterSelectProps {
   label: string;
   emptyLabel: string;
   value?: string | null;
-  options: Record<string, string>;
+  options?: Record<string, string>;
+  items?: Array<[string, string]>;
   onChange: (value: string | null) => void;
   className?: string;
 }
@@ -23,9 +24,11 @@ export function FilterSelect({
   emptyLabel,
   value,
   options,
+  items,
   onChange,
   className = "w-40",
 }: FilterSelectProps) {
+  const resolvedOptions = options ?? Object.fromEntries(items ?? []);
   return (
     <Select
       value={value ?? "__clear__"}
@@ -34,13 +37,13 @@ export function FilterSelect({
       }
     >
       <SelectTrigger className={cn(className, "shrink-0")} aria-label={label}>
-        <SelectValue>{value ? options[value] : label}</SelectValue>
+        <SelectValue>{value ? resolvedOptions[value] : label}</SelectValue>
       </SelectTrigger>
       <SelectContent>
         <SelectGroup>
           <SelectLabel>{label}</SelectLabel>
           <SelectItem value="__clear__">{emptyLabel}</SelectItem>
-          {Object.entries(options).map(([optionValue, optionLabel]) => (
+          {Object.entries(resolvedOptions).map(([optionValue, optionLabel]) => (
             <SelectItem key={optionValue} value={optionValue}>
               {optionLabel}
             </SelectItem>

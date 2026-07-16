@@ -19,6 +19,7 @@ interface DatePickerProps {
   disabled?: boolean;
   disabledDates?: ComponentProps<typeof Calendar>["disabled"];
   className?: string;
+  "aria-label"?: string;
   "aria-invalid"?: boolean;
 }
 
@@ -40,6 +41,7 @@ export function DatePicker({
   disabled,
   disabledDates,
   className,
+  "aria-label": ariaLabel,
   "aria-invalid": ariaInvalid,
 }: DatePickerProps) {
   const [open, setOpen] = useState(false);
@@ -54,6 +56,7 @@ export function DatePicker({
             className={cn("w-full justify-start font-normal", className)}
             disabled={disabled}
             aria-invalid={ariaInvalid}
+            aria-label={ariaLabel}
           />
         }
       >
@@ -73,6 +76,7 @@ export function DatePicker({
             }
           }}
           captionLayout="dropdown"
+          weekStartsOn={1}
         />
       </PopoverContent>
     </Popover>

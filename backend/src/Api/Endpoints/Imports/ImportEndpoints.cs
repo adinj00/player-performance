@@ -58,8 +58,6 @@ internal static class ImportEndpoints
         var file = await reader.ReadNextSectionAsync(ct);
         if (request is null || !IsPart(file, "file", true))
             return TypedResults.BadRequest();
-        if (await reader.ReadNextSectionAsync(ct) is not null)
-            return TypedResults.BadRequest();
         var name = HeaderUtilities.RemoveQuotes(ContentDispositionHeaderValue.Parse(file!.ContentDisposition!).FileName).Value;
         return ToCreated(await s.CreateAsync(new(request.TeamId, request.MatchId, request.ImportType, request.SourceSystem, request.SourceLabel, request.Description, name!, file.ContentType, h.Request.ContentLength, file.Body), ct), h);
     }
