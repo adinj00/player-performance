@@ -303,11 +303,11 @@ Add mature low-level CSV/XLSX readers, provider-neutral tabular contracts, conte
 
 Dependencies: Unit 40, Unit 43.
 
-### Unit 46: Gpexe Mapping Spec After Sample Review
+### Unit 46: Gpexe Sample Review and Mapping Gate
 
-Implement confirmed Gpexe import mappings only after real export samples are reviewed and documented.
+Document the evidence, privacy, row-grain, identity, units, null/zero, duplicate, destination-model, mapping-matrix, fixture, and processor-capability gate required before any Gpexe-specific processor is implemented. Keep the Unit 45 generic raw preview as the only active Gpexe behavior until real exports or matching authoritative documentation are reviewed.
 
-Dependencies: Unit 45. Blocked until samples are available.
+Dependencies: Unit 45. Blocked until real Gpexe export evidence is available. Confirmation implementation will also depend on the approved canonical GPS/workload destination model.
 
 ### Unit 47: Zone14 Mapping Spec After Sample Review
 
@@ -381,8 +381,8 @@ Dependencies: Unit 40, Unit 53.
 
 ## Next Immediate Unit
 
-The next implementation unit after Unit 44 should be:
+The next implementation unit after Unit 45 should be:
 
-**Unit 45: Generic CSV/XLSX Parsing Foundation**
+**Unit 48: Training GPS Backend Foundation**
 
-Reason: authorized users can now upload and inspect retained import jobs, but no processor is registered yet. The next dependency-safe step is to install mature low-level CSV/XLSX readers and add a safe generic raw-preview fallback so every accepted source can expose its actual columns and bounded rows. Domain validation, confirmation, and Gpexe/Zone14 mappings remain blocked until exact formats and semantics are confirmed.
+Reason: Units 46 and 47 remain evidence-gated and must not invent Gpexe or Zone14 mappings without real exports or authoritative matching documentation. Their review-gate documents can be maintained in parallel, but they do not block independent canonical GPS/workload modeling. Unit 48 can therefore proceed using a vendor-neutral confirmed metric structure, while Gpexe and Zone14 exact processors remain disabled until their evidence gates are satisfied.
