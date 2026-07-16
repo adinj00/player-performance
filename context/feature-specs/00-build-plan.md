@@ -293,9 +293,9 @@ Dependencies: Unit 23, Unit 30, Unit 38, Unit 40.
 
 ### Unit 44: Import UI Foundation
 
-Add import workflow screens for upload, type selection, preview, validation result display, and explicit confirmation.
+Add the protected `Importi` workspace with capability-driven CSV/XLSX upload, URL-filtered import history, detail workflow, source download, backend preview and validation views, explicit confirmation, cancellation, processing-state refresh, and import audit history. Unsupported processor combinations must be shown truthfully rather than through placeholder actions.
 
-Dependencies: Unit 19, Unit 43.
+Dependencies: Unit 39, Unit 43.
 
 ### Unit 45: Generic CSV/XLSX Parsing Foundation
 
@@ -381,8 +381,8 @@ Dependencies: Unit 40, Unit 53.
 
 ## Next Immediate Unit
 
-The next implementation unit after Unit 42 should be:
+The next implementation unit after Unit 43 should be:
 
-**Unit 43: Import Workflow Backend Foundation**
+**Unit 44: Import UI Foundation**
 
-Reason: media and import source files now share a secure provider-neutral storage foundation, while the application already has team-scope authorization and semantic audit infrastructure. The next dependency-safe step is to establish persistent import jobs, original-file retention, backend-owned workflow states, processor contracts, preview/validation persistence, explicit confirmation safety, and cancellation before Unit 44 builds the import screens and Unit 45 introduces real CSV/XLSX readers.
+Reason: the backend now owns secure source-file retention, import workflow statuses, allowed actions, processor capabilities, preview/validation persistence, explicit confirmation safety, cancellation, and audit history. The next dependency-safe step is to build the real `Importi` workspace so authorized users can upload and inspect jobs immediately, while unsupported processing combinations remain truthful until Unit 45 registers generic CSV/XLSX readers.
