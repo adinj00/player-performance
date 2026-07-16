@@ -319,15 +319,15 @@ Dependencies: Unit 45. Blocked until samples are available.
 
 ### Unit 48: Training GPS Backend Foundation
 
-Add training session metadata and GPS/physical workload models using confirmed generic metric structure where practical.
+Add training-session metadata/lifecycle, date-eligible participants, a canonical vendor-neutral physical metric catalogue, explicit training-participant and match-appearance workload contexts, immutable workload revisions, safe threshold/method comparability, workload read APIs, import-confirmation writer contracts, optional training-session import targets, and audit coverage. Do not activate blocked vendor processors.
 
-Dependencies: Unit 22, Unit 27, Unit 43.
+Dependencies: Unit 22, Unit 23, Unit 28, Unit 30, Unit 31, Unit 32, Unit 38, Unit 43, Unit 45.
 
 ### Unit 49: Training GPS UI Foundation
 
-Add training session list/detail UI and GPS workload display where data exists.
+Add training-session list/detail, participant management, canonical workload display and comparison-safe metric presentation, contextual TRAINING_GPS import creation/target selection, and empty/unsupported vendor states using the Unit 48 APIs.
 
-Dependencies: Unit 48.
+Dependencies: Unit 44, Unit 48.
 
 ### Unit 50: Medical Availability Backend
 
@@ -381,8 +381,8 @@ Dependencies: Unit 40, Unit 53.
 
 ## Next Immediate Unit
 
-The next implementation unit after Unit 45 should be:
+The next implementation unit after Unit 48 should be:
 
-**Unit 48: Training GPS Backend Foundation**
+**Unit 49: Training GPS UI Foundation**
 
-Reason: Units 46 and 47 remain evidence-gated and must not invent Gpexe or Zone14 mappings without real exports or authoritative matching documentation. Their review-gate documents can be maintained in parallel, but they do not block independent canonical GPS/workload modeling. Unit 48 can therefore proceed using a vendor-neutral confirmed metric structure, while Gpexe and Zone14 exact processors remain disabled until their evidence gates are satisfied.
+Reason: vendor-neutral training sessions, date-eligible participants, canonical physical metric definitions, versioned training/match workload records, safe comparability context, workload reads, and import-target contracts now exist. The next dependency-safe step is to build the training-session and workload UI, including contextual training-import creation, while Gpexe and Zone14 exact mappings remain evidence-gated.
