@@ -9,6 +9,7 @@ public sealed class ImportJob : Entity
     private ImportJob() : base(Guid.Empty)
     {
         ResultSummaryJson = "{}";
+        PreviewMetadataJson = "{}";
     }
     private ImportJob(Guid id, Guid teamId, Guid? matchId, Guid storedFileId, ImportType type, ImportSourceSystem source, string? label, ImportFileFormat format, string? description, Guid userId, DateTime now) : base(id)
     {
@@ -25,6 +26,7 @@ public sealed class ImportJob : Entity
         Status = ImportJobStatus.UPLOADED;
         ConfigurationRevision = 1;
         ResultSummaryJson = "{}";
+        PreviewMetadataJson = "{}";
     }
     public Guid TeamId { get; private set; }
     public Guid? MatchId { get; private set; }
@@ -53,6 +55,7 @@ public sealed class ImportJob : Entity
     public string? FailureCode { get; private set; }
     public string? FailureMessage { get; private set; }
     public string ResultSummaryJson { get; private set; }
+    public string PreviewMetadataJson { get; private set; }
     public ImportProcessingOperation? ProcessingOperation { get; private set; }
     public Guid? ProcessingLeaseId { get; private set; }
     public DateTime? ProcessingStartedAtUtc { get; private set; }
@@ -95,15 +98,20 @@ public sealed class ImportJob : Entity
         return ProcessingLeaseId.Value;
     }
     public bool IsLeaseCurrent(Guid leaseId) => Status == ImportJobStatus.PARSING && ProcessingLeaseId == leaseId;
-    public void CompletePreview(Guid leaseId, int previewRowCount, DateTime now)
+    public void CompletePreview(Guid leaseId, int previewRowCount, int totalRowCount, string metadataJson, DateTime now)
     {
         EnsureLease(leaseId);
         Status = ImportJobStatus.UPLOADED;
         PreviewGeneratedAtUtc = now;
         PreviewRowCount = previewRowCount;
+        TotalRowCount = totalRowCount;
+        PreviewMetadataJson = metadataJson;
+        FailureCode = null;
+        FailureMessage = null;
         ClearLease();
         UpdatedAtUtc = now;
     }
+    public void CompletePreview(Guid leaseId, int previewRowCount, DateTime now) => CompletePreview(leaseId, previewRowCount, previewRowCount, "{}", now);
     public void CompleteValidation(Guid leaseId, string key, string version, bool hasErrors, int? totalRows, int? validRows, int? invalidRows, int? warningCount, DateTime now)
     {
         EnsureLease(leaseId);

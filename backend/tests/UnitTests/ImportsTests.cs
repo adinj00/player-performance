@@ -33,6 +33,20 @@ public sealed class ImportsTests
     }
 
     [Fact]
+    public void CompletePreview_ShouldPersistSafeMetadataAndTotalCount()
+    {
+        var job = Create();
+        var lease = job.AcquireLease(ImportProcessingOperation.PREVIEW, "generic-csv-preview", "1.0.0", Guid.NewGuid(), Now, TimeSpan.FromMinutes(30));
+
+        job.CompletePreview(lease, 2, 5, "{\"readerKey\":\"generic-csv-preview\"}", Now.AddMinutes(1));
+
+        Assert.Equal(ImportJobStatus.UPLOADED, job.Status);
+        Assert.Equal(2, job.PreviewRowCount);
+        Assert.Equal(5, job.TotalRowCount);
+        Assert.Equal("{\"readerKey\":\"generic-csv-preview\"}", job.PreviewMetadataJson);
+    }
+
+    [Fact]
     public void ValidationAndConfirmation_ShouldRequireReadyCurrentValidation()
     {
         var job = Create();

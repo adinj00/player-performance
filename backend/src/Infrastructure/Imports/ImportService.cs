@@ -167,10 +167,12 @@ internal sealed class ImportService(AppDbContext db, ICurrentUserAccess current,
                 db.ImportPreviewRows.RemoveRange(db.ImportPreviewRows.Where(x => x.ImportJobId == id));
                 db.ImportPreviewColumns.AddRange(preview.Columns.Select(x => Domain.Imports.ImportPreviewColumn.Create(Guid.NewGuid(), id, x.Ordinal, x.SourceHeader, x.NormalizedHeader, x.DetectedDataType)));
                 db.ImportPreviewRows.AddRange(preview.Rows.Select(x => Domain.Imports.ImportPreviewRow.Create(Guid.NewGuid(), id, x.SourceRowNumber, x.ValuesJson)));
-                final.CompletePreview(lease, preview.Rows.Count, clock.UtcNow);
+                final.CompletePreview(lease, preview.Rows.Count, preview.TotalRowCount, preview.PreviewMetadataJson, clock.UtcNow);
                 audit.Add(AuditPayload.Create(access.UserId.Value, AuditActions.ImportJobPreviewed, AuditEntityTypes.ImportJob, id, clock.UtcNow, null, new
                 {
                     previewRowCount = preview.Rows.Count,
+                    totalRowCount = preview.TotalRowCount,
+                    previewWasTruncated = preview.PreviewWasTruncated,
                     columnCount = preview.Columns.Count
                 }));
                 await db.SaveChangesAsync(ct);
@@ -201,12 +203,13 @@ internal sealed class ImportService(AppDbContext db, ICurrentUserAccess current,
         }
         catch (Exception exception) when (exception is not OperationCanceledException)
         {
-            var final = await db.ImportJobs.SingleOrDefaultAsync(x => x.Id == id, ct);
+            var final = await db.ImportJobs.SingleOrDefaultAsync(x => x.Id == id, CancellationToken.None);
             if (final?.IsLeaseCurrent(lease) == true)
             {
-                final.Fail(lease, "PROCESSING_FAILED", "The import processor could not complete the requested operation.", clock.UtcNow);
-                audit.Add(AuditPayload.Create(access.UserId!.Value, AuditActions.ImportJobFailed, AuditEntityTypes.ImportJob, id, clock.UtcNow, null, new { operation }));
-                await db.SaveChangesAsync(ct);
+                var safeCode = exception is TabularReadException parsing ? parsing.Code.ToString() : "SOURCE_READ_FAILED";
+                final.Fail(lease, safeCode, "Uvoz nije moguće sigurno obraditi.", clock.UtcNow);
+                audit.Add(AuditPayload.Create(access.UserId!.Value, AuditActions.ImportJobFailed, AuditEntityTypes.ImportJob, id, clock.UtcNow, null, new { operation, failureCode = safeCode }));
+                await db.SaveChangesAsync(CancellationToken.None);
             }
             return Result.Failure(Conflict);
         }
@@ -248,5 +251,19 @@ internal sealed class ImportService(AppDbContext db, ICurrentUserAccess current,
         var row = await (from job in db.ImportJobs.AsNoTracking() join file in db.StoredFiles.AsNoTracking() on job.StoredFileId equals file.Id where job.Id == id select new { job, file }).SingleOrDefaultAsync(ct);
         return row is null || !await CanUseAsync(ct) || !await teamAccess.CanAccessAsync(row.job.TeamId, ct) ? null : (row.job, row.file);
     }
-    private static ImportJobResponse ToResponse(ImportJob job, StoredFile file) => new(job.Id, job.TeamId, job.MatchId, job.ImportType, job.SourceSystem, job.SourceLabel, job.FileFormat, job.Status, job.Description, file.OriginalFileName, file.ContentType, file.SizeBytes, job.CreatedAtUtc, job.UpdatedAtUtc, job.ConfigurationRevision, job.ValidatedConfigurationRevision, job.ValidatedAtUtc, job.PreviewGeneratedAtUtc, job.ValidationCompletedAtUtc, job.TotalRowCount, job.PreviewRowCount, job.ValidRowCount, job.InvalidRowCount, job.WarningCount, job.FailureCode, job.FailureMessage, job.ConfirmedAtUtc, job.CancelledAtUtc, job.Status is ImportJobStatus.UPLOADED or ImportJobStatus.VALIDATION_FAILED or ImportJobStatus.FAILED or ImportJobStatus.READY_TO_CONFIRM ? [ImportAllowedAction.CANCEL] : []);
+    private ImportJobResponse ToResponse(ImportJob job, StoredFile file)
+    {
+        var processable = job.Status is ImportJobStatus.UPLOADED or ImportJobStatus.VALIDATION_FAILED or ImportJobStatus.FAILED or ImportJobStatus.READY_TO_CONFIRM;
+        var processor = processors.Find(job.ImportType, job.SourceSystem, job.FileFormat);
+        var actions = new List<ImportAllowedAction>();
+        if (processable && processor?.Capability.CanPreview == true)
+            actions.Add(ImportAllowedAction.PREVIEW);
+        if (processable && processor?.Capability.CanValidate == true)
+            actions.Add(ImportAllowedAction.VALIDATE);
+        if (job.Status == ImportJobStatus.READY_TO_CONFIRM && processor?.Capability.CanConfirm == true)
+            actions.Add(ImportAllowedAction.CONFIRM);
+        if (processable)
+            actions.Add(ImportAllowedAction.CANCEL);
+        return new(job.Id, job.TeamId, job.MatchId, job.ImportType, job.SourceSystem, job.SourceLabel, job.FileFormat, job.Status, job.Description, file.OriginalFileName, file.ContentType, file.SizeBytes, job.CreatedAtUtc, job.UpdatedAtUtc, job.ConfigurationRevision, job.ValidatedConfigurationRevision, job.ValidatedAtUtc, job.PreviewGeneratedAtUtc, job.ValidationCompletedAtUtc, job.TotalRowCount, job.PreviewRowCount, job.ValidRowCount, job.InvalidRowCount, job.WarningCount, job.FailureCode, job.FailureMessage, job.PreviewMetadataJson, job.ConfirmedAtUtc, job.CancelledAtUtc, actions);
+    }
 }

@@ -83,6 +83,11 @@ public static class DependencyInjection
         services.AddScoped<IAuditHistoryRepository>(provider => provider.GetRequiredService<AuditStore>());
         services.AddScoped<IStaffUsersService, IdentityStaffUsersService>();
         services.AddScoped<IMediaService, MediaService>();
+        services.AddSingleton<ITabularSourceReader, CsvTabularSourceReader>();
+        services.AddSingleton<ITabularSourceReader, XlsxTabularSourceReader>();
+        services.AddSingleton<ITabularSourceReaderResolver, TabularSourceReaderResolver>();
+        services.AddSingleton<IImportWorkflowProcessor>(provider => new GenericPreviewImportProcessor(provider.GetRequiredService<ITabularSourceReaderResolver>(), provider.GetRequiredService<IOptions<ImportOptions>>(), Domain.Imports.ImportFileFormat.CSV));
+        services.AddSingleton<IImportWorkflowProcessor>(provider => new GenericPreviewImportProcessor(provider.GetRequiredService<ITabularSourceReaderResolver>(), provider.GetRequiredService<IOptions<ImportOptions>>(), Domain.Imports.ImportFileFormat.XLSX));
         services.AddSingleton<IImportProcessorRegistry, ImportProcessorRegistry>();
         services.AddScoped<IImportService, ImportService>();
         services.AddScoped<TeamStartupInitializer>();

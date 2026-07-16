@@ -40,6 +40,7 @@ internal sealed class ImportJobConfiguration : IEntityTypeConfiguration<ImportJo
         b.Property(x => x.FailureCode).HasColumnName("failure_code").HasMaxLength(100);
         b.Property(x => x.FailureMessage).HasColumnName("failure_message").HasMaxLength(1000);
         b.Property(x => x.ResultSummaryJson).HasColumnName("result_summary_json").HasColumnType("jsonb");
+        b.Property(x => x.PreviewMetadataJson).HasColumnName("preview_metadata_json").HasColumnType("jsonb");
         b.Property(x => x.ProcessingOperation).HasColumnName("processing_operation").HasConversion<string>().HasMaxLength(16);
         b.Property(x => x.ProcessingLeaseId).HasColumnName("processing_lease_id");
         b.Property(x => x.ProcessingStartedAtUtc).HasColumnName("processing_started_at_utc");

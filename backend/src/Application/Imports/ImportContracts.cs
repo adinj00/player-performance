@@ -6,7 +6,7 @@ namespace PlayerPerformance.Application.Imports;
 
 public sealed record CreateImportRequest(Guid TeamId, Guid? MatchId, ImportType ImportType, ImportSourceSystem SourceSystem, string? SourceLabel, string? Description, string OriginalFileName, string? ContentType, long? DeclaredLength, Stream Content);
 public sealed record ImportListQuery(Guid? TeamId = null, Guid? MatchId = null, ImportType? ImportType = null, ImportSourceSystem? SourceSystem = null, ImportFileFormat? FileFormat = null, ImportJobStatus? Status = null, string? Search = null, DateTime? DateFrom = null, DateTime? DateTo = null, int Page = 1, int PageSize = 25);
-public sealed record ImportJobResponse(Guid Id, Guid TeamId, Guid? MatchId, ImportType ImportType, ImportSourceSystem SourceSystem, string? SourceLabel, ImportFileFormat FileFormat, ImportJobStatus Status, string? Description, string OriginalFileName, string ContentType, long SizeBytes, DateTime CreatedAtUtc, DateTime UpdatedAtUtc, int ConfigurationRevision, int? ValidatedConfigurationRevision, DateTime? ValidatedAtUtc, DateTime? PreviewGeneratedAtUtc, DateTime? ValidationCompletedAtUtc, int? TotalRowCount, int? PreviewRowCount, int? ValidRowCount, int? InvalidRowCount, int? WarningCount, string? FailureCode, string? FailureMessage, DateTime? ConfirmedAtUtc, DateTime? CancelledAtUtc, IReadOnlyList<ImportAllowedAction> AllowedActions);
+public sealed record ImportJobResponse(Guid Id, Guid TeamId, Guid? MatchId, ImportType ImportType, ImportSourceSystem SourceSystem, string? SourceLabel, ImportFileFormat FileFormat, ImportJobStatus Status, string? Description, string OriginalFileName, string ContentType, long SizeBytes, DateTime CreatedAtUtc, DateTime UpdatedAtUtc, int ConfigurationRevision, int? ValidatedConfigurationRevision, DateTime? ValidatedAtUtc, DateTime? PreviewGeneratedAtUtc, DateTime? ValidationCompletedAtUtc, int? TotalRowCount, int? PreviewRowCount, int? ValidRowCount, int? InvalidRowCount, int? WarningCount, string? FailureCode, string? FailureMessage, string? PreviewMetadataJson, DateTime? ConfirmedAtUtc, DateTime? CancelledAtUtc, IReadOnlyList<ImportAllowedAction> AllowedActions);
 public sealed record PagedImportJobsResponse(IReadOnlyList<ImportJobResponse> Items, int Page, int PageSize, int TotalCount, int TotalPages);
 public sealed record ImportSourceResponse(Stream Content, string ContentType, string OriginalFileName);
 public sealed record ImportPreviewResponse(IReadOnlyList<ImportPreviewColumnResponse> Columns, IReadOnlyList<ImportPreviewRowResponse> Rows, int Page, int PageSize, int TotalCount);
@@ -34,6 +34,7 @@ public sealed record ImportProcessorContext(Guid ImportJobId, Guid TeamId, Guid?
 public interface IImportWorkflowProcessor
 {
     ImportProcessorCapability Capability { get; }
+    bool IsGenericFallback => false;
     Task<ImportPreviewResult> GeneratePreviewAsync(ImportProcessorContext context, Stream source, CancellationToken ct);
     Task<ImportValidationResult> ValidateAsync(ImportProcessorContext context, Stream source, CancellationToken ct);
     Task<ImportConfirmationResult> ConfirmAsync(ImportProcessorContext context, Stream source, CancellationToken ct);
@@ -43,7 +44,7 @@ public interface IImportProcessorRegistry
     IImportWorkflowProcessor? Find(ImportType type, ImportSourceSystem source, ImportFileFormat format);
     IReadOnlyList<ImportProcessorCapability> Capabilities { get; }
 }
-public sealed record ImportPreviewResult(IReadOnlyList<ImportPreviewColumnData> Columns, IReadOnlyList<ImportPreviewRowData> Rows);
+public sealed record ImportPreviewResult(IReadOnlyList<ImportPreviewColumnData> Columns, IReadOnlyList<ImportPreviewRowData> Rows, int TotalRowCount, bool PreviewWasTruncated, string PreviewMetadataJson);
 public sealed record ImportPreviewColumnData(int Ordinal, string SourceHeader, string NormalizedHeader, string? DetectedDataType);
 public sealed record ImportPreviewRowData(int SourceRowNumber, string ValuesJson);
 public sealed record ImportValidationResult(IReadOnlyList<ImportValidationIssueData> Issues, int? TotalRowCount, int? ValidRowCount, int? InvalidRowCount, int? WarningCount);
