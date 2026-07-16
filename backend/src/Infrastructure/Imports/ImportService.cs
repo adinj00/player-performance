@@ -68,6 +68,8 @@ internal sealed class ImportService(AppDbContext db, ICurrentUserAccess current,
             source = source.Where(x => x.TeamId == q.TeamId);
         if (q.MatchId.HasValue)
             source = source.Where(x => x.MatchId == q.MatchId);
+        if (q.TrainingSessionId.HasValue)
+            source = source.Where(x => x.TrainingSessionId == q.TrainingSessionId);
         if (q.ImportType.HasValue)
             source = source.Where(x => x.ImportType == q.ImportType);
         if (q.SourceSystem.HasValue)

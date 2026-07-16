@@ -35,3 +35,10 @@ export function getStaffUserAudit(userId: string, filters: AuditFilters) {
 export function getImportAudit(importJobId: string, filters: AuditFilters) {
   return history(`/api/imports/${importJobId}/audit`, filters);
 }
+
+export function getTrainingSessionAudit(
+  sessionId: string,
+  filters: AuditFilters,
+) {
+  return history(`/api/training-sessions/${sessionId}/audit`, filters);
+}

@@ -40,6 +40,14 @@ import { LineupTab } from "@/features/matches/components/lineup-tab";
 import { StatisticsTab } from "@/features/matches/components/statistics-tab";
 import { ReportReviewTab } from "@/features/matches/components/report-review-tab";
 import { MediaLinksSection } from "@/features/media";
+import { WorkloadTable } from "@/features/training/workloads";
+import { CreateImport } from "@/features/imports/imports-page";
+import {
+  importQueryKeys,
+  importsApi,
+} from "@/features/imports/api/imports-api";
+import { settingsApi } from "@/features/settings/api";
+import type { MatchResponse } from "@/features/matches/types/match";
 import {
   locationLabels,
   matchStatusLabels,
@@ -223,6 +231,9 @@ export function MatchDetailPage() {
         <TabsContent value="statistics">
           <StatisticsTab match={data} />
         </TabsContent>
+        <TabsContent value="physical">
+          <MatchPhysicalTab match={data} />
+        </TabsContent>
         <TabsContent value="video">
           <MatchMediaTab matchId={data.id} />
         </TabsContent>
@@ -235,7 +246,12 @@ export function MatchDetailPage() {
           />
         </TabsContent>
         {futureTabs
-          .filter((tab) => tab.value !== "audit" && tab.value !== "video")
+          .filter(
+            (tab) =>
+              tab.value !== "audit" &&
+              tab.value !== "video" &&
+              tab.value !== "physical",
+          )
           .map((tab) => (
             <TabsContent key={tab.value} value={tab.value}>
               <Empty>
@@ -258,6 +274,76 @@ export function MatchDetailPage() {
           onClose={() => setArchiveOpen(false)}
         />
       ) : null}
+    </div>
+  );
+}
+
+function MatchPhysicalTab({ match }: { match: MatchResponse }) {
+  const { user } = useSession();
+  const matchId = match.id;
+  const workloads = useQuery({
+    queryKey: ["match", matchId, "physical-workloads"],
+    queryFn: () => matchesApi.physicalWorkloads(matchId),
+    retry: false,
+  });
+  const capabilities = useQuery({
+    queryKey: importQueryKeys.capabilities,
+    queryFn: importsApi.capabilities,
+    enabled:
+      user?.primaryRole === "ADMIN" ||
+      (user?.primaryRole === "DATA_OPERATOR" && user.permissions.canImportData),
+  });
+  const teams = useQuery({
+    queryKey: ["settings", "teams", "match-import"],
+    queryFn: () => settingsApi.listTeams(false),
+  });
+  const imports = useQuery({
+    queryKey: importQueryKeys.list({ matchId }),
+    queryFn: () => importsApi.list({ matchId }),
+  });
+  if (workloads.isLoading) return <Skeleton className="h-48 w-full" />;
+  if (workloads.isError)
+    return (
+      <Alert variant="destructive">
+        <AlertTitle>Fizički podaci nisu dostupni</AlertTitle>
+        <AlertDescription>
+          Pokušajte ponovo nakon osvježavanja utakmice.
+        </AlertDescription>
+      </Alert>
+    );
+  const canImport =
+    user?.primaryRole === "ADMIN" ||
+    (user?.primaryRole === "DATA_OPERATOR" && user.permissions.canImportData);
+  return (
+    <div className="flex flex-col gap-4">
+      <WorkloadTable workloads={workloads.data ?? []} />
+      {canImport ? (
+        <CreateImport
+          disabled={match.isArchived}
+          capabilities={capabilities.data}
+          teams={teams.data ?? []}
+          context={{ teamId: match.team.id, matchId, importType: "MATCH_GPS" }}
+          onCreated={() => void imports.refetch()}
+        />
+      ) : null}
+      <section className="flex flex-col gap-2">
+        <h3 className="font-medium">Izvorni importi</h3>
+        {imports.data?.items.length ? (
+          imports.data.items.map((item) => (
+            <Link
+              className="text-primary text-sm"
+              key={item.id}
+              to={`/imports?importJobId=${item.id}`}
+            >
+              {item.originalFileName}
+            </Link>
+          ))
+        ) : (
+          <p className="text-muted-foreground text-sm">
+            Nema importa vezanih za ovu utakmicu.
+          </p>
+        )}
+      </section>
     </div>
   );
 }

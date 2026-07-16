@@ -54,6 +54,7 @@ import {
 } from "@/components/ui/table";
 import { useSession } from "@/features/auth/hooks/use-session";
 import { MediaLinksSection } from "@/features/media";
+import { WorkloadTable } from "@/features/training/workloads";
 import { settingsApi } from "@/features/settings/api";
 import { isApiError } from "@/lib/api/api-client";
 import { formatDate } from "@/lib/date-format";
@@ -595,6 +596,11 @@ export function PlayerDetailPage() {
     queryFn: () => playersApi.assignments(playerId),
     retry: false,
   });
+  const physical = useQuery({
+    queryKey: ["players", "physical-workloads", playerId],
+    queryFn: () => playersApi.physicalWorkloads(playerId),
+    retry: false,
+  });
   if (player.isLoading) return <LoadingState />;
   if (player.isError || !player.data)
     return (
@@ -708,6 +714,23 @@ export function PlayerDetailPage() {
               </TableBody>
             </Table>
           </div>
+        )}
+      </section>
+      <section className="flex flex-col gap-3">
+        <h2 className="font-heading text-xl">Fizički podaci</h2>
+        {physical.isLoading ? (
+          <LoadingState label="Učitavanje fizičkih podataka..." />
+        ) : physical.isError ? (
+          <ErrorState
+            description="Fizičke podatke nije moguće učitati."
+            action={
+              <Button onClick={() => void physical.refetch()}>
+                Pokušaj ponovo
+              </Button>
+            }
+          />
+        ) : (
+          <WorkloadTable workloads={physical.data ?? []} />
         )}
       </section>
       <MediaLinksSection targetId={playerId} targetType="PLAYER" />

@@ -24,6 +24,7 @@ internal static class TrainingSessionEndpoints
         g.MapPost("/{id:guid}/complete", CompleteAsync);
         g.MapPost("/{id:guid}/cancel", CancelAsync);
         g.MapGet("/{id:guid}/participants", ParticipantsAsync);
+        g.MapGet("/{id:guid}/participant-candidates", ParticipantCandidatesAsync);
         g.MapPost("/{id:guid}/participants", AddParticipantAsync);
         g.MapDelete("/{id:guid}/participants/{participantId:guid}", RemoveParticipantAsync);
         g.MapGet("/{id:guid}/workloads", WorkloadsAsync);
@@ -145,7 +146,47 @@ internal static class TrainingSessionEndpoints
         var s = await db.TrainingSessions.AsNoTracking().SingleOrDefaultAsync(x => x.Id == id, ct);
         if (s is null || !Read(await access.GetAsync(ct), s.TeamId))
             return Results.NotFound();
-        return Results.Ok(await db.TrainingSessionParticipants.AsNoTracking().Where(x => x.TrainingSessionId == id && x.RemovedAtUtc == null).ToListAsync(ct));
+        var participants = await (from participant in db.TrainingSessionParticipants.AsNoTracking()
+                                  join player in db.Players.AsNoTracking() on participant.PlayerId equals player.Id
+                                  where participant.TrainingSessionId == id && participant.RemovedAtUtc == null
+                                  orderby player.LastName, player.FirstName
+                                  select new ParticipantResponse(participant.Id, participant.TrainingSessionId, participant.PlayerId, player.FirstName + " " + player.LastName, player.PreferredName, participant.RemovedAtUtc))
+            .ToListAsync(ct);
+        return Results.Ok(participants);
+    }
+    private static async Task<IResult> ParticipantCandidatesAsync(Guid id, AppDbContext db, ICurrentUserAccess access, string? search = null, int page = 1, int pageSize = 25, CancellationToken ct = default)
+    {
+        if (page < 1 || pageSize is < 1 or > 100 || search?.Length > 200)
+            return Results.BadRequest();
+        var session = await db.TrainingSessions.AsNoTracking().SingleOrDefaultAsync(x => x.Id == id, ct);
+        var actor = await access.GetAsync(ct);
+        if (session is null)
+            return Results.NotFound();
+        if (!Write(actor, session.TeamId))
+            return Results.Forbid();
+
+        var activeParticipantIds = db.TrainingSessionParticipants.AsNoTracking()
+            .Where(x => x.TrainingSessionId == id && x.RemovedAtUtc == null)
+            .Select(x => x.PlayerId);
+        var candidates = from assignment in db.PlayerTeamAssignments.AsNoTracking()
+                         join player in db.Players.AsNoTracking() on assignment.PlayerId equals player.Id
+                         where assignment.TeamId == session.TeamId
+                               && assignment.StartDate <= session.SessionDate
+                               && (assignment.EndDate == null || assignment.EndDate >= session.SessionDate)
+                               && !activeParticipantIds.Contains(player.Id)
+                         select new { player.Id, player.FirstName, player.LastName, player.PreferredName, assignment.StartDate, assignment.EndDate };
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var term = search.Trim().ToUpper();
+            candidates = candidates.Where(x => x.FirstName.ToUpper().Contains(term) || x.LastName.ToUpper().Contains(term) || x.PreferredName != null && x.PreferredName.ToUpper().Contains(term));
+        }
+        var total = await candidates.Select(x => x.Id).Distinct().CountAsync(ct);
+        var items = await candidates.GroupBy(x => new { x.Id, x.FirstName, x.LastName, x.PreferredName })
+            .OrderBy(x => x.Key.LastName).ThenBy(x => x.Key.FirstName).ThenBy(x => x.Key.Id)
+            .Skip((page - 1) * pageSize).Take(pageSize)
+            .Select(x => new { x.Key.Id, x.Key.FirstName, x.Key.LastName, x.Key.PreferredName, assignmentStartDate = x.Min(y => y.StartDate), assignmentEndDate = x.Max(y => y.EndDate) })
+            .ToListAsync(ct);
+        return Results.Ok(new { items, page, pageSize, totalCount = total });
     }
     private static async Task<IResult> AddParticipantAsync(Guid id, AddParticipantRequest r, HttpContext h, IAntiforgery af, AppDbContext db, ICurrentUserAccess access, ISystemClock clock, IAuditWriter audit, CancellationToken ct)
     {
@@ -204,7 +245,40 @@ internal static class TrainingSessionEndpoints
         var q = db.PlayerPhysicalWorkloads.AsNoTracking().Where(predicate);
         if (!a.IsAdmin && a.TeamScopeType != TeamScopeType.ALL_TEAMS)
             q = q.Where(x => a.SelectedTeamIds.Contains(x.TeamId));
-        return Results.Ok(await q.ToListAsync(ct));
+        var sourceRows = await (from workload in q
+                                join player in db.Players.AsNoTracking() on workload.PlayerId equals player.Id
+                                join revision in db.PhysicalWorkloadRevisions.AsNoTracking() on workload.CurrentRevisionId equals revision.Id
+                                orderby workload.OccurredOn descending, player.LastName, player.FirstName
+                                select new
+                                {
+                                    workload.Id,
+                                    workload.PlayerId,
+                                    PlayerName = player.FirstName + " " + player.LastName,
+                                    workload.TeamId,
+                                    workload.OccurredOn,
+                                    workload.TrainingSessionParticipantId,
+                                    workload.PlayerMatchAppearanceId,
+                                    CurrentRevisionId = revision.Id,
+                                    revision.RevisionNumber,
+                                    revision.ImportJobId,
+                                    revision.SourceSystem,
+                                    revision.ProcessorKey,
+                                    revision.ProcessorVersion,
+                                    revision.RecordedAtUtc
+                                }).ToListAsync(ct);
+        var revisionIds = sourceRows.Select(x => x.CurrentRevisionId).ToArray();
+        var metricsByRevision = (await db.PhysicalMetricValues.AsNoTracking()
+                .Where(value => revisionIds.Contains(value.PhysicalWorkloadRevisionId))
+                .OrderBy(value => value.MetricCode)
+                .Select(value => new
+                {
+                    value.PhysicalWorkloadRevisionId,
+                    Metric = new PhysicalMetricValueResponse(value.MetricCode, value.Value, value.UnitCode, value.ThresholdValue, value.ThresholdUnitCode, value.ThresholdDirection, value.ThresholdScope, value.MethodKey, value.MethodVersion)
+                }).ToListAsync(ct))
+            .GroupBy(x => x.PhysicalWorkloadRevisionId)
+            .ToDictionary(x => x.Key, x => (IReadOnlyList<PhysicalMetricValueResponse>)x.Select(value => value.Metric).ToList());
+        var rows = sourceRows.Select(x => new PhysicalWorkloadResponse(x.Id, x.PlayerId, x.PlayerName, x.TeamId, x.OccurredOn, x.TrainingSessionParticipantId, x.PlayerMatchAppearanceId, x.CurrentRevisionId, x.RevisionNumber, x.ImportJobId, x.SourceSystem, x.ProcessorKey, x.ProcessorVersion, x.RecordedAtUtc, metricsByRevision.GetValueOrDefault(x.CurrentRevisionId, Array.Empty<PhysicalMetricValueResponse>()))).ToList();
+        return Results.Ok(rows);
     }
     private static async Task<IResult> AuditAsync(Guid id, AppDbContext db, ICurrentUserAccess access, IAuditHistoryRepository audits, CancellationToken ct)
     {
@@ -214,4 +288,7 @@ internal static class TrainingSessionEndpoints
         return Results.Ok(await audits.ListAsync(AuditEntityTypes.TrainingSession, id, new(), ct));
     }
     internal sealed record CreateTrainingSessionRequest(Guid TeamId, DateOnly SessionDate, DateTime? StartsAtUtc, DateTime? EndsAtUtc, string Title, string? Location, string? Description); internal sealed record AddParticipantRequest(Guid PlayerId);
+    private sealed record ParticipantResponse(Guid Id, Guid TrainingSessionId, Guid PlayerId, string PlayerName, string? PreferredName, DateTime? RemovedAtUtc);
+    private sealed record PhysicalWorkloadResponse(Guid Id, Guid PlayerId, string PlayerName, Guid TeamId, DateOnly OccurredOn, Guid? TrainingSessionParticipantId, Guid? PlayerMatchAppearanceId, Guid CurrentRevisionId, int RevisionNumber, Guid? ImportJobId, string? SourceSystem, string? ProcessorKey, string? ProcessorVersion, DateTime RecordedAtUtc, IReadOnlyList<PhysicalMetricValueResponse> Metrics);
+    private sealed record PhysicalMetricValueResponse(string MetricCode, decimal Value, PlayerPerformance.Domain.Physical.PhysicalMetricUnit UnitCode, decimal? ThresholdValue, PlayerPerformance.Domain.Physical.PhysicalMetricUnit? ThresholdUnitCode, PlayerPerformance.Domain.Physical.ThresholdDirection? ThresholdDirection, PlayerPerformance.Domain.Physical.ThresholdScope? ThresholdScope, string? MethodKey, string? MethodVersion);
 }

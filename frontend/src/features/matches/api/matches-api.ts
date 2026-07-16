@@ -1,5 +1,6 @@
 import { getCsrf } from "@/features/auth/api/auth-api";
 import { apiRequest } from "@/lib/api/api-client";
+import type { PhysicalWorkload } from "@/features/training/workloads";
 
 import type {
   CreateMatchRequest,
@@ -65,6 +66,8 @@ async function mutate<T>(
 }
 
 export const matchesApi = {
+  physicalWorkloads: (id: string) =>
+    apiRequest<PhysicalWorkload[]>(`/api/matches/${id}/physical-workloads`),
   list: (filters: MatchListFilters) => apiRequest<PagedMatches>(query(filters)),
   get: (id: string) => apiRequest<MatchResponse>(`/api/matches/${id}`),
   getLineup: (id: string) =>

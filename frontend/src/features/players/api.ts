@@ -1,5 +1,6 @@
 import { getCsrf } from "@/features/auth/api/auth-api";
 import { apiRequest } from "@/lib/api/api-client";
+import type { PhysicalWorkload } from "@/features/training/workloads";
 import type {
   PagedPlayers,
   Player,
@@ -21,6 +22,8 @@ async function unsafe<T>(
   });
 }
 export const playersApi = {
+  physicalWorkloads: (id: string) =>
+    apiRequest<PhysicalWorkload[]>(`/api/players/${id}/physical-workloads`),
   list(filters: PlayerFilters) {
     const p = new URLSearchParams({
       page: String(filters.page),

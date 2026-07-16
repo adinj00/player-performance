@@ -31,7 +31,10 @@ import { MediaPage } from "@/features/media";
 import { PlayersPage } from "@/pages/players-page";
 import { PlayerDetailPage } from "@/features/players";
 import { TeamsPage } from "@/pages/teams-page";
-import { TrainingGpsPage } from "@/pages/training-gps-page";
+import {
+  TrainingSessionDetailPage,
+  TrainingSessionsPage,
+} from "@/features/training/pages";
 import { UsersPage } from "@/pages/users-page";
 import { AcceptInvitationPage } from "@/pages/accept-invitation-page";
 import { SettingsLayout } from "@/features/settings/components";
@@ -135,7 +138,11 @@ export function AppRoutes() {
             <Route path="/players/:playerId" element={<PlayerDetailPage />} />
             <Route
               path={routePaths.trainingGps}
-              element={<TrainingGpsPage />}
+              element={<TrainingSessionsPage />}
+            />
+            <Route
+              path="/training-sessions/:id"
+              element={<TrainingSessionDetailPage />}
             />
             <Route path={routePaths.imports} element={<ImportsPage />} />
             <Route path={routePaths.teams} element={<TeamsPage />} />

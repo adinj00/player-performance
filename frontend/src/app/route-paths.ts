@@ -23,7 +23,7 @@ export const routePaths = {
   matchReports: "/match-reports",
   matchDetail: (matchId: string) => `/matches/${matchId}`,
   players: "/players",
-  trainingGps: "/training-gps",
+  trainingGps: "/training-sessions",
   imports: "/imports",
   teams: "/teams",
   medical: "/medical",
@@ -165,7 +165,7 @@ export const navigationGroups: NavigationGroupDefinition[] = [
         icon: ClipboardCheck,
       },
       { label: "Igrači", path: routePaths.players, icon: Users },
-      { label: "Trening GPS", path: routePaths.trainingGps, icon: Activity },
+      { label: "Treninzi i GPS", path: routePaths.trainingGps, icon: Activity },
       { label: "Importi", path: routePaths.imports, icon: Upload },
     ],
   },
@@ -195,6 +195,13 @@ export function getRouteDefinition(pathname: string) {
     return (
       appRouteDefinitions.find((route) => route.path === routePaths.matches) ??
       null
+    );
+  }
+  if (pathname.startsWith(`${routePaths.trainingGps}/`)) {
+    return (
+      appRouteDefinitions.find(
+        (route) => route.path === routePaths.trainingGps,
+      ) ?? null
     );
   }
 

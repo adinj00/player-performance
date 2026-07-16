@@ -97,6 +97,7 @@ const filtersParser = {
   search: parseAsString,
   teamId: parseAsString,
   matchId: parseAsString,
+  trainingSessionId: parseAsString,
   importType: parseAsString,
   sourceSystem: parseAsString,
   fileFormat: parseAsString,
@@ -515,23 +516,32 @@ function ImportTable({
   );
 }
 
-function CreateImport({
+export function CreateImport({
   disabled,
   capabilities,
   teams,
   onCreated,
+  context,
 }: {
   disabled: boolean;
   capabilities: ImportCapabilities | undefined;
   teams: { id: string; name: string }[];
   onCreated: (job: ImportJob) => void;
+  context?: {
+    teamId: string;
+    matchId?: string;
+    trainingSessionId?: string;
+    importType: "MATCH_GPS" | "TRAINING_GPS";
+  };
 }) {
   const [open, setOpen] = useState(false);
   const [file, setFile] = useState<File | null>(null);
-  const [type, setType] = useState<ImportType | null>(null);
+  const [type, setType] = useState<ImportType | null>(
+    context?.importType ?? null,
+  );
   const [source, setSource] = useState<ImportSourceSystem | null>(null);
-  const [teamId, setTeamId] = useState("");
-  const [matchId, setMatchId] = useState("");
+  const [teamId, setTeamId] = useState(context?.teamId ?? "");
+  const [matchId, setMatchId] = useState(context?.matchId ?? "");
   const [sourceLabel, setSourceLabel] = useState("");
   const [description, setDescription] = useState("");
   const [progress, setProgress] = useState<number | null>(null);
@@ -568,6 +578,10 @@ function CreateImport({
         {
           teamId,
           matchId: matchesRequired(type) ? matchId : null,
+          trainingSessionId:
+            type === "TRAINING_GPS"
+              ? (context?.trainingSessionId ?? null)
+              : null,
           importType: type,
           sourceSystem: source,
           sourceLabel: source === "OTHER" ? sourceLabel : null,
@@ -597,7 +611,7 @@ function CreateImport({
     <>
       <Button disabled={disabled} onClick={() => setOpen(true)}>
         <UploadIcon data-icon="inline-start" />
-        Novi import
+        {context ? "Učitaj GPS podatke" : "Novi import"}
       </Button>
       <Dialog
         open={open}
@@ -607,7 +621,9 @@ function CreateImport({
       >
         <DialogContent className="flex max-h-[calc(100dvh-2rem)] max-w-lg flex-col gap-0 overflow-hidden p-0">
           <DialogHeader className="shrink-0 p-4">
-            <DialogTitle>Novi import</DialogTitle>
+            <DialogTitle>
+              {context ? "Učitaj GPS podatke" : "Novi import"}
+            </DialogTitle>
             <DialogDescription>
               Prvo odaberite izvorni fajl, zatim njegov nepromjenjivi kontekst.
             </DialogDescription>
@@ -627,17 +643,24 @@ function CreateImport({
                   {capabilities ? size(capabilities.maxUploadSizeBytes) : "—"}.
                 </p>
               </Field>
-              <Filter
-                label="Vrsta importa"
-                value={type}
-                items={
-                  capabilities?.importTypes.map((value) => [
-                    value,
-                    types[value],
-                  ]) ?? []
-                }
-                onChange={(value) => setType(value as ImportType | null)}
-              />
+              {context ? (
+                <Field>
+                  <FieldLabel>Vrsta importa</FieldLabel>
+                  <p className="text-sm">{types[context.importType]}</p>
+                </Field>
+              ) : (
+                <Filter
+                  label="Vrsta importa"
+                  value={type}
+                  items={
+                    capabilities?.importTypes.map((value) => [
+                      value,
+                      types[value],
+                    ]) ?? []
+                  }
+                  onChange={(value) => setType(value as ImportType | null)}
+                />
+              )}
               <Filter
                 label="Izvor"
                 value={source}
@@ -651,15 +674,25 @@ function CreateImport({
                   setSource(value as ImportSourceSystem | null)
                 }
               />
-              <Filter
-                label="Selekcija"
-                value={teamId || null}
-                items={teams.map((team) => [team.id, team.name])}
-                onChange={(value) => {
-                  setTeamId(value ?? "");
-                  setMatchId("");
-                }}
-              />
+              {context ? (
+                <Field>
+                  <FieldLabel>Selekcija</FieldLabel>
+                  <p className="text-sm">
+                    {teams.find((team) => team.id === context.teamId)?.name ??
+                      "Nije dostupno"}
+                  </p>
+                </Field>
+              ) : (
+                <Filter
+                  label="Selekcija"
+                  value={teamId || null}
+                  items={teams.map((team) => [team.id, team.name])}
+                  onChange={(value) => {
+                    setTeamId(value ?? "");
+                    setMatchId("");
+                  }}
+                />
+              )}
               {matchesRequired(type) ? (
                 <Filter
                   label="Utakmica"

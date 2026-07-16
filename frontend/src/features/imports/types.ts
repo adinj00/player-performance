@@ -41,6 +41,7 @@ export interface ImportJob {
   id: string;
   teamId: string;
   matchId: string | null;
+  trainingSessionId: string | null;
   importType: ImportType;
   sourceSystem: ImportSourceSystem;
   sourceLabel: string | null;
@@ -105,6 +106,7 @@ export interface ImportFilters {
   search?: string | null;
   teamId?: string | null;
   matchId?: string | null;
+  trainingSessionId?: string | null;
   importType?: ImportType | null;
   sourceSystem?: ImportSourceSystem | null;
   fileFormat?: ImportFileFormat | null;

@@ -654,3 +654,10 @@ This file approves the initial UI direction:
 - Layout-only utility classes are allowed.
 - Desktop-first responsive dashboard layout.
 - TanStack Query, Zustand, Zod, React Hook Form, TanStack Table, and shadcn/Recharts as the frontend UI/data toolkit.
+
+## Treninzi i GPS
+
+- Performance navigation exposes `Treninzi i GPS` at `/training-sessions`, with a session detail route at `/training-sessions/:id`.
+- The training workspace uses URL-backed list filters, server pagination, lifecycle actions, participant eligibility search, and distinct Overview, Participants, and GPS / Physical views.
+- Training and match physical-data views reuse the Import workspace upload dialog with a locked team, target, and GPS import type. Their source-import history links to the existing Import detail workspace.
+- GPS/vendor processing remains capability-driven: Gpexe and Zone14 are presented as generic-preview-only until confirmed processor mappings exist.

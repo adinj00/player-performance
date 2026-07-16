@@ -96,12 +96,14 @@ export function AuditHistory({
   fields,
   expectedEntityType,
   formatValue,
+  formatMetadata,
 }: {
   data: PagedAuditHistory | undefined;
   labels: AuditLabels;
   fields: AuditFieldLabels;
   expectedEntityType: string;
   formatValue?: (key: string, value: unknown) => string | undefined;
+  formatMetadata?: (value: unknown) => string | undefined;
 }) {
   if (!data?.items.length)
     return (
@@ -132,7 +134,9 @@ export function AuditHistory({
                 {formatUtcDateTime(item.occurredAtUtc)}
               </p>
             </div>
-            <Badge variant="secondary">{item.action}</Badge>
+            <Badge variant="secondary">
+              {labels[item.action] ?? `Nepoznata radnja: ${item.action}`}
+            </Badge>
           </header>
           {item.entityType !== expectedEntityType ? (
             <Alert variant="destructive">
@@ -146,10 +150,10 @@ export function AuditHistory({
           )}
           <Collapsible>
             <CollapsibleTrigger render={<Button variant="ghost" size="sm" />}>
-              Tehnički detalji
+              Detalji promjene
             </CollapsibleTrigger>
             <CollapsibleContent className="text-muted-foreground pt-3 text-sm">
-              {auditValue(item.metadata)}
+              {formatMetadata?.(item.metadata) ?? auditValue(item.metadata)}
             </CollapsibleContent>
           </Collapsible>
         </article>
