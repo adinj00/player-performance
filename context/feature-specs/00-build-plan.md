@@ -325,9 +325,9 @@ Dependencies: Unit 22, Unit 23, Unit 28, Unit 30, Unit 31, Unit 32, Unit 38, Uni
 
 ### Unit 49: Training GPS UI Foundation
 
-Add training-session list/detail, participant management, canonical workload display and comparison-safe metric presentation, contextual TRAINING_GPS import creation/target selection, and empty/unsupported vendor states using the Unit 48 APIs.
+Add the protected `Treninzi i GPS` module, training-session lifecycle and date-eligible participant management, canonical comparison-safe workload tables, contextual training/match GPS import flows, session import history and audit, a real match physical-data tab, and player physical-history trends restricted to one exact comparability key. Add only participant-candidate and training-session import-filter read support.
 
-Dependencies: Unit 44, Unit 48.
+Dependencies: Unit 29, Unit 34, Unit 39, Unit 44, Unit 48.
 
 ### Unit 50: Medical Availability Backend
 
@@ -381,8 +381,8 @@ Dependencies: Unit 40, Unit 53.
 
 ## Next Immediate Unit
 
-The next implementation unit after Unit 48 should be:
+The next implementation unit after Unit 49 should be:
 
-**Unit 49: Training GPS UI Foundation**
+**Unit 50: Medical Availability Backend**
 
-Reason: vendor-neutral training sessions, date-eligible participants, canonical physical metric definitions, versioned training/match workload records, safe comparability context, workload reads, and import-target contracts now exist. The next dependency-safe step is to build the training-session and workload UI, including contextual training-import creation, while Gpexe and Zone14 exact mappings remain evidence-gated.
+Reason: training sessions, participant management, canonical physical workload reads, comparison-safe presentation, contextual imports, and match/player physical surfaces are now complete without weakening the vendor evidence gates. The next dependency-safe module is medical availability: define availability and injury records, restricted-note permissions, team-scoped reads, lifecycle behavior, and audit coverage before Unit 51 adds coach-safe and medical-authorized UI.
