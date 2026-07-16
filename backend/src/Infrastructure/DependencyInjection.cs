@@ -29,6 +29,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using PlayerPerformance.Application.Imports;
 using PlayerPerformance.Infrastructure.Imports;
+using PlayerPerformance.Application.Physical;
+using PlayerPerformance.Infrastructure.Physical;
 
 namespace PlayerPerformance.Infrastructure;
 
@@ -90,6 +92,7 @@ public static class DependencyInjection
         services.AddSingleton<IImportWorkflowProcessor>(provider => new GenericPreviewImportProcessor(provider.GetRequiredService<ITabularSourceReaderResolver>(), provider.GetRequiredService<IOptions<ImportOptions>>(), Domain.Imports.ImportFileFormat.XLSX));
         services.AddSingleton<IImportProcessorRegistry, ImportProcessorRegistry>();
         services.AddScoped<IImportService, ImportService>();
+        services.AddScoped<IPhysicalWorkloadWriter, PhysicalWorkloadWriter>();
         services.AddScoped<TeamStartupInitializer>();
 
         services.AddDbContext<AppDbContext>(options =>

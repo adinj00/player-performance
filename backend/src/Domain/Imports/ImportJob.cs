@@ -11,10 +11,11 @@ public sealed class ImportJob : Entity
         ResultSummaryJson = "{}";
         PreviewMetadataJson = "{}";
     }
-    private ImportJob(Guid id, Guid teamId, Guid? matchId, Guid storedFileId, ImportType type, ImportSourceSystem source, string? label, ImportFileFormat format, string? description, Guid userId, DateTime now) : base(id)
+    private ImportJob(Guid id, Guid teamId, Guid? matchId, Guid? trainingSessionId, Guid storedFileId, ImportType type, ImportSourceSystem source, string? label, ImportFileFormat format, string? description, Guid userId, DateTime now) : base(id)
     {
         TeamId = teamId;
         MatchId = matchId;
+        TrainingSessionId = trainingSessionId;
         StoredFileId = storedFileId;
         ImportType = type;
         SourceSystem = source;
@@ -30,6 +31,7 @@ public sealed class ImportJob : Entity
     }
     public Guid TeamId { get; private set; }
     public Guid? MatchId { get; private set; }
+    public Guid? TrainingSessionId { get; private set; }
     public Guid StoredFileId { get; private set; }
     public ImportType ImportType { get; private set; }
     public ImportSourceSystem SourceSystem { get; private set; }
@@ -72,13 +74,25 @@ public sealed class ImportJob : Entity
         Guard.AgainstDefault(teamId, nameof(teamId));
         Guard.AgainstDefault(storedFileId, nameof(storedFileId));
         Guard.AgainstDefault(userId, nameof(userId));
-        EnsureTarget(type, matchId);
+        EnsureTarget(type, matchId, null);
         if (!Enum.IsDefined(source) || !Enum.IsDefined(format))
             throw new ArgumentOutOfRangeException();
         var label = Normalize(sourceLabel, SourceLabelMaxLength);
         if ((source == ImportSourceSystem.OTHER) != (label is not null))
             throw new ArgumentException("A source label is required only for OTHER.");
-        return new(id, teamId, matchId, storedFileId, type, source, label, format, Normalize(description, DescriptionMaxLength), userId, now);
+        return new(id, teamId, matchId, null, storedFileId, type, source, label, format, Normalize(description, DescriptionMaxLength), userId, now);
+    }
+    public static ImportJob Create(Guid id, Guid teamId, Guid? matchId, Guid? trainingSessionId, Guid storedFileId, ImportType type, ImportSourceSystem source, string? sourceLabel, ImportFileFormat format, string? description, Guid userId, DateTime now)
+    {
+        Guard.AgainstDefault(id, nameof(id));
+        Guard.AgainstDefault(teamId, nameof(teamId));
+        Guard.AgainstDefault(storedFileId, nameof(storedFileId));
+        Guard.AgainstDefault(userId, nameof(userId));
+        EnsureTarget(type, matchId, trainingSessionId);
+        var label = Normalize(sourceLabel, SourceLabelMaxLength);
+        if ((source == ImportSourceSystem.OTHER) != (label is not null))
+            throw new ArgumentException("A source label is required only for OTHER.");
+        return new(id, teamId, matchId, trainingSessionId, storedFileId, type, source, label, format, Normalize(description, DescriptionMaxLength), userId, now);
     }
     public Guid AcquireLease(ImportProcessingOperation operation, string key, string version, Guid actorId, DateTime now, TimeSpan timeout)
     {
@@ -177,9 +191,9 @@ public sealed class ImportJob : Entity
         ProcessingProcessorVersion = null;
     }
     private static bool CanProcessFrom(ImportJobStatus status) => status is ImportJobStatus.UPLOADED or ImportJobStatus.VALIDATION_FAILED or ImportJobStatus.FAILED or ImportJobStatus.READY_TO_CONFIRM;
-    private static void EnsureTarget(ImportType type, Guid? matchId)
+    private static void EnsureTarget(ImportType type, Guid? matchId, Guid? trainingSessionId)
     {
-        if (!Enum.IsDefined(type) || ((type is ImportType.MATCH_GPS or ImportType.MATCH_PLAYER_STATISTICS) != matchId.HasValue))
+        if (!Enum.IsDefined(type) || matchId.HasValue && trainingSessionId.HasValue || ((type is ImportType.MATCH_GPS or ImportType.MATCH_PLAYER_STATISTICS) != matchId.HasValue) || trainingSessionId.HasValue && type != ImportType.TRAINING_GPS)
             throw new ArgumentException("The import type and target context do not match.");
     }
     private static string? Normalize(string? value, int limit) => string.IsNullOrWhiteSpace(value) ? null : Ensure(value.Trim(), limit);

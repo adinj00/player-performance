@@ -59,7 +59,7 @@ internal static class ImportEndpoints
         if (request is null || !IsPart(file, "file", true))
             return TypedResults.BadRequest();
         var name = HeaderUtilities.RemoveQuotes(ContentDispositionHeaderValue.Parse(file!.ContentDisposition!).FileName).Value;
-        return ToCreated(await s.CreateAsync(new(request.TeamId, request.MatchId, request.ImportType, request.SourceSystem, request.SourceLabel, request.Description, name!, file.ContentType, h.Request.ContentLength, file.Body), ct), h);
+        return ToCreated(await s.CreateAsync(new(request.TeamId, request.MatchId, request.TrainingSessionId, request.ImportType, request.SourceSystem, request.SourceLabel, request.Description, name!, file.ContentType, h.Request.ContentLength, file.Body), ct), h);
     }
     private static async Task<IResult> ListAsync(IImportService s, HttpContext h, CancellationToken ct, Guid? teamId = null, Guid? matchId = null, ImportType? importType = null, ImportSourceSystem? sourceSystem = null, ImportFileFormat? fileFormat = null, ImportJobStatus? status = null, string? search = null, DateTime? dateFrom = null, DateTime? dateTo = null, int page = 1, int pageSize = 25) => ToResult(await s.ListAsync(new(teamId, matchId, importType, sourceSystem, fileFormat, status, search, dateFrom, dateTo, page, pageSize), ct), h);
     private static async Task<IResult> GetAsync(Guid id, IImportService s, CancellationToken ct) => await s.GetAsync(id, ct) is { } item ? TypedResults.Ok(item) : TypedResults.NotFound();
@@ -116,5 +116,5 @@ internal static class ImportEndpoints
         Extensions = { ["code"] = error.Code, ["traceId"] = h.TraceIdentifier
         }
     });
-    private sealed record ImportMetadata(Guid TeamId, Guid? MatchId, ImportType ImportType, ImportSourceSystem SourceSystem, string? SourceLabel, string? Description);
+    private sealed record ImportMetadata(Guid TeamId, Guid? MatchId, Guid? TrainingSessionId, ImportType ImportType, ImportSourceSystem SourceSystem, string? SourceLabel, string? Description);
 }

@@ -20,6 +20,14 @@ public sealed class ImportsTests
     }
 
     [Fact]
+    public void Create_ShouldSupportOnlyTrainingGpsTrainingSessionTarget()
+    {
+        var training = ImportJob.Create(Guid.NewGuid(), Guid.NewGuid(), null, Guid.NewGuid(), Guid.NewGuid(), ImportType.TRAINING_GPS, ImportSourceSystem.GENERIC, null, ImportFileFormat.CSV, null, Guid.NewGuid(), Now);
+        Assert.NotNull(training.TrainingSessionId);
+        Assert.Throws<ArgumentException>(() => ImportJob.Create(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), ImportType.MATCH_GPS, ImportSourceSystem.GENERIC, null, ImportFileFormat.CSV, null, Guid.NewGuid(), Now));
+    }
+
+    [Fact]
     public void PreviewLease_ShouldPreventActiveReplacement_AndRecordBoundedPreviewCount()
     {
         var job = Create();

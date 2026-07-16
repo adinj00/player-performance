@@ -4,6 +4,7 @@ using PlayerPerformance.Domain.Files;
 using PlayerPerformance.Domain.Imports;
 using PlayerPerformance.Domain.Matches;
 using PlayerPerformance.Domain.Teams;
+using PlayerPerformance.Domain.Training;
 using PlayerPerformance.Infrastructure.Identity;
 namespace PlayerPerformance.Infrastructure.Imports;
 
@@ -15,6 +16,7 @@ internal sealed class ImportJobConfiguration : IEntityTypeConfiguration<ImportJo
         b.HasKey(x => x.Id);
         b.Property(x => x.TeamId).HasColumnName("team_id").IsRequired();
         b.Property(x => x.MatchId).HasColumnName("match_id");
+        b.Property(x => x.TrainingSessionId).HasColumnName("training_session_id");
         b.Property(x => x.StoredFileId).HasColumnName("stored_file_id").IsRequired();
         b.Property(x => x.ImportType).HasColumnName("import_type").HasConversion<string>().HasMaxLength(32).IsRequired();
         b.Property(x => x.SourceSystem).HasColumnName("source_system").HasConversion<string>().HasMaxLength(16).IsRequired();
@@ -58,6 +60,7 @@ internal sealed class ImportJobConfiguration : IEntityTypeConfiguration<ImportJo
             x.Status,
             x.CreatedAtUtc
         });
+        b.HasIndex(x => x.TrainingSessionId);
         b.HasIndex(x => new
         {
             x.MatchId,
@@ -76,6 +79,7 @@ internal sealed class ImportJobConfiguration : IEntityTypeConfiguration<ImportJo
         });
         b.HasOne<Team>().WithMany().HasForeignKey(x => x.TeamId).OnDelete(DeleteBehavior.Restrict);
         b.HasOne<Match>().WithMany().HasForeignKey(x => x.MatchId).OnDelete(DeleteBehavior.Restrict);
+        b.HasOne<TrainingSession>().WithMany().HasForeignKey(x => x.TrainingSessionId).OnDelete(DeleteBehavior.Restrict);
         b.HasOne<StoredFile>().WithMany().HasForeignKey(x => x.StoredFileId).OnDelete(DeleteBehavior.Restrict);
         b.HasOne<ApplicationUser>().WithMany().HasForeignKey(x => x.CreatedByUserId).OnDelete(DeleteBehavior.Restrict);
         b.HasOne<ApplicationUser>().WithMany().HasForeignKey(x => x.ProcessingRequestedByUserId).OnDelete(DeleteBehavior.Restrict);

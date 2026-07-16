@@ -234,8 +234,13 @@ V1 domain model includes, but is not limited to:
 - `GoalkeeperMatchStats`
 - `TeamMatchStats`
 - `TrainingSession`
-- `GpsImport`
-- `GpsMetric`
+- `TrainingSession` — team-scoped operational training metadata with planned/completed/cancelled lifecycle.
+- `TrainingSessionParticipant` — append-only participant-link history, date-eligible through player-team assignments.
+- `PlayerPhysicalWorkload` — a canonical workload snapshot targeting exactly one training participant or match appearance.
+- `PhysicalWorkloadRevision` — append-only official workload source/provenance revision; the parent identifies its current revision.
+- `PhysicalMetricValue` — queryable canonical metric value with unit, threshold, and methodology comparability context.
+
+`ImportJob` owns import workflow and original-file retention. Physical workloads are official canonical data created only by approved import-confirmation use cases; vendor mappings remain evidence-gated and canonical metric codes do not claim a vendor export supplies them. There is no separate `GpsImport` workflow.
 - `ImportJob`
 - `MediaAsset`
 - `ExternalMediaReference`

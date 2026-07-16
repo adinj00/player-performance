@@ -11,6 +11,8 @@ using PlayerPerformance.Domain.Auditing;
 using PlayerPerformance.Domain.Files;
 using PlayerPerformance.Domain.Media;
 using PlayerPerformance.Domain.Imports;
+using PlayerPerformance.Domain.Training;
+using PlayerPerformance.Domain.Physical;
 
 namespace PlayerPerformance.Infrastructure.Persistence;
 
@@ -46,6 +48,11 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options)
     public DbSet<ImportPreviewColumn> ImportPreviewColumns => Set<ImportPreviewColumn>();
     public DbSet<ImportPreviewRow> ImportPreviewRows => Set<ImportPreviewRow>();
     public DbSet<ImportValidationIssue> ImportValidationIssues => Set<ImportValidationIssue>();
+    public DbSet<TrainingSession> TrainingSessions => Set<TrainingSession>();
+    public DbSet<TrainingSessionParticipant> TrainingSessionParticipants => Set<TrainingSessionParticipant>();
+    public DbSet<PlayerPhysicalWorkload> PlayerPhysicalWorkloads => Set<PlayerPhysicalWorkload>();
+    public DbSet<PhysicalWorkloadRevision> PhysicalWorkloadRevisions => Set<PhysicalWorkloadRevision>();
+    public DbSet<PhysicalMetricValue> PhysicalMetricValues => Set<PhysicalMetricValue>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

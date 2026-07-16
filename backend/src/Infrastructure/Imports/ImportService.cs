@@ -26,7 +26,7 @@ internal sealed class ImportService(AppDbContext db, ICurrentUserAccess current,
         var access = await current.GetAsync(ct);
         if (!CanUse(access) || !await teamAccess.CanAccessAsync(request.TeamId, ct))
             return Result<ImportJobResponse>.Failure(Forbidden);
-        if (!ImportUploadRules.TryGetFormat(request.OriginalFileName, request.ContentType, out var format) || request.Content is null || request.DeclaredLength is <= 0 || request.DeclaredLength > options.Value.MaxUploadSizeBytes || !await ValidTargetAsync(request.TeamId, request.MatchId, request.ImportType, ct))
+        if (!ImportUploadRules.TryGetFormat(request.OriginalFileName, request.ContentType, out var format) || request.Content is null || request.DeclaredLength is <= 0 || request.DeclaredLength > options.Value.MaxUploadSizeBytes || !await ValidTargetAsync(request.TeamId, request.MatchId, request.TrainingSessionId, request.ImportType, ct))
             return Result<ImportJobResponse>.Failure(Validation);
         var name = FileMetadataValidation.NormalizeOriginalFileName(request.OriginalFileName);
         if (name.IsFailure)
@@ -43,7 +43,7 @@ internal sealed class ImportService(AppDbContext db, ICurrentUserAccess current,
         {
             var now = clock.UtcNow;
             var file = StoredFile.Create(Guid.NewGuid(), key, name.Value, request.ContentType!.Trim(), write.Value.SizeBytes, access.UserId!.Value, now);
-            var job = ImportJob.Create(Guid.NewGuid(), request.TeamId, request.MatchId, file.Id, request.ImportType, request.SourceSystem, request.SourceLabel, format, request.Description, access.UserId.Value, now);
+            var job = ImportJob.Create(Guid.NewGuid(), request.TeamId, request.MatchId, request.TrainingSessionId, file.Id, request.ImportType, request.SourceSystem, request.SourceLabel, format, request.Description, access.UserId.Value, now);
             db.StoredFiles.Add(file);
             db.ImportJobs.Add(job);
             audit.Add(AuditPayload.Create(access.UserId.Value, AuditActions.ImportJobCreated, AuditEntityTypes.ImportJob, job.Id, now, null, new { job.TeamId, job.MatchId, job.ImportType, job.SourceSystem, job.FileFormat, originalFileName = file.OriginalFileName, file.ContentType, file.SizeBytes }));
@@ -192,6 +192,7 @@ internal sealed class ImportService(AppDbContext db, ICurrentUserAccess current,
                 await db.SaveChangesAsync(ct);
                 return Result.Success();
             }
+            await using var transaction = await db.Database.BeginTransactionAsync(ct);
             var confirmation = await processor.ConfirmAsync(context, stream, ct);
             var confirmationFinal = await db.ImportJobs.SingleAsync(x => x.Id == id, ct);
             if (!confirmationFinal.IsLeaseCurrent(lease))
@@ -199,6 +200,7 @@ internal sealed class ImportService(AppDbContext db, ICurrentUserAccess current,
             confirmationFinal.CompleteConfirmation(lease, access.UserId.Value, confirmation.ResultSummaryJson, clock.UtcNow);
             audit.Add(AuditPayload.Create(access.UserId.Value, AuditActions.ImportJobConfirmed, AuditEntityTypes.ImportJob, id, clock.UtcNow));
             await db.SaveChangesAsync(ct);
+            await transaction.CommitAsync(ct);
             return Result.Success();
         }
         catch (Exception exception) when (exception is not OperationCanceledException)
@@ -237,14 +239,14 @@ internal sealed class ImportService(AppDbContext db, ICurrentUserAccess current,
     }
     private async Task<bool> CanUseAsync(CancellationToken ct) => CanUse(await current.GetAsync(ct));
     private static bool CanUse(CurrentUserAccess access) => access.IsAdmin || access.IsActive && access.PrimaryRole == StaffRole.DATA_OPERATOR && access.EffectivePermissions.CanImportData;
-    private async Task<bool> ValidTargetAsync(Guid teamId, Guid? matchId, ImportType type, CancellationToken ct)
+    private async Task<bool> ValidTargetAsync(Guid teamId, Guid? matchId, Guid? trainingSessionId, ImportType type, CancellationToken ct)
     {
         var team = await db.Teams.AsNoTracking().SingleOrDefaultAsync(x => x.Id == teamId, ct);
         if (team is null || team.Status == TeamStatus.ARCHIVED)
             return false;
         if (type is ImportType.MATCH_GPS or ImportType.MATCH_PLAYER_STATISTICS)
             return matchId.HasValue && await db.Matches.AsNoTracking().AnyAsync(x => x.Id == matchId && x.TeamId == teamId && !x.IsArchived, ct);
-        return !matchId.HasValue;
+        return type != ImportType.TRAINING_GPS ? !matchId.HasValue && !trainingSessionId.HasValue : !matchId.HasValue && (!trainingSessionId.HasValue || await db.TrainingSessions.AsNoTracking().AnyAsync(x => x.Id == trainingSessionId && x.TeamId == teamId, ct));
     }
     private async Task<(ImportJob job, StoredFile file)?> FindReadableAsync(Guid id, CancellationToken ct)
     {
@@ -264,6 +266,6 @@ internal sealed class ImportService(AppDbContext db, ICurrentUserAccess current,
             actions.Add(ImportAllowedAction.CONFIRM);
         if (processable)
             actions.Add(ImportAllowedAction.CANCEL);
-        return new(job.Id, job.TeamId, job.MatchId, job.ImportType, job.SourceSystem, job.SourceLabel, job.FileFormat, job.Status, job.Description, file.OriginalFileName, file.ContentType, file.SizeBytes, job.CreatedAtUtc, job.UpdatedAtUtc, job.ConfigurationRevision, job.ValidatedConfigurationRevision, job.ValidatedAtUtc, job.PreviewGeneratedAtUtc, job.ValidationCompletedAtUtc, job.TotalRowCount, job.PreviewRowCount, job.ValidRowCount, job.InvalidRowCount, job.WarningCount, job.FailureCode, job.FailureMessage, job.PreviewMetadataJson, job.ConfirmedAtUtc, job.CancelledAtUtc, actions);
+        return new(job.Id, job.TeamId, job.MatchId, job.TrainingSessionId, job.ImportType, job.SourceSystem, job.SourceLabel, job.FileFormat, job.Status, job.Description, file.OriginalFileName, file.ContentType, file.SizeBytes, job.CreatedAtUtc, job.UpdatedAtUtc, job.ConfigurationRevision, job.ValidatedConfigurationRevision, job.ValidatedAtUtc, job.PreviewGeneratedAtUtc, job.ValidationCompletedAtUtc, job.TotalRowCount, job.PreviewRowCount, job.ValidRowCount, job.InvalidRowCount, job.WarningCount, job.FailureCode, job.FailureMessage, job.PreviewMetadataJson, job.ConfirmedAtUtc, job.CancelledAtUtc, actions);
     }
 }
