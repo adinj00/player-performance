@@ -299,9 +299,9 @@ Dependencies: Unit 39, Unit 43.
 
 ### Unit 45: Generic CSV/XLSX Parsing Foundation
 
-Add mature CSV/XLSX reader packages, format detection, row parsing abstraction, column preview, validation result structure, and tests without vendor-specific mappings.
+Add mature low-level CSV/XLSX readers, provider-neutral tabular contracts, content-level format verification, bounded streaming row processing, deterministic headers/types, persisted preview metadata, and exact-first generic raw-preview fallback processors. Generic fallback enables preview only—never domain validation, confirmation, or vendor-specific mappings.
 
-Dependencies: Unit 43.
+Dependencies: Unit 40, Unit 43.
 
 ### Unit 46: Gpexe Mapping Spec After Sample Review
 
@@ -381,8 +381,8 @@ Dependencies: Unit 40, Unit 53.
 
 ## Next Immediate Unit
 
-The next implementation unit after Unit 43 should be:
+The next implementation unit after Unit 44 should be:
 
-**Unit 44: Import UI Foundation**
+**Unit 45: Generic CSV/XLSX Parsing Foundation**
 
-Reason: the backend now owns secure source-file retention, import workflow statuses, allowed actions, processor capabilities, preview/validation persistence, explicit confirmation safety, cancellation, and audit history. The next dependency-safe step is to build the real `Importi` workspace so authorized users can upload and inspect jobs immediately, while unsupported processing combinations remain truthful until Unit 45 registers generic CSV/XLSX readers.
+Reason: authorized users can now upload and inspect retained import jobs, but no processor is registered yet. The next dependency-safe step is to install mature low-level CSV/XLSX readers and add a safe generic raw-preview fallback so every accepted source can expose its actual columns and bounded rows. Domain validation, confirmation, and Gpexe/Zone14 mappings remain blocked until exact formats and semantics are confirmed.
