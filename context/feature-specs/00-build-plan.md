@@ -331,15 +331,15 @@ Dependencies: Unit 29, Unit 34, Unit 39, Unit 44, Unit 48.
 
 ### Unit 50: Medical Availability Backend
 
-Add availability statuses, injury/availability records, restricted notes, medical permissions, and audit coverage.
+Add privacy-separated coach-safe availability and restricted injury records, immutable revisions, synthetic unknown status, current-team availability counts, optimistic concurrency, medical-detail permission/team-scope rules, injury lifecycle, and disclosure-safe audit coverage.
 
-Dependencies: Unit 20, Unit 23, Unit 27, Unit 38.
+Dependencies: Unit 20, Unit 22, Unit 23, Unit 27, Unit 28, Unit 38.
 
 ### Unit 51: Medical Availability UI
 
-Add team-filtered availability views, player availability editing for authorized roles, restricted note behavior, and coach-safe summaries.
+Add team-filtered coach-safe availability summaries, authorized medical availability editing, restricted injury list/detail/revision workflows, player-profile availability integration, permission-aware medical disclosure, and entity audit history using the Unit 50 APIs.
 
-Dependencies: Unit 50.
+Dependencies: Unit 29, Unit 39, Unit 50.
 
 ### Unit 52: Dashboard Backend Read Models
 
@@ -381,8 +381,8 @@ Dependencies: Unit 40, Unit 53.
 
 ## Next Immediate Unit
 
-The next implementation unit after Unit 49 should be:
+The next implementation unit after Unit 50 should be:
 
-**Unit 50: Medical Availability Backend**
+**Unit 51: Medical Availability UI**
 
-Reason: training sessions, participant management, canonical physical workload reads, comparison-safe presentation, contextual imports, and match/player physical surfaces are now complete without weakening the vendor evidence gates. The next dependency-safe module is medical availability: define availability and injury records, restricted-note permissions, team-scoped reads, lifecycle behavior, and audit coverage before Unit 51 adds coach-safe and medical-authorized UI.
+Reason: the backend now provides a strict separation between coach-safe availability and restricted injury details, immutable histories, current-team status counts, medical-detail authorization, concurrency protection, lifecycle operations, and privacy-safe audit endpoints. The next dependency-safe step is to build the team availability workspace and player medical surfaces without allowing restricted fields to leak into coach-safe views.
