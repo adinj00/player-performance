@@ -2,28 +2,28 @@
 
 ## Stack
 
-| Layer | Technology | Role |
-| --- | --- | --- |
-| Frontend Framework | React + Vite + TypeScript | Single-page web application for staff workflows, dashboards, forms, tables, and analysis views |
-| Frontend Styling | Tailwind CSS v4 + shadcn/ui | Token-based UI system, reusable primitives, dashboard layout, forms, tables, dialogs, and charts |
-| Frontend Data Fetching | TanStack Query | Server-state fetching, caching, invalidation, and mutations |
-| Frontend URL State | React Router search params and local React state | URL state where a workflow requires shareable navigation; local component state for current Players/Users filters to keep typing and filter changes independent of router updates |
-| Frontend Client UI State | Zustand | Limited global client-side UI state such as sidebar state, command palette state, or transient layout preferences |
-| Frontend Validation | Zod + React Hook Form | Form schemas, frontend validation, and typed form handling |
-| Frontend Tables | TanStack Table + shadcn/ui table primitives | Headless table behavior with design-system rendering |
-| Frontend Charts | shadcn/ui chart components built on Recharts | V1 dashboard and trend charts |
-| Frontend Localization | i18next + react-i18next when localization is implemented | Bosnian Latin default UI language with optional English UI selection |
-| Backend Framework | ASP.NET Core 8 | Backend API, authentication, authorization, middleware, OpenAPI, and endpoint groups |
-| Backend API Style | Minimal APIs with endpoint groups | Thin HTTP endpoint layer organized by module |
-| Backend Architecture | Clean Architecture + Vertical Slice Application layer | Separation of domain, use cases, infrastructure, and API boundaries |
-| Backend Mapping | Mapster | DTO/entity mapping where mapping automation improves clarity |
-| Backend Validation | FluentValidation | Request and command validation in the Application layer |
-| Authentication | ASP.NET Core Identity-style user management + secure HttpOnly cookies | Staff-only authentication, account lifecycle, invite/setup flow, password reset, and session handling |
-| Database | PostgreSQL | Relational source of truth for structured application data |
-| File Storage | File storage abstraction with local development adapter and S3-compatible production target | Media, import source files, player images, generated reports, and large artifacts |
-| Local Configuration | `backend/.env` and `frontend/.env.local` | Local development configuration and secrets; only example files are committed |
-| Production Configuration | Hosting environment variables or managed secret store | Production secrets and deployment configuration |
-| Testing | .NET unit/integration tests; frontend type/build/lint checks; later Vitest/RTL/Playwright as needed | Quality gates and regression protection |
+| Layer                    | Technology                                                                                          | Role                                                                                                                                                                              |
+| ------------------------ | --------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Frontend Framework       | React + Vite + TypeScript                                                                           | Single-page web application for staff workflows, dashboards, forms, tables, and analysis views                                                                                    |
+| Frontend Styling         | Tailwind CSS v4 + shadcn/ui                                                                         | Token-based UI system, reusable primitives, dashboard layout, forms, tables, dialogs, and charts                                                                                  |
+| Frontend Data Fetching   | TanStack Query                                                                                      | Server-state fetching, caching, invalidation, and mutations                                                                                                                       |
+| Frontend URL State       | React Router search params and local React state                                                    | URL state where a workflow requires shareable navigation; local component state for current Players/Users filters to keep typing and filter changes independent of router updates |
+| Frontend Client UI State | Zustand                                                                                             | Limited global client-side UI state such as sidebar state, command palette state, or transient layout preferences                                                                 |
+| Frontend Validation      | Zod + React Hook Form                                                                               | Form schemas, frontend validation, and typed form handling                                                                                                                        |
+| Frontend Tables          | TanStack Table + shadcn/ui table primitives                                                         | Headless table behavior with design-system rendering                                                                                                                              |
+| Frontend Charts          | shadcn/ui chart components built on Recharts                                                        | V1 dashboard and trend charts                                                                                                                                                     |
+| Frontend Localization    | i18next + react-i18next when localization is implemented                                            | Bosnian Latin default UI language with optional English UI selection                                                                                                              |
+| Backend Framework        | ASP.NET Core 8                                                                                      | Backend API, authentication, authorization, middleware, OpenAPI, and endpoint groups                                                                                              |
+| Backend API Style        | Minimal APIs with endpoint groups                                                                   | Thin HTTP endpoint layer organized by module                                                                                                                                      |
+| Backend Architecture     | Clean Architecture + Vertical Slice Application layer                                               | Separation of domain, use cases, infrastructure, and API boundaries                                                                                                               |
+| Backend Mapping          | Mapster                                                                                             | DTO/entity mapping where mapping automation improves clarity                                                                                                                      |
+| Backend Validation       | FluentValidation                                                                                    | Request and command validation in the Application layer                                                                                                                           |
+| Authentication           | ASP.NET Core Identity-style user management + secure HttpOnly cookies                               | Staff-only authentication, account lifecycle, invite/setup flow, password reset, and session handling                                                                             |
+| Database                 | PostgreSQL                                                                                          | Relational source of truth for structured application data                                                                                                                        |
+| File Storage             | File storage abstraction with local development adapter and S3-compatible production target         | Media, import source files, player images, generated reports, and large artifacts                                                                                                 |
+| Local Configuration      | `backend/.env` and `frontend/.env.local`                                                            | Local development configuration and secrets; only example files are committed                                                                                                     |
+| Production Configuration | Hosting environment variables or managed secret store                                               | Production secrets and deployment configuration                                                                                                                                   |
+| Testing                  | .NET unit/integration tests; frontend type/build/lint checks; later Vitest/RTL/Playwright as needed | Quality gates and regression protection                                                                                                                                           |
 
 ## Repository Structure
 
@@ -241,6 +241,7 @@ V1 domain model includes, but is not limited to:
 - `PhysicalMetricValue` — queryable canonical metric value with unit, threshold, and methodology comparability context.
 
 `ImportJob` owns import workflow and original-file retention. Physical workloads are official canonical data created only by approved import-confirmation use cases; vendor mappings remain evidence-gated and canonical metric codes do not claim a vendor export supplies them. There is no separate `GpsImport` workflow.
+
 - `ImportJob`
 - `MediaAsset`
 - `ExternalMediaReference`
@@ -457,6 +458,12 @@ Statuses:
 - `REHAB`
 - `UNKNOWN`
 
+### Medical privacy tiers
+
+The medical module uses two separate disclosure tiers. Coach-safe availability exposes only operational status, effective date, expected return, and a deliberately coach-visible operational note to active staff within team scope. Restricted medical details (body area, diagnosis, restricted notes, injury revisions, and injury lifecycle metadata) are returned only through dedicated medical routes after team-scope checks and `canViewMedicalDetails` authorization.
+
+Availability and injury records are separate versioned, append-only aggregates with semantic audit events. A player/team without an availability aggregate is presented as synthesized `UNKNOWN`; this creates neither persistence nor an audit entry. Injury resolution never changes availability automatically. Injury mutation remains limited to administrators and in-scope medical staff with medical-detail permission. Generic player, dashboard, team, match, training, and safe availability contracts must never embed restricted injury fields.
+
 ### User Account Statuses
 
 Statuses:
@@ -531,7 +538,6 @@ Shared logic should not be moved to global folders until at least two features n
 - shadcn/ui table primitives render tables visually.
 - shadcn/ui chart components built on Recharts provide V1 charts.
 - React Hook Form and Zod own form state and frontend form validation.
-
 
 ## Localization Model
 

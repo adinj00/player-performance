@@ -10,6 +10,7 @@ This file intentionally starts lightweight. It should become more detailed as bu
 
 ## Current Goal
 
+- Unit 50: Medical Availability Backend is complete. Added separate coach-safe availability and restricted injury domain models, append-only revision mappings, scoped endpoint surface, synthetic unknown reads, CSRF-protected mutations, and medical audit entity/action codes. Migration `20260717140512_AddMedicalAvailabilityBackend` was generated under `backend/src/Infrastructure/Persistence/Migrations/`; `dotnet ef database update` completed and reported the configured local database already up to date. Focused domain invariants plus safe-DTO privacy and medical-detail authorization integration coverage were added. Verification passed: whitespace format and verify, `dotnet build`, `dotnet test` (112 unit / 34 integration), and `git diff --check`.
 - Unit 48: Training GPS Backend Foundation is in progress. The implementation is present, but the required fake exact-processor integration suite proving atomic workload/import/audit confirmation is still outstanding.
 
 ## In Progress

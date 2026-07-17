@@ -20,6 +20,7 @@ internal static class EndpointRouteBuilderExtensions
         endpoints.MapTeamEndpoints();
         endpoints.MapStaffUserEndpoints();
         endpoints.MapPlayerEndpoints();
+        endpoints.MapMedicalEndpoints();
         endpoints.MapMatchEndpoints();
         endpoints.MapMatchReportEndpoints();
         endpoints.MapMediaEndpoints();

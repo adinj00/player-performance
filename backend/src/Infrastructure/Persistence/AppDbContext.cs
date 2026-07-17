@@ -13,6 +13,7 @@ using PlayerPerformance.Domain.Media;
 using PlayerPerformance.Domain.Imports;
 using PlayerPerformance.Domain.Training;
 using PlayerPerformance.Domain.Physical;
+using PlayerPerformance.Domain.Medical;
 
 namespace PlayerPerformance.Infrastructure.Persistence;
 
@@ -53,6 +54,10 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options)
     public DbSet<PlayerPhysicalWorkload> PlayerPhysicalWorkloads => Set<PlayerPhysicalWorkload>();
     public DbSet<PhysicalWorkloadRevision> PhysicalWorkloadRevisions => Set<PhysicalWorkloadRevision>();
     public DbSet<PhysicalMetricValue> PhysicalMetricValues => Set<PhysicalMetricValue>();
+    public DbSet<PlayerAvailability> PlayerAvailabilities => Set<PlayerAvailability>();
+    public DbSet<PlayerAvailabilityRevision> PlayerAvailabilityRevisions => Set<PlayerAvailabilityRevision>();
+    public DbSet<InjuryRecord> InjuryRecords => Set<InjuryRecord>();
+    public DbSet<InjuryRecordRevision> InjuryRecordRevisions => Set<InjuryRecordRevision>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
