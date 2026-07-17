@@ -26,7 +26,7 @@ export const routePaths = {
   trainingGps: "/training-sessions",
   imports: "/imports",
   teams: "/teams",
-  medical: "/medical",
+  medical: "/availability",
   media: "/media",
   users: "/users",
   settings: "/settings",
@@ -166,6 +166,11 @@ export const navigationGroups: NavigationGroupDefinition[] = [
       },
       { label: "Igrači", path: routePaths.players, icon: Users },
       { label: "Treninzi i GPS", path: routePaths.trainingGps, icon: Activity },
+      {
+        label: "Dostupnost igrača",
+        path: routePaths.medical,
+        icon: HeartPulse,
+      },
       { label: "Importi", path: routePaths.imports, icon: Upload },
     ],
   },
@@ -173,11 +178,6 @@ export const navigationGroups: NavigationGroupDefinition[] = [
     label: "Klub",
     items: [
       { label: "Timovi / Selekcije", path: routePaths.teams, icon: Users },
-      {
-        label: "Medicinski status",
-        path: routePaths.medical,
-        icon: HeartPulse,
-      },
       { label: "Medijateka", path: routePaths.media, icon: Film },
     ],
   },

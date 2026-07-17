@@ -25,6 +25,7 @@ internal static class MedicalEndpoints
         players.MapGet("/{playerId:guid}/availability", PlayerHistoryAsync);
         players.MapPost("/{playerId:guid}/availability", RecordAvailabilityAsync);
         var injuries = endpoints.MapGroup("/api/medical/injuries").RequireAuthorization().WithTags("Restricted medical injuries");
+        endpoints.MapGet("/api/medical/injury-player-candidates", InjuryPlayerCandidatesAsync).RequireAuthorization().WithTags("Restricted medical injuries");
         injuries.MapGet("", ListInjuriesAsync);
         injuries.MapGet("/{injuryId:guid}", InjuryDetailAsync);
         injuries.MapGet("/{injuryId:guid}/revisions", InjuryRevisionsAsync);
@@ -74,6 +75,7 @@ internal static class MedicalEndpoints
             effectiveOn = x.revision == null ? (DateOnly?)null : x.revision.EffectiveOn,
             expectedReturnOn = x.revision == null ? (DateOnly?)null : x.revision.ExpectedReturnOn,
             coachVisibleNote = x.revision == null ? null : x.revision.CoachVisibleNote,
+            currentRevisionId = x.revision == null ? (Guid?)null : x.revision.Id,
             revisionNumber = x.revision == null ? (int?)null : x.revision.RevisionNumber,
             recordedAtUtc = x.revision == null ? (DateTime?)null : x.revision.RecordedAtUtc,
             allowedActions = SafeWrite(a, teamId) ? new[] { "VIEW", "UPDATE" } : new[] { "VIEW" }
@@ -94,7 +96,16 @@ internal static class MedicalEndpoints
             return Results.Forbid();
         var today = Today(clock);
         var statuses = await (from assignment in db.PlayerTeamAssignments.AsNoTracking() join player in db.Players.AsNoTracking() on assignment.PlayerId equals player.Id join av in db.PlayerAvailabilities.AsNoTracking() on new { assignment.PlayerId, assignment.TeamId } equals new { av.PlayerId, av.TeamId } into avs from av in avs.DefaultIfEmpty() join rev in db.PlayerAvailabilityRevisions.AsNoTracking() on av.CurrentRevisionId equals rev.Id into revs from rev in revs.DefaultIfEmpty() where assignment.TeamId == teamId && assignment.StartDate <= today && (assignment.EndDate == null || assignment.EndDate >= today) && player.Status != PlayerRecordStatus.ARCHIVED select rev == null ? AvailabilityStatus.UNKNOWN : rev.Status).ToListAsync(ct);
-        return Results.Ok(new { totalPlayers = statuses.Count, availableCount = statuses.Count(x => x == AvailabilityStatus.AVAILABLE), limitedCount = statuses.Count(x => x == AvailabilityStatus.LIMITED), unavailableCount = statuses.Count(x => x == AvailabilityStatus.UNAVAILABLE), rehabCount = statuses.Count(x => x == AvailabilityStatus.REHAB), unknownCount = statuses.Count(x => x == AvailabilityStatus.UNKNOWN), generatedAtUtc = clock.UtcNow });
+        return Results.Ok(new
+        {
+            totalPlayers = statuses.Count,
+            availableCount = statuses.Count(x => x == AvailabilityStatus.AVAILABLE),
+            limitedCount = statuses.Count(x => x == AvailabilityStatus.LIMITED),
+            unavailableCount = statuses.Count(x => x == AvailabilityStatus.UNAVAILABLE),
+            rehabCount = statuses.Count(x => x == AvailabilityStatus.REHAB),
+            unknownCount = statuses.Count(x => x == AvailabilityStatus.UNKNOWN),
+            generatedAtUtc = clock.UtcNow
+        });
     }
     private static async Task<IResult> PlayerHistoryAsync(Guid playerId, AppDbContext db, ICurrentUserAccess access, Guid? teamId = null, int page = 1, int pageSize = 25, CancellationToken ct = default)
     {
@@ -103,18 +114,60 @@ internal static class MedicalEndpoints
         var a = await access.GetAsync(ct);
         if (teamId.HasValue && !Read(a, teamId.Value))
             return Results.Forbid();
-        var q = from av in db.PlayerAvailabilities.AsNoTracking() join rev in db.PlayerAvailabilityRevisions.AsNoTracking() on av.CurrentRevisionId equals rev.Id where av.PlayerId == playerId && (!teamId.HasValue || av.TeamId == teamId) && ReadScope(a, av.TeamId) select new { av, rev };
+        var q = from av in db.PlayerAvailabilities.AsNoTracking() join rev in db.PlayerAvailabilityRevisions.AsNoTracking() on av.Id equals rev.PlayerAvailabilityId where av.PlayerId == playerId && (!teamId.HasValue || av.TeamId == teamId) select new { av, rev };
+        if (!a.IsAdmin && a.TeamScopeType != TeamScopeType.ALL_TEAMS)
+        {
+            var scopedTeamIds = a.SelectedTeamIds;
+            q = q.Where(x => scopedTeamIds.Contains(x.av.TeamId));
+        }
         var total = await q.CountAsync(ct);
-        var rows = await q.OrderByDescending(x => x.rev.RecordedAtUtc).ThenByDescending(x => x.rev.Id).Skip((page - 1) * pageSize).Take(pageSize).Select(x => new { availabilityId = x.av.Id, teamId = x.av.TeamId, status = x.rev.Status, effectiveOn = x.rev.EffectiveOn, expectedReturnOn = x.rev.ExpectedReturnOn, coachVisibleNote = x.rev.CoachVisibleNote, revisionNumber = x.rev.RevisionNumber, recordedAtUtc = x.rev.RecordedAtUtc, allowedActions = SafeWrite(a, x.av.TeamId) ? new[] { "VIEW", "UPDATE" } : new[] { "VIEW" } }).ToListAsync(ct);
+        var rows = await q.OrderByDescending(x => x.rev.RecordedAtUtc).ThenByDescending(x => x.rev.Id).Skip((page - 1) * pageSize).Take(pageSize).Select(x => new { availabilityId = x.av.Id, teamId = x.av.TeamId, status = x.rev.Status, effectiveOn = x.rev.EffectiveOn, expectedReturnOn = x.rev.ExpectedReturnOn, coachVisibleNote = x.rev.CoachVisibleNote, currentRevisionId = x.rev.Id, revisionNumber = x.rev.RevisionNumber, recordedAtUtc = x.rev.RecordedAtUtc, allowedActions = SafeWrite(a, x.av.TeamId) ? new[] { "VIEW", "UPDATE" } : new[] { "VIEW" } }).ToListAsync(ct);
         return Results.Ok(new
         {
             items = rows,
             page,
             pageSize,
-            totalCount = total
+            totalCount = total,
+            totalPages = (int)Math.Ceiling(total / (double)pageSize)
         });
     }
     private static bool ReadScope(CurrentUserAccess a, Guid teamId) => a.IsAdmin || a.TeamScopeType == TeamScopeType.ALL_TEAMS || a.SelectedTeamIds.Contains(teamId);
+    private static async Task<IResult> InjuryPlayerCandidatesAsync(Guid teamId, DateOnly occurredOn, AppDbContext db, ICurrentUserAccess access, Guid? playerId = null, string? search = null, int page = 1, int pageSize = 25, CancellationToken ct = default)
+    {
+        if (teamId == Guid.Empty || !ValidPage(page, pageSize) || search?.Length > 200)
+            return Results.BadRequest();
+        var a = await access.GetAsync(ct);
+        if (!InjuryWrite(a, teamId))
+            return Results.Forbid();
+        var query = from assignment in db.PlayerTeamAssignments.AsNoTracking()
+                    join player in db.Players.AsNoTracking() on assignment.PlayerId equals player.Id
+                    where assignment.TeamId == teamId && assignment.StartDate <= occurredOn && (assignment.EndDate == null || assignment.EndDate >= occurredOn) && player.Status != PlayerRecordStatus.ARCHIVED
+                    select new { assignment, player };
+        if (playerId.HasValue)
+            query = query.Where(x => x.player.Id == playerId.Value);
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var term = search.Trim().ToUpper();
+            query = query.Where(x => x.player.FirstName.ToUpper().Contains(term) || x.player.LastName.ToUpper().Contains(term) || x.player.PreferredName != null && x.player.PreferredName.ToUpper().Contains(term));
+        }
+        var total = await query.CountAsync(ct);
+        var items = await query.OrderBy(x => x.player.PreferredName ?? (x.player.FirstName + " " + x.player.LastName)).ThenBy(x => x.player.Id).Skip((page - 1) * pageSize).Take(pageSize).Select(x => new
+        {
+            id = x.player.Id,
+            displayName = x.player.PreferredName ?? (x.player.FirstName + " " + x.player.LastName),
+            preferredName = x.player.PreferredName,
+            dateOfBirth = x.player.DateOfBirth,
+            eligibleAssignment = new { id = x.assignment.Id, teamId = x.assignment.TeamId, startDate = x.assignment.StartDate, endDate = x.assignment.EndDate }
+        }).ToListAsync(ct);
+        return Results.Ok(new
+        {
+            items,
+            page,
+            pageSize,
+            totalCount = total,
+            totalPages = (int)Math.Ceiling(total / (double)pageSize)
+        });
+    }
     private static async Task<IResult> RecordAvailabilityAsync(Guid playerId, AvailabilityRequest r, HttpContext h, IAntiforgery af, AppDbContext db, ICurrentUserAccess access, ISystemClock clock, IAuditWriter audit, CancellationToken ct)
     {
         var csrf = await AntiforgeryValidation.ValidateRequestAsync(h, af);
@@ -164,9 +217,16 @@ internal static class MedicalEndpoints
         if (!ValidPage(page, pageSize) || occurredFrom > occurredTo)
             return Results.BadRequest();
         var a = await access.GetAsync(ct);
+        if (!a.IsActive || !a.HasAccessProfile || !(a.IsAdmin || a.EffectivePermissions.CanViewMedicalDetails))
+            return Results.Forbid();
         if (teamId.HasValue && !DetailRead(a, teamId.Value))
             return Results.Forbid();
-        var q = db.InjuryRecords.AsNoTracking().Where(x => (!teamId.HasValue || x.TeamId == teamId) && (!playerId.HasValue || x.PlayerId == playerId) && (!status.HasValue || x.Status == status) && (!occurredFrom.HasValue || x.OccurredOn >= occurredFrom) && (!occurredTo.HasValue || x.OccurredOn <= occurredTo) && ReadScope(a, x.TeamId));
+        var q = db.InjuryRecords.AsNoTracking().Where(x => (!teamId.HasValue || x.TeamId == teamId) && (!playerId.HasValue || x.PlayerId == playerId) && (!status.HasValue || x.Status == status) && (!occurredFrom.HasValue || x.OccurredOn >= occurredFrom) && (!occurredTo.HasValue || x.OccurredOn <= occurredTo));
+        if (!a.IsAdmin && a.TeamScopeType != TeamScopeType.ALL_TEAMS)
+        {
+            var scopedTeamIds = a.SelectedTeamIds;
+            q = q.Where(x => scopedTeamIds.Contains(x.TeamId));
+        }
         var total = await q.CountAsync(ct);
         var rows = await q.OrderBy(x => x.Status == InjuryStatus.RESOLVED).ThenByDescending(x => x.OccurredOn).ThenByDescending(x => x.Id).Skip((page - 1) * pageSize).Take(pageSize).Select(x => new { id = x.Id, playerId = x.PlayerId, teamId = x.TeamId, x.OccurredOn, x.Status, x.ResolvedOn }).ToListAsync(ct);
         return Results.Ok(new
@@ -174,7 +234,8 @@ internal static class MedicalEndpoints
             items = rows,
             page,
             pageSize,
-            totalCount = total
+            totalCount = total,
+            totalPages = (int)Math.Ceiling(total / (double)pageSize)
         });
     }
     private static async Task<IResult> InjuryDetailAsync(Guid injuryId, AppDbContext db, ICurrentUserAccess access, CancellationToken ct)

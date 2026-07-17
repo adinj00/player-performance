@@ -56,6 +56,43 @@ public sealed class MedicalAvailabilityEndpointsTests
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
 
+    [Fact]
+    public async Task InjuryCandidates_ShouldUseOccurrenceDateAssignment_AndRemainSupportOnly()
+    {
+        using var factory = new IdentityTestApplicationFactory();
+        var (teamId, playerId) = await SeedAssignmentAsync(factory);
+        var admin = await factory.CreateUserAsync("admin.candidates@example.com", "Temporary!Pass123");
+        await factory.CreateAccessProfileAsync(admin.Id, StaffRole.ADMIN);
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { BaseAddress = new Uri("https://localhost") });
+        await LoginAsync(client, admin.Email!);
+
+        using var response = await client.GetAsync($"/api/medical/injury-player-candidates?teamId={teamId}&occurredOn={DateOnly.FromDateTime(DateTime.UtcNow):yyyy-MM-dd}");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        using var document = await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync());
+        var item = Assert.Single(document.RootElement.GetProperty("items").EnumerateArray());
+        Assert.Equal(playerId, item.GetProperty("id").GetGuid());
+        Assert.True(item.TryGetProperty("eligibleAssignment", out _));
+        Assert.False(item.TryGetProperty("status", out _));
+        Assert.False(item.TryGetProperty("diagnosis", out _));
+        Assert.False(item.TryGetProperty("restrictedNotes", out _));
+    }
+
+    [Fact]
+    public async Task InjuryList_ShouldApplyTeamScopeInDatabaseQuery()
+    {
+        using var factory = new IdentityTestApplicationFactory();
+        var (teamId, _) = await SeedAssignmentAsync(factory);
+        var admin = await factory.CreateUserAsync("admin.injury-list@example.com", "Temporary!Pass123");
+        await factory.CreateAccessProfileAsync(admin.Id, StaffRole.ADMIN);
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { BaseAddress = new Uri("https://localhost") });
+        await LoginAsync(client, admin.Email!);
+
+        using var response = await client.GetAsync($"/api/medical/injuries?teamId={teamId}");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
     private static async Task<(Guid TeamId, Guid PlayerId)> SeedAssignmentAsync(TestApplicationFactory factory)
     {
         await using var scope = factory.Services.CreateAsyncScope();

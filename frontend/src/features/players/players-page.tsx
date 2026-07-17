@@ -1,5 +1,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQuery,
+  useQueries,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { MoreHorizontal, Plus } from "lucide-react";
 import { useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
@@ -7,6 +12,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { z } from "zod";
 import { EmptyState } from "@/components/common/empty-state";
 import { DatePicker } from "@/components/common/date-picker";
+import { routePaths } from "@/app/route-paths";
 import { ErrorState } from "@/components/common/error-state";
 import { FilterSelect } from "@/components/common/filter-select";
 import { LoadingState } from "@/components/common/loading-state";
@@ -55,6 +61,7 @@ import {
 import { useSession } from "@/features/auth/hooks/use-session";
 import { MediaLinksSection } from "@/features/media";
 import { WorkloadTable } from "@/features/training/workloads";
+import { medicalApi, type AvailabilityStatus } from "@/features/medical/api";
 import { settingsApi } from "@/features/settings/api";
 import { isApiError } from "@/lib/api/api-client";
 import { formatDate } from "@/lib/date-format";
@@ -97,6 +104,17 @@ function Status({ status }: { status: PlayerStatus }) {
       {playerStatusLabels[status]}
     </Badge>
   );
+}
+function availabilityLabel(status: AvailabilityStatus | undefined) {
+  return (
+    {
+      AVAILABLE: "Dostupan",
+      LIMITED: "Ograničeno dostupan",
+      UNAVAILABLE: "Nedostupan",
+      REHAB: "Rehabilitacija",
+      UNKNOWN: "Nepoznato",
+    } as const
+  )[status ?? "UNKNOWN"];
 }
 function Memberships({ items }: { items: { teamName: string }[] }) {
   return items.length ? (
@@ -580,6 +598,9 @@ export function PlayerDetailPage() {
   const { playerId = "" } = useParams();
   const { user } = useSession();
   const admin = user?.primaryRole === "ADMIN";
+  const canViewMedicalDetails =
+    admin || user?.permissions.canViewMedicalDetails === true;
+  const canRecordInjury = admin || user?.primaryRole === "MEDICAL_STAFF";
   const nav = useNavigate();
   const qc = useQueryClient();
   const [add, setAdd] = useState(false);
@@ -600,6 +621,13 @@ export function PlayerDetailPage() {
     queryKey: ["players", "physical-workloads", playerId],
     queryFn: () => playersApi.physicalWorkloads(playerId),
     retry: false,
+  });
+  const availability = useQueries({
+    queries: (player.data?.currentAssignments ?? []).map((assignment) => ({
+      queryKey: ["availability", "player-history", playerId, assignment.teamId],
+      queryFn: () => medicalApi.playerAvailability(playerId, assignment.teamId),
+      retry: false,
+    })),
   });
   if (player.isLoading) return <LoadingState />;
   if (player.isError || !player.data)
@@ -650,6 +678,93 @@ export function PlayerDetailPage() {
           />
           <Info label="Status" value={playerStatusLabels[p.status]} />
         </dl>
+      </section>
+      <section className="flex flex-col gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="font-heading text-xl">Dostupnost</h2>
+          {canViewMedicalDetails && p.currentAssignments.length ? (
+            <div className="flex flex-wrap gap-2">
+              {p.currentAssignments.map((assignment) => (
+                <Button
+                  key={assignment.teamId}
+                  size="sm"
+                  variant="outline"
+                  onClick={() =>
+                    nav(
+                      `${routePaths.medical}?teamId=${assignment.teamId}&medicalView=injuries&injuryPlayerId=${playerId}`,
+                    )
+                  }
+                >
+                  Povrede: {assignment.teamName}
+                </Button>
+              ))}
+              {canRecordInjury
+                ? p.currentAssignments.map((assignment) => (
+                    <Button
+                      key={`create-injury-${assignment.teamId}`}
+                      size="sm"
+                      onClick={() =>
+                        nav(
+                          `${routePaths.medical}?teamId=${assignment.teamId}&medicalView=injuries&injuryPlayerId=${playerId}&injuryCreatePlayerId=${playerId}`,
+                        )
+                      }
+                    >
+                      Evidentiraj: {assignment.teamName}
+                    </Button>
+                  ))
+                : null}
+            </div>
+          ) : null}
+        </div>
+        <div className="border-border overflow-x-auto rounded-xl border">
+          <Table>
+            <TableHeader className="bg-muted">
+              <TableRow>
+                <TableHead>Selekcija</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Datum važenja</TableHead>
+                <TableHead>Očekivani povratak</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {p.currentAssignments.map((assignment, index) => {
+                const record = availability[index]?.data?.items[0];
+                return (
+                  <TableRow key={assignment.teamId}>
+                    <TableCell>{assignment.teamName}</TableCell>
+                    <TableCell>
+                      <Badge variant="secondary">
+                        {availabilityLabel(record?.status)}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {record?.effectiveOn
+                        ? formatDate(record.effectiveOn)
+                        : "Nije uneseno"}
+                    </TableCell>
+                    <TableCell>
+                      {record &&
+                      ["LIMITED", "UNAVAILABLE", "REHAB"].includes(
+                        record.status,
+                      )
+                        ? record.expectedReturnOn
+                          ? formatDate(record.expectedReturnOn)
+                          : "Nije uneseno"
+                        : "—"}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+              {!p.currentAssignments.length ? (
+                <TableRow>
+                  <TableCell colSpan={4} className="text-muted-foreground">
+                    Nema trenutne selekcije.
+                  </TableCell>
+                </TableRow>
+              ) : null}
+            </TableBody>
+          </Table>
+        </div>
       </section>
       <section className="flex flex-col gap-3">
         <h2 className="font-heading text-xl">

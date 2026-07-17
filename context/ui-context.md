@@ -492,6 +492,10 @@ Common actions:
 
 ### Medical / Availability
 
+The visible navigation label is `Dostupnost igrača`. `/availability` contains separate nested `Dostupnost` and permission-gated `Povrede` views. Availability is coach-safe and team-scoped; coach-visible notes are not medical notes. Restricted diagnosis, body area, and notes never appear in safe tables, cards, player overview, dashboard-safe summaries, or ordinary audit history.
+
+Availability and injury filters, selected Sheets, Sheet tabs, and audit/revision pages are URL-backed. Restricted queries use an in-memory, zero-retention cache namespace which is cancelled and removed on permission or team-scope loss. Availability history exposes only operational revisions; expected return is relevant only to `LIMITED`, `UNAVAILABLE`, and `REHAB`. Injury candidate selection is date and team dependent, uses assignment coverage on the occurrence date, and is available only to injury-mutation roles. Player profiles expose safe availability per current team assignment; medical-detail users have a restricted injury shortcut, while authorized medical staff and administrators can start an explicit player-and-team contextual injury record.
+
 Medical and availability screens must be clear and permission-aware.
 
 Common sections:

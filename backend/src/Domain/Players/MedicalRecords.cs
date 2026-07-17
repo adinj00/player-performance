@@ -8,7 +8,8 @@ public enum AvailabilityStatus
     AVAILABLE,
     LIMITED,
     UNAVAILABLE,
-    REHAB, UNKNOWN
+    REHAB,
+    UNKNOWN
 }
 public enum InjuryStatus
 {
