@@ -343,15 +343,15 @@ Dependencies: Unit 29, Unit 39, Unit 50.
 
 ### Unit 52: Dashboard Backend Read Models
 
-Add one bounded team/season dashboard read model for recent matches, report workflow counts, coach-safe availability counts, confirmed statistics leaders, comparison-safe workload summaries, and data-quality alerts. Reuse existing domain queries without exposing restricted medical details or aggregating incompatible workload contexts.
+Add safe dashboard context options and one bounded team/season overview containing recent played matches and form, role-aware report workflow counts, current coach-safe availability counts, leaders from current verified/archived statistics only, exact-comparability training/match workload aggregates, and role-aware data-quality alerts. Do not expose restricted medical details, hidden workflow/import counts, or incompatible workload aggregation.
 
-Dependencies: Unit 30, Unit 32, Unit 33, Unit 48, Unit 50.
+Dependencies: Unit 21, Unit 22, Unit 23, Unit 30, Unit 32, Unit 33, Unit 43, Unit 48, Unit 50.
 
 ### Unit 53: Dashboard UI
 
-Add dashboard page with filters, KPI cards, summaries, charts, empty states, and token-based visualization.
+Replace the dashboard placeholder with a URL-driven team/season overview using the Unit 52 composite response: context selectors, recent form/matches, role-aware report status, current availability cards, confirmed statistics leaders, exact-comparability workload summaries, quality alerts, truthful empty states, and token-based shadcn charts without client-side cross-context aggregation.
 
-Dependencies: Unit 52.
+Dependencies: Unit 39, Unit 52.
 
 ## Localization and Polish
 
@@ -381,8 +381,8 @@ Dependencies: Unit 40, Unit 53.
 
 ## Next Immediate Unit
 
-The next implementation unit after Unit 51 should be:
+The next implementation unit after Unit 52 should be:
 
-**Unit 52: Dashboard Backend Read Models**
+**Unit 53: Dashboard UI**
 
-Reason: coach-safe availability and restricted medical workflows now have complete backend and UI boundaries, while matches, reports, confirmed statistics, and canonical physical workloads already expose their domain read data. The next dependency-safe step is to compose one bounded dashboard backend response that reuses those sources without leaking restricted injury details or combining incompatible workload metrics.
+Reason: the backend now exposes safe dashboard context options and one bounded, role-aware team/season snapshot covering recent form, report workflow, current availability, confirmed statistics leaders, comparison-safe physical workloads, and data-quality alerts. The next dependency-safe step is to replace the dashboard placeholder with URL-driven filters, cards, tables, and charts that render these authoritative sections without re-aggregating incompatible data in the browser.
