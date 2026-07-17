@@ -337,15 +337,15 @@ Dependencies: Unit 20, Unit 22, Unit 23, Unit 27, Unit 28, Unit 38.
 
 ### Unit 51: Medical Availability UI
 
-Add team-filtered coach-safe availability summaries, authorized medical availability editing, restricted injury list/detail/revision workflows, player-profile availability integration, permission-aware medical disclosure, and entity audit history using the Unit 50 APIs.
+Add the protected `Dostupnost igrača` workspace with backend availability counts, coach-safe player status and append-only editing, safe revision/audit history, a separately authorized restricted injury list/detail/revision workflow, historical date-eligible injury-player selection, restricted-cache cleanup, and privacy-safe player-profile integration.
 
 Dependencies: Unit 29, Unit 39, Unit 50.
 
 ### Unit 52: Dashboard Backend Read Models
 
-Add dashboard read endpoints for selected season/team: recent matches, report statuses, availability summary, top performers, workload summary, and data quality alerts where data exists.
+Add one bounded team/season dashboard read model for recent matches, report workflow counts, coach-safe availability counts, confirmed statistics leaders, comparison-safe workload summaries, and data-quality alerts. Reuse existing domain queries without exposing restricted medical details or aggregating incompatible workload contexts.
 
-Dependencies: Unit 32, Unit 33, Unit 48, Unit 50.
+Dependencies: Unit 30, Unit 32, Unit 33, Unit 48, Unit 50.
 
 ### Unit 53: Dashboard UI
 
@@ -381,8 +381,8 @@ Dependencies: Unit 40, Unit 53.
 
 ## Next Immediate Unit
 
-The next implementation unit after Unit 50 should be:
+The next implementation unit after Unit 51 should be:
 
-**Unit 51: Medical Availability UI**
+**Unit 52: Dashboard Backend Read Models**
 
-Reason: the backend now provides a strict separation between coach-safe availability and restricted injury details, immutable histories, current-team status counts, medical-detail authorization, concurrency protection, lifecycle operations, and privacy-safe audit endpoints. The next dependency-safe step is to build the team availability workspace and player medical surfaces without allowing restricted fields to leak into coach-safe views.
+Reason: coach-safe availability and restricted medical workflows now have complete backend and UI boundaries, while matches, reports, confirmed statistics, and canonical physical workloads already expose their domain read data. The next dependency-safe step is to compose one bounded dashboard backend response that reuses those sources without leaking restricted injury details or combining incompatible workload metrics.
