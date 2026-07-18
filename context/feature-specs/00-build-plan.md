@@ -355,34 +355,34 @@ Dependencies: Unit 49, Unit 51, Unit 52.
 
 ## Localization and Polish
 
-### Unit 54: Localization Foundation
+### Unit 54: Localization Foundation — DEFERRED
 
-Add the approved React localization stack, Bosnian Latin default resources, optional English infrastructure, language detection/persistence conventions, typed translation namespaces, and shared enum/validation/date-number translation helpers without attempting the full existing-UI migration in the same unit.
+Preserve the approved detailed localization-foundation spec for future work, but do not implement it in the current Bosnian-only release sequence. Bosnian Latin remains the only implemented/selectable UI language. No localization packages, language selector, backend field, or migration are required now.
 
-Dependencies: Unit 19, Unit 26, Unit 53.
+Dependencies when resumed: Unit 19, Unit 26, Unit 53.
 
-### Unit 55: Localization Pass for Existing UI
+### Unit 55: Localization Pass for Existing UI — DEFERRED
 
-Move long-lived visible UI strings into translation resources and verify Bosnian Latin default behavior.
+Resume only after Unit 54 is implemented. Migrate the complete V1 interface and enable optional English only after the documented coverage gate passes. This unit is not required for the current Bosnian-only release.
 
-Dependencies: Unit 54.
+Dependencies when resumed: Unit 54.
 
 ### Unit 56: Responsive and Accessibility Hardening
 
-Audit key pages for keyboard navigation, focus states, mobile/tablet rendering, semantic tables, status labels, and accessible actions.
+Audit and harden the complete V1 frontend against practical WCAG 2.2 AA expectations: shell landmarks and skip navigation, route/focus behavior, keyboard-complete workflows, semantic forms/tables, accessible async status and charts, medical privacy interactions, reduced motion, contrast/focus tokens, mobile/tablet layouts, 200% zoom/reflow, and a documented route/role/viewport verification matrix. Preserve the Bosnian-only UI and do not introduce localization infrastructure.
 
-Dependencies: Unit 37, Unit 44, Unit 51, Unit 53.
+Dependencies: Unit 37, Unit 44, Unit 49, Unit 51, Unit 53.
 
 ### Unit 57: Production Configuration Readiness
 
-Add production configuration validation, deployment notes, object storage provider decision points, and environment documentation. Do not choose hosting unless confirmed.
+Add production configuration validation, deployment notes, object storage provider decision points, environment documentation, and operational readiness checks after responsive/accessibility hardening. Do not choose hosting unless confirmed.
 
-Dependencies: Unit 40, Unit 53.
+Dependencies: Unit 40, Unit 53, Unit 56.
 
 ## Next Immediate Unit
 
 The next implementation unit after Unit 53 should be:
 
-**Unit 54: Localization Foundation**
+**Unit 56: Responsive and Accessibility Hardening**
 
-Reason: all major V1 operational modules now have real Bosnian Latin interfaces, including the bounded role-aware dashboard. The next dependency-safe step is to introduce the shared localization infrastructure, typed translation resources, language preference behavior, and formatting conventions before Unit 55 migrates the existing long-lived UI copy into Bosnian-default and optional English namespaces.
+Reason: localization Units 54 and 55 are intentionally deferred and are not required for the current Bosnian-only application. All major V1 operational modules are now specified through the dashboard, so the next release-critical step is to verify and harden the complete frontend across keyboard-only use, focus management, semantic forms/tables/charts, medical privacy interactions, mobile/tablet layouts, 200% zoom/reflow, reduced motion, contrast, and assistive-technology workflows before production-readiness work in Unit 57.
