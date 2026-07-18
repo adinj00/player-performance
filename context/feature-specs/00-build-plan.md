@@ -367,7 +367,7 @@ Resume only after Unit 54 is implemented. Migrate the complete V1 interface and 
 
 Dependencies when resumed: Unit 54.
 
-### Unit 56: Responsive and Accessibility Hardening — COMPLETE
+### Unit 56: Responsive and Accessibility Hardening
 
 Audit and harden the complete V1 frontend against practical WCAG 2.2 AA expectations: shell landmarks and skip navigation, route/focus behavior, keyboard-complete workflows, semantic forms/tables, accessible async status and charts, medical privacy interactions, reduced motion, contrast/focus tokens, mobile/tablet layouts, 200% zoom/reflow, and a documented route/role/viewport verification matrix. Preserve the Bosnian-only UI and do not introduce localization infrastructure.
 
@@ -375,14 +375,30 @@ Dependencies: Unit 37, Unit 44, Unit 49, Unit 51, Unit 53.
 
 ### Unit 57: Production Configuration Readiness
 
-Add production configuration validation, deployment notes, object storage provider decision points, environment documentation, and operational readiness checks after responsive/accessibility hardening. Do not choose hosting unless confirmed.
+Add production configuration/startup validation, public-origin and deployment-topology rules, secure cookie/CORS/CSRF and trusted-proxy behavior, persistent Data Protection requirements, live/ready health checks, built-in sensitive-endpoint rate limits, frontend production-environment validation, structured logging/redaction rules, controlled database migration/rollback and backup/restore runbooks, first-admin/onboarding procedures, security-header/static-cache guidance, object-storage decision and adapter gates, deployment smoke tests, and signed readiness documentation. Do not select hosting or a cloud provider without approval; production remains blocked until mandatory infrastructure decisions—especially object storage—are resolved.
 
-Dependencies: Unit 40, Unit 53, Unit 56.
+Dependencies: Unit 07, Unit 12, Unit 15, Unit 17, Unit 40, Unit 41, Unit 43, Unit 45, Unit 50, Unit 52, Unit 56.
 
 ## Next Immediate Unit
 
-The next implementation unit is:
+The next implementation unit after Unit 56 should be:
 
 **Unit 57: Production Configuration Readiness**
 
-Reason: Units 54 and 55 remain intentionally deferred, and Unit 56 is complete with its remaining environment-dependent MEDIUM verification items documented as approved repository-maintainer follow-up. The next release step is production configuration and operational readiness.
+Reason: responsive/accessibility hardening completes the planned V1 product and UI quality pass. The final planned V1 unit must now make deployment safety explicit: validate production origins, cookies, proxies, Data Protection, database and temporary storage; add live/ready health behavior, rate limits, frontend build validation, migration/backup/rollback and first-admin procedures; and create a signed readiness checklist. Hosting and object storage must remain blocked decisions rather than guessed integrations.
+
+## After Unit 57
+
+Unit 57 is the final numbered unit in the current V1 build plan.
+
+Do not create an automatic Unit 58.
+
+After Unit 57 implementation, review the readiness checklist and create separate approved specs only for decisions that are actually resolved, such as:
+
+- the selected production object-storage adapter;
+- selected hosting/deployment infrastructure;
+- selected email-delivery provider;
+- deferred Unit 54/55 localization;
+- evidence-backed Gpexe Unit 46 implementation;
+- evidence-backed Zone14 Unit 47 implementation;
+- release-candidate fixes discovered through production smoke testing.
