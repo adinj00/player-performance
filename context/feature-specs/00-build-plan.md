@@ -349,17 +349,17 @@ Dependencies: Unit 21, Unit 22, Unit 23, Unit 30, Unit 32, Unit 33, Unit 43, Uni
 
 ### Unit 53: Dashboard UI
 
-Replace the dashboard placeholder with a URL-driven team/season overview using the Unit 52 composite response: context selectors, recent form/matches, role-aware report status, current availability cards, confirmed statistics leaders, exact-comparability workload summaries, quality alerts, truthful empty states, and token-based shadcn charts without client-side cross-context aggregation.
+Replace the `/` placeholder with a URL-driven `Kontrolna ploča` using the Unit 52 composite snapshot: deterministic team/season context, role-aware quality alerts and report workflow, recent matches/form with a score chart, current coach-safe availability, final-report statistics leaders, and exact-comparability workload cards/tables. Use token-based shadcn charts only for intrinsically comparable data and never reconstruct hidden or incompatible values.
 
-Dependencies: Unit 39, Unit 52.
+Dependencies: Unit 49, Unit 51, Unit 52.
 
 ## Localization and Polish
 
 ### Unit 54: Localization Foundation
 
-Add i18next/react-i18next or approved localization stack, Bosnian Latin default resources, optional English infrastructure, and translation conventions.
+Add the approved React localization stack, Bosnian Latin default resources, optional English infrastructure, language detection/persistence conventions, typed translation namespaces, and shared enum/validation/date-number translation helpers without attempting the full existing-UI migration in the same unit.
 
-Dependencies: Unit 19, Unit 26.
+Dependencies: Unit 19, Unit 26, Unit 53.
 
 ### Unit 55: Localization Pass for Existing UI
 
@@ -381,8 +381,8 @@ Dependencies: Unit 40, Unit 53.
 
 ## Next Immediate Unit
 
-The next implementation unit after Unit 52 should be:
+The next implementation unit after Unit 53 should be:
 
-**Unit 53: Dashboard UI**
+**Unit 54: Localization Foundation**
 
-Reason: the backend now exposes safe dashboard context options and one bounded, role-aware team/season snapshot covering recent form, report workflow, current availability, confirmed statistics leaders, comparison-safe physical workloads, and data-quality alerts. The next dependency-safe step is to replace the dashboard placeholder with URL-driven filters, cards, tables, and charts that render these authoritative sections without re-aggregating incompatible data in the browser.
+Reason: all major V1 operational modules now have real Bosnian Latin interfaces, including the bounded role-aware dashboard. The next dependency-safe step is to introduce the shared localization infrastructure, typed translation resources, language preference behavior, and formatting conventions before Unit 55 migrates the existing long-lived UI copy into Bosnian-default and optional English namespaces.
