@@ -6,6 +6,7 @@ import { z } from "zod";
 
 import { DatePicker } from "@/components/common/date-picker";
 import { Button } from "@/components/ui/button";
+import { invalidateDashboardOverview } from "@/features/dashboard";
 import {
   Dialog,
   DialogClose,
@@ -114,6 +115,7 @@ function refreshMatches(
 ) {
   void queryClient.invalidateQueries({ queryKey: ["matches"] });
   void queryClient.invalidateQueries({ queryKey: ["match", id] });
+  void invalidateDashboardOverview(queryClient);
 }
 
 function SelectField({

@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { invalidateDashboardOverview } from "@/features/dashboard";
 import { Plus, Search } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -461,6 +462,7 @@ export function TrainingSessionDetailPage() {
     void qc.invalidateQueries({ queryKey: trainingKeys.detail(id) });
     void qc.invalidateQueries({ queryKey: trainingKeys.participants(id) });
     void qc.invalidateQueries({ queryKey: ["trainingSessions"] });
+    void invalidateDashboardOverview(qc, session.data?.teamId);
   };
   const life = useMutation({
     mutationFn: (action: "complete" | "cancel") =>

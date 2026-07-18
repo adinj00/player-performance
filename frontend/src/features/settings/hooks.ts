@@ -2,6 +2,10 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 
 import { useSession } from "@/features/auth/hooks/use-session";
+import {
+  invalidateDashboardContextOptions,
+  invalidateDashboardOverview,
+} from "@/features/dashboard";
 
 import { settingsApi } from "./api";
 
@@ -38,6 +42,10 @@ function useSettingsMutation<TVariables, TResponse>(
     retry: false,
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["settings", resource] });
+      if (resource === "seasons" || resource === "teams") {
+        await invalidateDashboardContextOptions(queryClient);
+        await invalidateDashboardOverview(queryClient);
+      }
     },
   });
 }

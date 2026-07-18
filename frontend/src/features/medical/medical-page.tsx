@@ -56,6 +56,7 @@ import { PageHeader } from "@/components/common/page-header";
 import { DatePicker } from "@/components/common/date-picker";
 import { FilterSelect } from "@/components/common/filter-select";
 import { useSession } from "@/features/auth/hooks/use-session";
+import { invalidateDashboardOverview } from "@/features/dashboard";
 import {
   AuditError,
   AuditHistory,
@@ -749,6 +750,7 @@ function AvailabilityDialog({
     retry: false,
     onSuccess: () => {
       void client.invalidateQueries({ queryKey: ["availability"] });
+      void invalidateDashboardOverview(client, teamId);
       toast.success("Dostupnost igrača je ažurirana.");
       close();
     },

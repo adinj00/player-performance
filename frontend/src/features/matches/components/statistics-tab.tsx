@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { invalidateDashboardOverview } from "@/features/dashboard";
 import {
   Dialog,
   DialogContent,
@@ -121,6 +122,7 @@ export function StatisticsTab({ match }: { match: MatchResponse }) {
     mutationFn: () => matchesApi.createReport(match.id),
     onSuccess: async () => {
       await client.invalidateQueries({ queryKey: ["match-report", match.id] });
+      await invalidateDashboardOverview(client, match.team.id);
       toast.success("Izvještaj je započet.");
     },
     onError: async (error) => {
@@ -263,6 +265,7 @@ function Editor({
           queryKey: ["match-statistics", data.reportId],
         }),
         client.invalidateQueries({ queryKey: ["match-report", match.id] }),
+        invalidateDashboardOverview(client, match.team.id),
       ]);
       toast.success("Statistika je sačuvana.");
     },

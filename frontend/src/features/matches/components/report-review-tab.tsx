@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { parseAsInteger, parseAsString, useQueryStates } from "nuqs";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { invalidateDashboardOverview } from "@/features/dashboard";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -256,6 +257,7 @@ export function ReportReviewTab({
       queryClient.invalidateQueries({ queryKey: ["match-lineup", match.id] }),
       queryClient.invalidateQueries({ queryKey: ["match", match.id] }),
       queryClient.invalidateQueries({ queryKey: ["match-report-audit"] }),
+      invalidateDashboardOverview(queryClient, match.team.id),
     ]);
   };
   const transition = useMutation({

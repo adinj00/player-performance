@@ -665,3 +665,11 @@ This file approves the initial UI direction:
 - The training workspace uses URL-backed list filters, server pagination, lifecycle actions, participant eligibility search, and distinct Overview, Participants, and GPS / Physical views.
 - Training and match physical-data views reuse the Import workspace upload dialog with a locked team, target, and GPS import type. Their source-import history links to the existing Import detail workspace.
 - GPS/vendor processing remains capability-driven: Gpexe and Zone14 are presented as generic-preview-only until confirmed processor mappings exist.
+
+## Kontrolna ploča
+
+- The protected `/` route is the dashboard. Its URL state uses `teamId`, `seasonId`, `leaderMetric`, `workloadContext`, `workloadMetric`, and `workloadComparison`; invalid or absent team/season IDs are replaced with the first active accessible team (otherwise first accessible team) and the first returned season.
+- The page provides selected context controls, season dates, inactive/archived status, manual overview refresh, generated timestamp, quality alerts, recent matches/form, report workflow, current availability, final-report leaders, and confirmed physical workload.
+- Report workflow disclosure follows the backend `visibilityMode`: `FULL_WORKFLOW` shows only supplied workflow fields; `FINAL_ONLY` shows only supplied final statuses. Availability is always explicitly presented as a current snapshot, not historical season availability.
+- Recent goals and selected leader values use responsive shadcn `ChartContainer`/Recharts bar charts with semantic `--chart-*` tokens and accompanying semantic lists/tables. Workload never merges comparability keys or charts across contexts; exact threshold/method groups remain separate.
+- Quality-alert labels and destinations are centralized in the dashboard feature and only backend-returned alerts are rendered. Dashboard overview invalidation is exposed as a focused shared helper; context-options invalidation remains separate.

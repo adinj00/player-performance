@@ -22,7 +22,10 @@ export function NotFoundPage() {
           title="Nije moguće otvoriti traženu stranicu"
           description="Vratite se na kontrolnu ploču i nastavite iz dostupne navigacije."
           action={
-            <Button render={<Link to={routePaths.dashboard} />}>
+            <Button
+              nativeButton={false}
+              render={<Link to={routePaths.dashboard} />}
+            >
               Nazad na kontrolnu ploču
             </Button>
           }

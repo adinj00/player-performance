@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { UploadIcon } from "lucide-react";
+import { invalidateDashboardOverview } from "@/features/dashboard";
 import { useState } from "react";
 import { useQueryStates, parseAsInteger, parseAsString } from "nuqs";
 import { toast } from "sonner";
@@ -592,6 +593,7 @@ export function CreateImport({
         abort.signal,
       );
       await client.invalidateQueries({ queryKey: ["importList"] });
+      await invalidateDashboardOverview(client);
       setOpen(false);
       onCreated(job);
       toast.success("Izvorni fajl je učitan.");
@@ -602,6 +604,7 @@ export function CreateImport({
           : errorMessage(error),
       );
       await client.invalidateQueries({ queryKey: ["importList"] });
+      await invalidateDashboardOverview(client);
     } finally {
       setProgress(null);
       setController(null);
@@ -819,6 +822,7 @@ function ImportDetail({
     onSuccess: async () => {
       await client.invalidateQueries({ queryKey: ["importDetail"] });
       await client.invalidateQueries({ queryKey: ["importList"] });
+      await invalidateDashboardOverview(client);
       toast.success("Tok importa je ažuriran.");
     },
     onError: async (error) => {
