@@ -724,3 +724,7 @@ Docker-based local development and production hosting decisions are intentionall
 17. Install packages just in time when a task requires them; do not add dependencies speculatively.
 18. User-facing UI copy is Bosnian Latin by default and must remain localizable when localization infrastructure exists.
 19. Context files must be updated before or with implementation when architecture, scope, or standards change.
+
+## Dashboard read model
+
+`GET /api/dashboard/context-options` and `GET /api/dashboard/overview` provide a single authenticated, team-scoped read model. Overview requires explicit team and season identifiers, captures one UTC timestamp/current date, and returns bounded recent matches/form, role-aware workflow data, current safe availability counts, final-report leader groups, exact-comparability workload groups, and role-aware quality alerts. Availability never queries or returns injury details; final-only readers do not receive hidden workflow fields or report alerts. Workloads keep training/match and threshold/method contexts separate; no dashboard cache, snapshot table, background worker, or migration is used.

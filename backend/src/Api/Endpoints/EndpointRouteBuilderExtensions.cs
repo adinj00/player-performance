@@ -27,6 +27,7 @@ internal static class EndpointRouteBuilderExtensions
         endpoints.MapImportEndpoints();
         endpoints.MapPhysicalMetricEndpoints();
         endpoints.MapTrainingSessionEndpoints();
+        endpoints.MapDashboardEndpoints();
 
         if (environment.IsEnvironment("Testing"))
         {

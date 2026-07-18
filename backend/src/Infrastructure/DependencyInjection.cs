@@ -31,6 +31,8 @@ using PlayerPerformance.Application.Imports;
 using PlayerPerformance.Infrastructure.Imports;
 using PlayerPerformance.Application.Physical;
 using PlayerPerformance.Infrastructure.Physical;
+using PlayerPerformance.Application.Dashboard;
+using PlayerPerformance.Infrastructure.Dashboard;
 
 namespace PlayerPerformance.Infrastructure;
 
@@ -93,6 +95,7 @@ public static class DependencyInjection
         services.AddSingleton<IImportProcessorRegistry, ImportProcessorRegistry>();
         services.AddScoped<IImportService, ImportService>();
         services.AddScoped<IPhysicalWorkloadWriter, PhysicalWorkloadWriter>();
+        services.AddScoped<IDashboardService, DashboardService>();
         services.AddScoped<TeamStartupInitializer>();
 
         services.AddDbContext<AppDbContext>(options =>
