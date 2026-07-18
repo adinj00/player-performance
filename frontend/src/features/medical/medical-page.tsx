@@ -5,7 +5,7 @@ import {
   type ColumnDef,
 } from "@tanstack/react-table";
 import { parseAsInteger, parseAsString, useQueryStates } from "nuqs";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -102,6 +102,7 @@ const queryKey = ["medical", "restricted"] as const;
 
 export function MedicalPage() {
   const { user } = useSession();
+  const availabilityTabRef = useRef<HTMLButtonElement>(null);
   const canDetail =
     user?.primaryRole === "ADMIN" ||
     user?.permissions.canViewMedicalDetails === true;
@@ -145,7 +146,7 @@ export function MedicalPage() {
       void setUrl({ teamId: accessible[0].id });
   }, [accessible, setUrl, url.teamId]);
   useEffect(() => {
-    if (url.medicalView === "injuries" && !canDetail)
+    if (url.medicalView === "injuries" && !canDetail) {
       void setUrl({
         medicalView: "availability",
         injuryStatus: null,
@@ -159,6 +160,8 @@ export function MedicalPage() {
         injuryAuditPage: 1,
         injuryCreatePlayerId: null,
       });
+      window.requestAnimationFrame(() => availabilityTabRef.current?.focus());
+    }
   }, [canDetail, setUrl, url.medicalView]);
   const client = useQueryClient();
   useEffect(() => {
@@ -237,7 +240,9 @@ export function MedicalPage() {
         onValueChange={(medicalView) => void setUrl({ medicalView })}
       >
         <TabsList>
-          <TabsTrigger value="availability">Dostupnost</TabsTrigger>
+          <TabsTrigger ref={availabilityTabRef} value="availability">
+            Dostupnost
+          </TabsTrigger>
           {canDetail ? (
             <TabsTrigger value="injuries">Povrede</TabsTrigger>
           ) : null}

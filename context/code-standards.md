@@ -425,6 +425,9 @@ Recommended ignore rules:
 - UI code must comply with token, import, and shadcn usage rules.
 - Do not introduce raw color utilities, hardcoded colors, deep relative imports, or one-off shadcn visual overrides.
 - UI/E2E tests can be introduced later for critical workflows. They are not mandatory for every initial UI task unless a feature spec requires them.
+- Accessibility and responsive changes use native semantics first. Do not make non-interactive elements keyboard-focusable, use positive `tabIndex`, duplicate IDs, expose focusable content inside `aria-hidden`, or replace buttons/links with clickable containers.
+- Each route must retain a meaningful `h1`; shared route-focus behavior may run only on pathname changes, never routine filter/search/tab/pagination state updates. Forms associate labels, help, and errors with their controls and provide a focused summary when no single field can safely receive focus.
+- Preserve contained semantic table overflow for dense views, viewport-safe overlay scrolling, visible focus, readable status text independent of color, and reduced-motion behavior. Do not change generated shadcn primitives for route-specific fixes; compose small application wrappers instead.
 
 ## Security Standards
 

@@ -1,4 +1,5 @@
 import { AlertCircle } from "lucide-react";
+import { useEffect, useRef } from "react";
 
 import {
   DEFAULT_FORM_ERROR_MESSAGE,
@@ -10,6 +11,7 @@ interface FormErrorSummaryProps {
 }
 
 export function FormErrorSummary({ errors }: FormErrorSummaryProps) {
+  const summaryRef = useRef<HTMLElement>(null);
   const normalizedErrors = normalizeFormErrors(errors);
   const summaryErrors =
     normalizedErrors.length > 0
@@ -17,8 +19,14 @@ export function FormErrorSummary({ errors }: FormErrorSummaryProps) {
       : errors
         ? [DEFAULT_FORM_ERROR_MESSAGE]
         : [];
+  const errorKey = summaryErrors.join("|");
+  const hasErrors = summaryErrors.length > 0;
 
-  if (summaryErrors.length === 0) {
+  useEffect(() => {
+    if (hasErrors) summaryRef.current?.focus();
+  }, [errorKey, hasErrors]);
+
+  if (!hasErrors) {
     return null;
   }
 
@@ -26,7 +34,9 @@ export function FormErrorSummary({ errors }: FormErrorSummaryProps) {
     <section
       aria-live="polite"
       className="border-destructive/20 bg-destructive/10 rounded-xl border px-4 py-3"
+      ref={summaryRef}
       role="alert"
+      tabIndex={-1}
     >
       <div className="flex gap-3">
         <div className="bg-destructive/15 text-destructive flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">

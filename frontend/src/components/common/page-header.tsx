@@ -23,7 +23,11 @@ export function PageHeader({
         ) : null}
 
         <div className="space-y-2">
-          <h1 className="font-heading text-foreground text-3xl leading-tight md:text-4xl">
+          <h1
+            className="font-heading text-foreground scroll-mt-24 text-3xl leading-tight outline-none md:text-4xl"
+            data-route-heading
+            tabIndex={-1}
+          >
             {title}
           </h1>
 
@@ -36,7 +40,9 @@ export function PageHeader({
       </div>
 
       {actions ? (
-        <div className="flex shrink-0 items-center gap-2">{actions}</div>
+        <div className="flex shrink-0 flex-wrap items-center gap-2">
+          {actions}
+        </div>
       ) : null}
     </header>
   );

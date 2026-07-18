@@ -367,7 +367,7 @@ Resume only after Unit 54 is implemented. Migrate the complete V1 interface and 
 
 Dependencies when resumed: Unit 54.
 
-### Unit 56: Responsive and Accessibility Hardening
+### Unit 56: Responsive and Accessibility Hardening — COMPLETE
 
 Audit and harden the complete V1 frontend against practical WCAG 2.2 AA expectations: shell landmarks and skip navigation, route/focus behavior, keyboard-complete workflows, semantic forms/tables, accessible async status and charts, medical privacy interactions, reduced motion, contrast/focus tokens, mobile/tablet layouts, 200% zoom/reflow, and a documented route/role/viewport verification matrix. Preserve the Bosnian-only UI and do not introduce localization infrastructure.
 
@@ -381,8 +381,8 @@ Dependencies: Unit 40, Unit 53, Unit 56.
 
 ## Next Immediate Unit
 
-The next implementation unit after Unit 53 should be:
+The next implementation unit is:
 
-**Unit 56: Responsive and Accessibility Hardening**
+**Unit 57: Production Configuration Readiness**
 
-Reason: localization Units 54 and 55 are intentionally deferred and are not required for the current Bosnian-only application. All major V1 operational modules are now specified through the dashboard, so the next release-critical step is to verify and harden the complete frontend across keyboard-only use, focus management, semantic forms/tables/charts, medical privacy interactions, mobile/tablet layouts, 200% zoom/reflow, reduced motion, contrast, and assistive-technology workflows before production-readiness work in Unit 57.
+Reason: Units 54 and 55 remain intentionally deferred, and Unit 56 is complete with its remaining environment-dependent MEDIUM verification items documented as approved repository-maintainer follow-up. The next release step is production configuration and operational readiness.

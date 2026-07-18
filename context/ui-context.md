@@ -633,6 +633,16 @@ Rules:
 - Form validation errors must be associated with fields where possible.
 - Tables must preserve semantic table structure.
 
+## Responsive and Accessibility Hardening
+
+- The current release is Bosnian Latin only. Unit 54 and Unit 55 are deferred; do not add a language selector or localization dependency before they resume.
+- Treat practical WCAG 2.2 AA as the implementation target. Use native landmarks and controls before ARIA, and never expose restricted medical content in hidden or focusable DOM.
+- Protected routes provide one `main` landmark, a visible-on-focus skip link, a named primary navigation, and one route `h1`. Pathname changes move focus to the route heading (or main fallback); filter, pagination, and tab query changes must not steal focus.
+- All interactive elements need a clearly visible semantic-token focus ring. Respect `prefers-reduced-motion` by removing nonessential motion rather than disabling user control.
+- Dense tables retain semantic table markup and use a named, contained horizontal overflow region at narrow widths. Dialogs and Sheets use the existing focus-managed primitives, have a title and description, and use viewport-safe internal overflow.
+- Charts need an accessible title/description and an equivalent bounded table or list; tooltips are supplementary. Disable nonessential chart animation and do not combine incompatible workload comparability groups.
+- When medical-detail permission is lost, cancel/remove restricted queries, unmount the injuries panel, and move focus to the safe availability tab. Do not reveal injury detail through labels, toasts, or unavailable controls.
+
 ## Loading, Empty, and Error States
 
 Every data-driven page should provide clear states:

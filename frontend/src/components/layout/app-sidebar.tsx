@@ -36,9 +36,9 @@ export function AppSidebar({ className, onNavigate }: AppSidebarProps) {
         <p className="text-club-red font-mono text-xs tracking-[0.22em] uppercase">
           FK Velež Mostar
         </p>
-        <h1 className="font-heading text-foreground mt-3 text-lg">
+        <p className="font-heading text-foreground mt-3 text-lg">
           Performance Data System
-        </h1>
+        </p>
         <p className="text-muted-foreground mt-1 text-sm">
           Operativni pregled kluba
         </p>

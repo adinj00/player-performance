@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useQueryStates, parseAsInteger, parseAsString } from "nuqs";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/common/page-header";
+import { TableRegion } from "@/components/common/table-region";
 import { DatePicker } from "@/components/common/date-picker";
 import { FilterSelect } from "@/components/common/filter-select";
 import { ErrorState } from "@/components/common/error-state";
@@ -453,7 +454,7 @@ function ImportTable({
     ]),
   );
   return (
-    <section className="overflow-x-auto rounded-xl border">
+    <TableRegion label="Historija importa">
       <Table>
         <TableHeader>
           <TableRow>
@@ -513,7 +514,7 @@ function ImportTable({
           )}
         </TableBody>
       </Table>
-    </section>
+    </TableRegion>
   );
 }
 
@@ -731,6 +732,12 @@ export function CreateImport({
                 <Field>
                   <FieldLabel>Učitavanje: {progress}%</FieldLabel>
                   <Progress value={progress} aria-label="Napredak učitavanja" />
+                  <p
+                    aria-live="polite"
+                    className="text-muted-foreground text-sm"
+                  >
+                    Učitavanje je u toku: {progress}%.
+                  </p>
                 </Field>
               ) : null}
             </FieldGroup>

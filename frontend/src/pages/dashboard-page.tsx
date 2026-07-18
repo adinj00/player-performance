@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { parseAsString, useQueryStates } from "nuqs";
 import { Bar, BarChart, XAxis, YAxis } from "recharts";
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { RefreshCw } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -154,11 +155,14 @@ export function DashboardPage() {
     options.data &&
     (team?.id !== state.teamId || season?.id !== state.seasonId),
   );
-  if (shouldNormalize)
+  useEffect(() => {
+    if (!shouldNormalize) return;
+
     void setState(
       { teamId: team?.id ?? null, seasonId: season?.id ?? null },
       { history: "replace" },
     );
+  }, [season?.id, setState, shouldNormalize, team?.id]);
   const overview = useQuery({
     queryKey: dashboardKeys.overview(team?.id ?? "", season?.id ?? ""),
     queryFn: () => dashboardApi.overview(team!.id, season!.id),
@@ -837,11 +841,18 @@ function Chart({
   data: { name: string; za?: number; protiv?: number; vrijednost?: number }[];
   horizontal?: boolean;
 }) {
+  const chartId = `graf-${title.toLocaleLowerCase("bs-BA").replaceAll(/[^a-z0-9]+/g, "-")}`;
   return (
-    <figure aria-labelledby={`${title}-caption`}>
-      <figcaption id={`${title}-caption`} className="sr-only">
-        {title}. Tablica ili lista iznad sadrži isti podatak.
+    <figure
+      aria-describedby={`${chartId}-description`}
+      aria-labelledby={`${chartId}-title`}
+    >
+      <figcaption id={`${chartId}-title`} className="sr-only">
+        {title}
       </figcaption>
+      <p id={`${chartId}-description`} className="sr-only">
+        {title}. Tablica ili lista iznad sadrži isti podatak.
+      </p>
       <ChartContainer
         className="h-64 w-full"
         config={horizontal ? leadersChartConfig : goalsChartConfig}
@@ -860,9 +871,14 @@ function Chart({
           <Bar
             dataKey={horizontal ? "vrijednost" : "za"}
             fill={horizontal ? "var(--color-vrijednost)" : "var(--color-za)"}
+            isAnimationActive={false}
           />
           {!horizontal ? (
-            <Bar dataKey="protiv" fill="var(--color-protiv)" />
+            <Bar
+              dataKey="protiv"
+              fill="var(--color-protiv)"
+              isAnimationActive={false}
+            />
           ) : null}
         </BarChart>
       </ChartContainer>

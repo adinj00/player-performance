@@ -12,6 +12,7 @@ import {
 
 import { routePaths } from "@/app/route-paths";
 import { NotFoundPage } from "@/components/common/not-found-page";
+import { RouteFocusManager } from "@/components/common/route-focus-manager";
 import { AppShell } from "@/components/layout/app-shell";
 import {
   AuthUnavailablePage,
@@ -82,6 +83,7 @@ export function AppRoutes() {
   return (
     <BrowserRouter>
       <NuqsAdapter>
+        <RouteFocusManager />
         <PasswordChangeRequiredSignalHandler />
         <Routes>
           <Route
