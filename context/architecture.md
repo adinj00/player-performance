@@ -703,6 +703,12 @@ Local development initially uses:
 
 Docker-based local development and production hosting decisions are intentionally deferred.
 
+### Production-readiness boundary
+
+Production configuration uses hosting environment variables or an approved secret store; `backend/.env` is Development-only. Deployment topology is explicitly configured as `SAME_ORIGIN` or `SPLIT_ORIGIN` with exact HTTPS public origins, trusted proxy configuration, persistent ASP.NET Core Data Protection keys, and safe build metadata. Same-origin does not need permissive CORS; split-origin permits only configured HTTPS frontend origins with credentials and existing CSRF protection.
+
+`/health/live` is dependency-free and `/health/ready` checks database connectivity, pending migrations, configured storage, and the private import temporary directory without exposing operational details. Production API startup does not run EF migrations. Storage remains deployment-blocked until an approved provider-specific `IFileStorage` adapter is implemented and tested; local storage is Development-only. Multi-instance operation is blocked until all nodes share a durable Data Protection key ring.
+
 ## Invariants
 
 1. The application is a single-club internal system for FK Velež Mostar. Multi-club tenancy is out of scope for V1.

@@ -12,7 +12,7 @@ using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Configuration.AddLocalDotEnvIfPresent(builder.Environment.ContentRootPath);
+builder.Configuration.AddLocalDotEnvIfPresent(builder.Environment.ContentRootPath, builder.Environment);
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
@@ -31,20 +31,31 @@ builder.Services
 
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration, builder.Environment);
+builder.Services.AddProductionConfiguration(builder.Configuration, builder.Environment);
 builder.Services.AddApiAuthentication(builder.Environment);
-builder.Services.AddApiCors(builder.Configuration);
+builder.Services.AddApiCors(builder.Configuration, builder.Environment);
 builder.Services.AddStaffAuthorization();
 builder.Services.AddApiProblemDetails();
 builder.Services.ConfigureHttpJsonOptions(options => options.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
 var app = builder.Build();
 
+var deployment = app.Services.GetRequiredService<Microsoft.Extensions.Options.IOptions<DeploymentOptions>>().Value;
+app.UseForwardedHeaders(ProductionServiceCollectionExtensions.CreateForwardedHeadersOptions(deployment));
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHsts();
+    app.UseHttpsRedirection();
+}
+
 await app.Services.BootstrapFirstAdminAsync(app.Environment);
 await app.Services.InitializeTeamsAsync(app.Environment);
 
 app.UseApiExceptionHandling();
 app.UseApiStatusCodeProblemDetails();
-app.UseCors(ApiCorsConstants.FrontendPolicyName);
+app.UseMiddleware<SecurityHeadersMiddleware>();
+if (deployment.IsSplitOrigin || app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Testing")) app.UseCors(ApiCorsConstants.FrontendPolicyName);
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseMiddleware<PasswordChangeRequiredMiddleware>();
 app.UseAuthorization();

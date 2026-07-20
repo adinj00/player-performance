@@ -4,8 +4,12 @@ namespace PlayerPerformance.Api.Configuration;
 
 internal static class ConfigurationExtensions
 {
-    public static void AddLocalDotEnvIfPresent(this ConfigurationManager configuration, string contentRootPath)
+    public static void AddLocalDotEnvIfPresent(this ConfigurationManager configuration, string contentRootPath, IHostEnvironment environment)
     {
+        if (!environment.IsDevelopment())
+        {
+            return;
+        }
         var backendRoot = FindBackendRoot(contentRootPath);
         if (backendRoot is null)
         {

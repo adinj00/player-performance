@@ -12,11 +12,17 @@ internal static class HealthEndpoints
 
     public static IEndpointRouteBuilder MapHealthEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        endpoints.MapGet("/health", (IOptions<PlayerPerformanceOptions> options) =>
+        endpoints.MapGet("/health/live", (IOptions<PlayerPerformanceOptions> options, IOptions<DeploymentOptions> deployment) =>
+            TypedResults.Ok(new HealthResponse("ok", options.Value.ServiceName, DateTimeOffset.UtcNow, deployment.Value.BuildVersion, deployment.Value.CommitSha)))
+            .AllowAnonymous();
+
+        endpoints.MapGet("/health", (IOptions<PlayerPerformanceOptions> options, IOptions<DeploymentOptions> deployment) =>
             TypedResults.Ok(new HealthResponse(
                 "ok",
                 options.Value.ServiceName,
-                DateTimeOffset.UtcNow)));
+                DateTimeOffset.UtcNow,
+                deployment.Value.BuildVersion,
+                deployment.Value.CommitSha)));
 
         endpoints.MapHealthChecks("/health/ready", new HealthCheckOptions
         {
@@ -49,7 +55,9 @@ internal static class HealthEndpoints
 internal sealed record HealthResponse(
     string Status,
     string Service,
-    DateTimeOffset TimestampUtc);
+    DateTimeOffset TimestampUtc,
+    string? Version,
+    string? CommitSha);
 
 internal sealed record ReadinessHealthResponse(
     string Status,

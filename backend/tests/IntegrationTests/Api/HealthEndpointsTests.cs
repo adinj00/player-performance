@@ -12,6 +12,20 @@ public sealed class HealthEndpointsTests : IClassFixture<TestApplicationFactory>
     }
 
     [Fact]
+    public async Task GetLiveness_ShouldReturnSuccessfulSafeResponse_WithoutDependencyDetails()
+    {
+        using var response = await _client.GetAsync("/health/live");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        using var payload = await response.Content.ReadFromJsonAsync<JsonDocument>();
+
+        Assert.NotNull(payload);
+        Assert.Equal("ok", payload.RootElement.GetProperty("status").GetString());
+        Assert.False(payload.RootElement.TryGetProperty("checks", out _));
+        Assert.False(payload.RootElement.TryGetProperty("connectionString", out _));
+    }
+
+    [Fact]
     public async Task GetHealth_ShouldReturnSuccessfulSafeResponse_WhenRequestIsValid()
     {
         using var response = await _client.GetAsync("/health");

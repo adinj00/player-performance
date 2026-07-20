@@ -372,6 +372,8 @@ Avoid visual override example:
 - Production must not depend on `.env` files. Production uses real environment variables or a managed secret store.
 - Use ASP.NET Core nested environment variable naming where appropriate, such as `ConnectionStrings__DefaultConnection`.
 - Validate required backend configuration at startup and fail clearly when required values are missing.
+- Production validation must fail safely for unsafe public origins, local storage, missing persistent Data Protection configuration, invalid proxy configuration, and non-positive rate limits. Validation messages name keys/sections but never include secrets, full connection strings, tokens, storage keys, or environment dumps.
+- Production APIs must use exact configured CORS origins, Secure/HttpOnly authentication cookies, CSRF protection for every unsafe cookie-authenticated mutation, trusted forwarded headers only, and no automatic schema migration at ordinary application startup.
 
 ### Frontend
 

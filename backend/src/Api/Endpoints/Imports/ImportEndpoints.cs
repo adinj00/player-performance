@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Net.Http.Headers;
 using PlayerPerformance.Api.Authentication;
+using PlayerPerformance.Api.Configuration;
 using PlayerPerformance.Application.Auditing;
 using PlayerPerformance.Application.Imports;
 using PlayerPerformance.Domain.Auditing;
@@ -21,7 +22,7 @@ internal static class ImportEndpoints
     {
         var group = endpoints.MapGroup("/api/imports").RequireAuthorization().WithTags("Imports");
         group.MapGet("/capabilities", CapabilitiesAsync);
-        group.MapPost("", CreateAsync);
+        group.MapPost("", CreateAsync).RequireRateLimiting(ProductionServiceCollectionExtensions.UploadCreatePolicy);
         group.MapGet("", ListAsync);
         group.MapGet("/{id:guid}", GetAsync);
         group.MapGet("/{id:guid}/source", SourceAsync);

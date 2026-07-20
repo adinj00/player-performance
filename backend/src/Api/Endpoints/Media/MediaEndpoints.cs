@@ -5,6 +5,7 @@ using Microsoft.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using PlayerPerformance.Api.Authentication;
+using PlayerPerformance.Api.Configuration;
 using PlayerPerformance.Application.Media;
 using PlayerPerformance.Domain.Common.Errors;
 using PlayerPerformance.Domain.Common.Results;
@@ -26,7 +27,7 @@ internal static class MediaEndpoints
         media.MapGet("/{mediaId:guid}/content", ContentAsync);
         media.MapGet("/{mediaId:guid}/audit", AuditAsync);
         media.MapGet("/{mediaId:guid}/link-candidates", CandidatesAsync);
-        media.MapPost("/assets", CreateAssetAsync);
+        media.MapPost("/assets", CreateAssetAsync).RequireRateLimiting(ProductionServiceCollectionExtensions.UploadCreatePolicy);
         media.MapPost("/external-references", CreateExternalAsync);
         media.MapPatch("/{mediaId:guid}", UpdateAsync);
         media.MapPost("/{mediaId:guid}/archive", ArchiveAsync);

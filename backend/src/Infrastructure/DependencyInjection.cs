@@ -132,7 +132,10 @@ public static class DependencyInjection
             .AddDbContextCheck<AppDbContext>(
                 name: "database",
                 failureStatus: Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Unhealthy,
-                tags: ["ready"]);
+                tags: ["ready"])
+            .AddCheck<PendingMigrationsHealthCheck>("migrations", tags: ["ready"])
+            .AddCheck<StorageReadinessHealthCheck>("storage", tags: ["ready"])
+            .AddCheck<ImportTemporaryDirectoryHealthCheck>("temporary-directory", tags: ["ready"]);
 
         return services;
     }

@@ -1,5 +1,13 @@
 # Progress Tracker
 
+## Unit 57: Production Configuration Readiness
+
+- Status: complete for application production-readiness; **production deployment remains BLOCKED** pending required infrastructure/provider decisions.
+- Added typed deployment, Data Protection, and rate-limit options; production-safe startup validation; Development-only `.env` loading; production key-ring persistence; exact split-origin CORS; trusted forwarded-header ordering; HTTPS/HSTS outside Development; health liveness/readiness checks; endpoint rate-limit policies; safe security headers; and frontend API-base validation for relative same-origin or absolute HTTPS production URLs.
+- Added operations configuration, deployment, backup/restore, object-storage decision, and sign-off checklist documents. They explicitly preserve unresolved hosting, PostgreSQL, object-storage, email delivery, backup/RPO/RTO, monitoring, TLS/proxy, and single/multi-instance decisions; no provider or secret is assumed.
+- No migration or provider SDK was added. `FileStorage__Provider=Local` remains Development-only, so deployment cannot be marked ready until an approved production adapter is implemented, health-checked, and integration-tested.
+- Verification in this environment: isolated `dotnet restore`, zero-warning `dotnet build`, 112 unit tests, and 48 integration tests passed. `dotnet format ... --verify-no-changes`, frontend format check, lint (two pre-existing warnings only), and production build passed.
+
 Update this file after every meaningful implementation change.
 
 This file intentionally starts lightweight. It should become more detailed as build units are added under `/feature-specs` and implementation work begins.

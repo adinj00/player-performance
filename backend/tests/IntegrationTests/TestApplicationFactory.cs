@@ -22,19 +22,20 @@ public class TestApplicationFactory : WebApplicationFactory<Program>
     protected virtual bool UseInMemoryDatabase => false;
     public TestApplicationFactory()
     {
-        Environment.SetEnvironmentVariable("PlayerPerformance__ServiceName", "PlayerPerformance.Api.Tests");
-        Environment.SetEnvironmentVariable("PlayerPerformance__FrontendOrigin", "https://frontend.test");
-        Environment.SetEnvironmentVariable(
-            "ConnectionStrings__DefaultConnection",
-            "Host=127.0.0.1;Port=1;Database=player_performance_tests;Username=test_user;Password=test_password;Timeout=1;Command Timeout=1");
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment("Testing");
+        builder.UseSetting("PlayerPerformance:ServiceName", "PlayerPerformance.Api.Tests");
+        builder.UseSetting("PlayerPerformance:FrontendOrigin", "https://frontend.test");
+        builder.UseSetting("ConnectionStrings:DefaultConnection", "Host=127.0.0.1;Port=1;Database=player_performance_tests;Username=test_user;Password=test_password;Timeout=1;Command Timeout=1");
         builder.UseSetting("FileStorage:Provider", "Local");
         builder.UseSetting("FileStorage:LocalRootPath", fileStorageRoot);
         builder.UseSetting("FileStorage:MaxObjectSizeBytes", "1024");
+        builder.UseSetting("Media:MaxUploadSizeBytes", "1024");
+        builder.UseSetting("Imports:MaxUploadSizeBytes", "1024");
+        builder.UseSetting("Imports:MaxXlsxUncompressedSizeBytes", "20480");
         builder.ConfigureLogging(logging => logging.ClearProviders());
         builder.ConfigureServices(services =>
         {
@@ -98,9 +99,6 @@ public class TestApplicationFactory : WebApplicationFactory<Program>
     {
         if (disposing)
         {
-            Environment.SetEnvironmentVariable("PlayerPerformance__ServiceName", null);
-            Environment.SetEnvironmentVariable("PlayerPerformance__FrontendOrigin", null);
-            Environment.SetEnvironmentVariable("ConnectionStrings__DefaultConnection", null);
             if (Directory.Exists(fileStorageRoot))
             {
                 Directory.Delete(fileStorageRoot, true);

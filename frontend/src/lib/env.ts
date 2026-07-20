@@ -9,7 +9,41 @@ function normalizeApiBaseUrl(value: string | undefined): string | null {
     return null;
   }
 
-  return trimmedValue.replace(/\/+$/, "");
+  const normalizedValue = trimmedValue.replace(/\/+$/, "");
+
+  if (normalizedValue.startsWith("/")) {
+    if (normalizedValue.startsWith("//")) {
+      throw new Error(
+        "VITE_API_BASE_URL ne smije koristiti protocol-relative URL.",
+      );
+    }
+
+    return normalizedValue;
+  }
+
+  let apiUrl: URL;
+  try {
+    apiUrl = new URL(normalizedValue);
+  } catch {
+    throw new Error(
+      "VITE_API_BASE_URL mora biti relativna API putanja ili apsolutni URL.",
+    );
+  }
+
+  const isProduction = import.meta.env.PROD;
+  if (
+    (isProduction && apiUrl.protocol !== "https:") ||
+    apiUrl.username ||
+    apiUrl.password ||
+    apiUrl.search ||
+    apiUrl.hash
+  ) {
+    throw new Error(
+      "VITE_API_BASE_URL u produkciji mora biti HTTPS URL bez vjerodajnica, upita i fragmenta.",
+    );
+  }
+
+  return normalizedValue;
 }
 
 const frontendEnv: FrontendEnv = {

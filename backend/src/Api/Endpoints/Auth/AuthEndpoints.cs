@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Mvc;
 using PlayerPerformance.Api.Authentication;
+using PlayerPerformance.Api.Configuration;
 using PlayerPerformance.Application.Auth;
 using PlayerPerformance.Domain.Common.Errors;
 
@@ -23,7 +24,8 @@ internal static class AuthEndpoints
             .AllowAnonymous();
 
         group.MapPost("/login", LoginAsync)
-            .AllowAnonymous();
+            .AllowAnonymous()
+            .RequireRateLimiting(ProductionServiceCollectionExtensions.AuthSensitivePolicy);
 
         group.MapPost("/change-password", ChangePasswordAsync)
             .RequireAuthorization()
@@ -31,7 +33,8 @@ internal static class AuthEndpoints
 
         group.MapPost("/logout", LogoutAsync)
             .RequireAuthorization()
-            .WithMetadata(new AllowPasswordChangeRequiredAttribute());
+            .WithMetadata(new AllowPasswordChangeRequiredAttribute())
+            .RequireRateLimiting(ProductionServiceCollectionExtensions.TokenSetupPolicy);
 
         return endpoints;
     }
