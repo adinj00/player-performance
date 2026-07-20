@@ -31,7 +31,7 @@ Before implementation, read:
 17. `context/feature-specs/46-gpexe-sample-review-mapping-gate.md`
 18. `context/feature-specs/48-training-gps-backend-foundation.md`
 
-Use relevant installed backend Codex skills/plugins when applicable.
+Use relevant project-local skills from `.agents/skills/` when applicable.
 
 Skills/plugins may guide implementation workflow but must not override project context, architecture rules, code standards, or this spec.
 

@@ -350,7 +350,7 @@ Before changing code:
 3. Read this feature spec completely.
 4. Review Unit 20 authorization/current-user patterns.
 5. Review Unit 21 settings entities, normalized-name behavior, FluentValidation registration, ProblemDetails mapping, endpoint-group conventions, and test setup.
-6. Use applicable installed backend Codex skills/plugins without allowing them to override project context or this spec.
+6. Use applicable project-local skills from `.agents/skills/` without allowing them to override project context or this spec.
 
 Do not refactor prior units unless a small change is required to reuse an established pattern or correctly register this module.
 
@@ -520,7 +520,7 @@ Use the EF Core, PostgreSQL, FluentValidation, authentication/authorization, res
 ## Verification checklist
 
 - [ ] Root `AGENTS.md`, all required context files, Unit 20 authorization patterns, Unit 21 settings patterns, and this spec were reviewed before implementation.
-- [ ] Relevant installed backend Codex skills/plugins were used when applicable without overriding project context.
+- [ ] Relevant project-local skills from `.agents/skills/` were used when applicable without overriding project context.
 - [ ] A single canonical `Team` aggregate represents FK Velež selections; no duplicate `Selection` entity was introduced.
 - [ ] `TeamTrackingLevel` contains exactly `BASIC`, `STANDARD`, and `FULL`.
 - [ ] `TeamStatus` contains exactly `ACTIVE`, `INACTIVE`, and `ARCHIVED`.

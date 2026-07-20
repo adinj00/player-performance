@@ -524,7 +524,7 @@ Before changing code:
 10. Review Unit 20 role/permission/session contracts.
 11. Review Unit 22 team list contract and lifecycle values.
 12. Review the implemented Unit 23 endpoint paths, exact request/response shapes, error status conventions, invitation credential response, and session extension before finalizing frontend types.
-13. Use relevant installed frontend skills in `frontend/.agents/` when applicable without allowing them to override project context or this spec.
+13. Use relevant project-local skills from `.agents/skills/` when applicable without allowing them to override project context or this spec.
 
 Do not refactor unrelated frontend foundations unless a small change is required to integrate this feature cleanly.
 
@@ -722,7 +722,7 @@ Do not add another server-state library, form library, validation library, globa
 ## Verification checklist
 
 - [ ] `AGENTS.md`, all required context files, the current build plan, relevant prior frontend/auth/authorization/team/staff specs, and this feature spec were read before implementation.
-- [ ] Relevant frontend skills from `frontend/.agents/` were used when applicable without overriding project context or this spec.
+- [ ] Relevant project-local skills from `.agents/skills/` were used when applicable without overriding project context or this spec.
 - [ ] No backend, database, migration, email-provider, public-registration, user-deletion, login-email-recovery, audit, or unrelated domain implementation was added.
 - [ ] The existing `/users` placeholder is replaced by a real staff-administration page.
 - [ ] `/users` waits for resolved session state and renders only for `ADMIN` users.

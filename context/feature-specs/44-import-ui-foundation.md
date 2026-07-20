@@ -26,7 +26,7 @@ Before implementation, read:
 14. `context/feature-specs/43-import-workflow-backend-foundation.md`
 15. `context/feature-specs/44-import-ui-foundation.md`
 
-Use relevant frontend skills from `frontend/.agents/` when applicable.
+Use relevant project-local skills from `.agents/skills/` when applicable.
 
 Before creating custom UI primitives or interaction patterns:
 

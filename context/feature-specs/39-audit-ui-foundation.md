@@ -26,7 +26,7 @@ Before implementation, read:
 14. `context/feature-specs/38-audit-backend-foundation.md`
 15. `context/feature-specs/39-audit-ui-foundation.md`
 
-Use relevant frontend skills from `frontend/.agents/` when applicable.
+Use relevant project-local skills from `.agents/skills/` when applicable.
 
 Before creating custom UI primitives or interaction patterns:
 

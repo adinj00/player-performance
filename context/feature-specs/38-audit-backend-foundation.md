@@ -24,7 +24,7 @@ Before implementation, read:
 12. `context/feature-specs/33-manual-match-statistics-backend.md`
 13. `context/feature-specs/38-audit-backend-foundation.md`
 
-Use relevant installed backend Codex skills/plugins when applicable.
+Use relevant project-local skills from `.agents/skills/` when applicable.
 
 Skills/plugins may guide implementation workflow, but must not override the project context files, architecture rules, code standards, or this spec.
 

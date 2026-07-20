@@ -33,7 +33,7 @@ Before implementation, read:
 15. `context/feature-specs/53-dashboard-ui.md`
 16. `context/feature-specs/56-responsive-accessibility-hardening.md`
 
-Use relevant frontend skills from `frontend/.agents/` when applicable.
+Use relevant project-local skills from `.agents/skills/` when applicable.
 
 Before changing a component:
 

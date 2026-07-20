@@ -355,7 +355,7 @@ Before implementation, read in order:
 
 Inspect the final implemented code from Units 08, 09, 12, 13, 18, 20, 21, and 22 before choosing concrete names, folders, base types, validation status codes, and test helpers.
 
-Use relevant installed backend Codex plugins when applicable. Plugins may guide implementation workflow but must not override the project context files, active feature spec, implemented contracts, or architecture boundaries.
+Use relevant project-local skills from `.agents/skills/` when applicable. Skills may guide implementation workflow but must not override the project context files, active feature spec, implemented contracts, or architecture boundaries.
 
 ### Existing-pattern inspection
 
@@ -593,7 +593,7 @@ All required runtime and test packages should already exist from Units 09, 12, a
 ## Verification checklist
 
 - [ ] `AGENTS.md`, all six context files, the build plan, Unit 21, Unit 22, and this spec were read before implementation.
-- [ ] Relevant installed backend Codex plugins were used when applicable without overriding project context or scope.
+- [ ] Relevant project-local skills from `.agents/skills/` were used when applicable without overriding project context or scope.
 - [ ] The implementation remains backend-only.
 - [ ] No frontend settings UI or routing changes were added.
 - [ ] No match, player, team-scope, import, media, GPS, medical, or dashboard behavior was added.

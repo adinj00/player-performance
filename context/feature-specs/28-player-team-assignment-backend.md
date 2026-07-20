@@ -20,7 +20,7 @@ Before implementation, read:
 8. `context/feature-specs/00-build-plan.md`
 9. `context/feature-specs/28-player-team-assignment-backend.md`
 
-Use relevant installed backend Codex plugins when applicable, but do not let plugin guidance override project context or this spec.
+Use relevant project-local skills from `.agents/skills/` when applicable, but do not let skill guidance override project context or this spec.
 
 This unit is backend-only. It adds player assignment history and the minimum assignment-aware player read authorization required for the future Players UI. It must not implement player UI, match lineups, match appearances, positions, shirt numbers, medical data, imports, media, or audit persistence.
 

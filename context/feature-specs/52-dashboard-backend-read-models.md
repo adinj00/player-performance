@@ -35,7 +35,7 @@ Before implementation, read:
 17. `context/feature-specs/50-medical-availability-backend.md`
 18. `context/feature-specs/52-dashboard-backend-read-models.md`
 
-Use relevant installed backend Codex skills/plugins when applicable.
+Use relevant project-local skills from `.agents/skills/` when applicable.
 
 Skills/plugins may guide implementation workflow but must not override project context, authorization, privacy, statistics completeness, workload comparability, or this spec.
 

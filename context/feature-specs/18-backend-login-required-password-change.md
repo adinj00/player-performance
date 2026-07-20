@@ -166,7 +166,7 @@ Also inspect the implemented outputs from:
 - Unit 15 backend CSRF and session API.
 - Unit 17 first admin bootstrap.
 
-Use relevant installed backend Codex plugins when applicable, while keeping the context files and this feature spec authoritative.
+Use relevant project-local skills from `.agents/skills/` when applicable, while keeping the context files and this feature spec authoritative.
 
 ### Application authentication contracts
 
@@ -336,7 +336,7 @@ Use the ASP.NET Core Identity, EF Core, antiforgery, ProblemDetails, configurati
 ## Verification checklist
 
 - [ ] `AGENTS.md`, all required context files, the corrected build plan, and this feature spec were read before implementation.
-- [ ] Relevant installed backend Codex plugins were used when applicable without overriding project context.
+- [ ] Relevant project-local skills from `.agents/skills/` were used when applicable without overriding project context.
 - [ ] `POST /api/auth/login` exists and uses the existing secure Identity cookie.
 - [ ] Login requires the approved antiforgery behavior.
 - [ ] Invalid credentials return a generic safe `401` response.

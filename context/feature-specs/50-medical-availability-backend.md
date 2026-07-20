@@ -31,7 +31,7 @@ Before implementation, read:
 13. `context/feature-specs/38-audit-backend-foundation.md`
 14. `context/feature-specs/50-medical-availability-backend.md`
 
-Use relevant installed backend Codex skills/plugins when applicable.
+Use relevant project-local skills from `.agents/skills/` when applicable.
 
 Skills/plugins may guide implementation workflow but must not override the project context, architecture rules, code standards, privacy rules, or this spec.
 

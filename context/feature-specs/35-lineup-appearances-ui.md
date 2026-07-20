@@ -25,7 +25,7 @@ Before implementation, read:
 13. `context/feature-specs/34-matches-ui-foundation.md`
 14. `context/feature-specs/35-lineup-appearances-ui.md`
 
-Use relevant frontend skills from `frontend/.agents/` and installed backend Codex skills/plugins when applicable.
+Use relevant project-local skills from `.agents/skills/` when applicable.
 
 Skills and plugins may guide implementation but must not override project context, architecture rules, code standards, or this spec.
 

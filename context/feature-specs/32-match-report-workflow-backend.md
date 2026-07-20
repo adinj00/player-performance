@@ -22,7 +22,7 @@ Before implementation, read:
 10. `context/feature-specs/31-match-lineup-appearance-backend.md`
 11. `context/feature-specs/32-match-report-workflow-backend.md`
 
-Use relevant installed backend Codex skills/plugins when applicable. Skills/plugins may guide implementation workflow but must not override project context, architecture rules, code standards, or this spec.
+Use relevant project-local skills from `.agents/skills/` when applicable. Skills may guide implementation workflow but must not override project context, architecture rules, code standards, or this spec.
 
 This unit is backend-only.
 

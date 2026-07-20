@@ -209,7 +209,7 @@ Before changing code:
 4. Read this feature spec completely.
 5. Review the existing app shell, route configuration, protected-route behavior, session provider, API client, TanStack Query provider, form helpers, and common UI primitives.
 6. Review Unit 21, Unit 22, and Unit 25 backend contracts and Unit 24 administrator UI patterns.
-7. Use relevant frontend skills from `frontend/.agents/` when applicable without allowing them to override project context, the active feature spec, or established code standards.
+7. Use relevant project-local skills from `.agents/skills/` when applicable without allowing them to override project context, the active feature spec, or established code standards.
 
 Implement only this unit. Do not refactor unrelated auth, users, shell, API, or backend code unless a small change is required to register the settings routes or administrator navigation correctly.
 
@@ -658,7 +658,7 @@ Add missing shadcn/ui primitives through the existing shadcn CLI only when the u
 ## Verification checklist
 
 - [ ] `AGENTS.md`, all required context files, the current build plan, Units 19, 21, 22, 24, and 25 specs, and this feature spec were read before implementation.
-- [ ] Relevant frontend skills from `frontend/.agents/` were used when applicable without overriding project context or this spec.
+- [ ] Relevant project-local skills from `.agents/skills/` were used when applicable without overriding project context or this spec.
 - [ ] `/settings` is protected and administrator-only in the frontend.
 - [ ] Direct access to every settings sub-route is guarded.
 - [ ] `/settings` resolves to a stable settings index screen or redirects to `/settings/seasons`.

@@ -338,6 +338,15 @@ import { Button } from "../../../components/ui/button";
 - Do not install the entire shadcn/ui catalog upfront.
 - A custom app-level component is appropriate when it composes primitives into project-specific behavior; it should not unnecessarily reimplement an existing primitive.
 
+### Agent-Skill Boundaries
+
+- Apply Vercel React guidance only when relevant to React/Vite client-side code; ignore Next.js-only and React Server Component guidance.
+- Apply Vercel composition guidance only where patterns are supported by the installed React version and current architecture.
+- Use Anthropic `frontend-design` for critique and refinement within the FK VeleÅ¾ design system; do not re-theme or redesign the product.
+- Use shadcn through its official CLI and documented composition. Do not manually edit generated primitives for project-specific visual overrides.
+- The project remains .NET 8. Skills do not authorize framework, test-platform, package-management, or architecture migrations without an approved specification.
+- Skills never authorize new dependencies or product scope by themselves.
+
 Allowed layout-only example:
 
 ```tsx

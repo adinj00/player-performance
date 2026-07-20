@@ -25,7 +25,7 @@ Before implementation, read:
 13. `context/feature-specs/33-manual-match-statistics-backend.md`
 14. `context/feature-specs/34-matches-ui-foundation.md`
 
-Use relevant frontend Codex skills from `frontend/.agents/` when applicable.
+Use relevant project-local skills from `.agents/skills/` when applicable.
 
 Before creating custom UI primitives or interaction patterns:
 

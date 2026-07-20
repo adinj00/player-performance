@@ -33,7 +33,7 @@ Before implementation, read:
 17. `context/feature-specs/52-dashboard-backend-read-models.md`
 18. `context/feature-specs/53-dashboard-ui.md`
 
-Use relevant frontend skills from `frontend/.agents/` when applicable.
+Use relevant project-local skills from `.agents/skills/` when applicable.
 
 Before creating custom UI primitives or interaction patterns:
 

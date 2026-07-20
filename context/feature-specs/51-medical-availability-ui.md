@@ -36,7 +36,7 @@ Before implementation, read:
 14. `context/feature-specs/50-medical-availability-backend.md`
 15. `context/feature-specs/51-medical-availability-ui.md`
 
-Use relevant frontend skills from `frontend/.agents/` and installed backend Codex skills/plugins when applicable.
+Use relevant project-local skills from `.agents/skills/` when applicable.
 
 Before creating custom UI primitives or interaction patterns:
 

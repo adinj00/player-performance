@@ -21,7 +21,7 @@ Before implementation, read:
 9. `context/feature-specs/00-build-plan.md`
 10. `context/feature-specs/29-players-ui-foundation.md`
 
-Use relevant frontend Codex skills from `frontend/.agents/` when applicable. Check the shadcn component reference before creating custom UI primitives or interaction patterns. Skills and component references may guide implementation but must not override project context or this spec.
+Use relevant project-local skills from `.agents/skills/` when applicable. Check the shadcn component reference before creating custom UI primitives or interaction patterns. Skills and component references may guide implementation but must not override project context or this spec.
 
 This unit is frontend-only. Use the existing backend contracts from Units 27 and 28. Do not add or change backend endpoints, persistence, authorization rules, player fields, assignment invariants, or migrations.
 

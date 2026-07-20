@@ -38,7 +38,7 @@ Before implementation, read:
 17. `context/feature-specs/48-training-gps-backend-foundation.md`
 18. `context/feature-specs/49-training-gps-ui-foundation.md`
 
-Use relevant frontend skills from `frontend/.agents/` and installed backend Codex skills/plugins when applicable.
+Use relevant project-local skills from `.agents/skills/` when applicable.
 
 Before creating custom UI primitives or interaction patterns:
 

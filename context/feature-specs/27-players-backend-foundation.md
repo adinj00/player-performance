@@ -20,7 +20,7 @@ Before implementation, read:
 8. `context/feature-specs/00-build-plan.md`
 9. `context/feature-specs/27-players-backend-foundation.md`
 
-Use relevant installed backend Codex plugins when applicable, but do not let plugin guidance override project context or this spec.
+Use relevant project-local skills from `.agents/skills/` when applicable, but do not let skill guidance override project context or this spec.
 
 This unit is backend-only. It establishes a persistent club player record and its lifecycle. It must not implement team assignment history, match appearances, medical availability, player media, performance data, imports, or frontend screens.
 

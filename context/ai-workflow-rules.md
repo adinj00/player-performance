@@ -8,6 +8,14 @@ The developer is the architect. The AI coding agent is the implementation engine
 
 Before implementing or making architectural decisions, read the root `AGENTS.md` file and the context files in the order listed there.
 
+## Agent Skills and Plugins
+
+- Root project skills in `.agents/skills/` are the normal source for frontend and backend workflow guidance.
+- Skills are advisory: apply only guidance that fits the actual React/Vite or .NET 8 code and current task. They never override context, active specifications, implemented contracts, or code standards.
+- Globally installed Codex plugins are optional capability extensions, not repository requirements.
+- Adding a skill requires explicit owner approval and recorded provenance from an approved official source.
+- Keep project-specific rules in `AGENTS.md` or `context/*`; do not modify vendored upstream `SKILL.md` files.
+
 ## Working Modes
 
 Use the correct mode for the current task.

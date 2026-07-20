@@ -439,7 +439,7 @@ Before changing code:
 4. Read this feature spec completely.
 5. Review Units 14–20 for Identity, account status, cookie/session, current-user, role, permission, policy, and first-admin patterns.
 6. Review Unit 22 for Team entity IDs, lifecycle, query abstractions, persistence, and test setup.
-7. Use relevant installed backend Codex skills/plugins when applicable without allowing them to override project context or this spec.
+7. Use relevant project-local skills from `.agents/skills/` when applicable without allowing them to override project context or this spec.
 
 Extend established patterns. Do not create parallel Identity, authorization, result/error, validation, transaction, clock, or endpoint-group infrastructure.
 
@@ -669,7 +669,7 @@ Do not install email providers, external RBAC libraries, JWT/OAuth packages, aud
 ## Verification checklist
 
 - [ ] `AGENTS.md`, all required context files, the current build plan, relevant prior auth/authorization/team specs, and this feature spec were read before implementation.
-- [ ] Relevant installed backend Codex plugins were used when applicable without overriding project context or the active spec.
+- [ ] Relevant project-local skills from `.agents/skills/` were used when applicable without overriding project context or the active spec.
 - [ ] No public registration, player login, multi-club behavior, frontend UI, or email-provider integration was added.
 - [ ] The existing authoritative Identity user and staff access/profile model were extended rather than duplicated.
 - [ ] A required staff display name exists in the authoritative staff profile.

@@ -13,8 +13,8 @@ The `context/` files are the primary source of truth.
 
 Use relevant Codex skills or plugins when applicable:
 
-- Frontend skills are in `frontend/.agents/`
-- Backend skills/plugins are available through the installed Codex plugins
+- Project-local skills are in `.agents/skills/`
+- Installed Codex plugins may provide additional optional capabilities, but they are not repository requirements
 
 For frontend UI work, also read `context/references/shadcn-components.md` before creating new UI primitives or interaction patterns.
 

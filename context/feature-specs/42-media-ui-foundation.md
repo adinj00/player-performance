@@ -27,7 +27,7 @@ Before implementation, read:
 15. `context/feature-specs/41-media-backend-foundation.md`
 16. `context/feature-specs/42-media-ui-foundation.md`
 
-Use relevant frontend skills from `frontend/.agents/` and installed backend Codex skills/plugins when applicable.
+Use relevant project-local skills from `.agents/skills/` when applicable.
 
 Before creating custom UI primitives or interaction patterns:
 

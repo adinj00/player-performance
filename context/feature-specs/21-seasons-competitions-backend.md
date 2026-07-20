@@ -352,7 +352,7 @@ Before implementation, read:
 
 Inspect the final implemented output from Units 08, 09, 12, 13, 14, 15, 18, and 20 before choosing concrete class names and extension points.
 
-Use relevant installed backend Codex plugins when applicable. Plugins may guide workflow but must not override project context, the active feature spec, existing architecture, or implemented contracts.
+Use relevant project-local skills from `.agents/skills/` when applicable. Skills may guide workflow but must not override project context, the active feature spec, existing architecture, or implemented contracts.
 
 ### Existing-contract inspection
 
@@ -582,7 +582,7 @@ Do not add MediatR, generic repository libraries, mapping libraries, date/time l
 ## Verification checklist
 
 - [ ] `AGENTS.md`, all required context files, the current build plan, and this feature spec were read before implementation.
-- [ ] Relevant installed backend Codex plugins were used when applicable without overriding project context or the active spec.
+- [ ] Relevant project-local skills from `.agents/skills/` were used when applicable without overriding project context or the active spec.
 - [ ] `Season` exists with only the approved ID, name, date range, archive, and timestamp fields.
 - [ ] `Competition` exists with only the approved ID, name, archive, and timestamp fields.
 - [ ] No `IsCurrent`, default-season, season/competition join, team, match, venue, opponent, or sample-data behavior was introduced.

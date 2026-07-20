@@ -234,7 +234,7 @@ Inspect the final implemented outputs from:
 - Unit 17 first admin bootstrap;
 - Unit 18 backend login and required password change.
 
-Use relevant installed backend Codex plugins when applicable. Plugins may guide implementation workflow but must not override the project context, active feature spec, existing architecture, or final contracts already implemented.
+Use relevant project-local skills from `.agents/skills/` when applicable. Skills may guide implementation workflow but must not override the project context, active feature spec, existing architecture, or final contracts already implemented.
 
 ### Existing-contract inspection
 
@@ -438,7 +438,7 @@ Use the ASP.NET Core Identity, authorization, EF Core/PostgreSQL, configuration,
 ## Verification checklist
 
 - [ ] `AGENTS.md`, all required context files, the revised build plan, and this feature spec were read before implementation.
-- [ ] Relevant installed backend Codex plugins were used when applicable without overriding project context.
+- [ ] Relevant project-local skills from `.agents/skills/` were used when applicable without overriding project context.
 - [ ] A single canonical primary-role model exists with `ADMIN`, `DATA_OPERATOR`, `ANALYST`, `COACH`, `MEDICAL_STAFF`, and `VIEWER`.
 - [ ] Explicit flags exist for report verification, imports, and medical-detail access.
 - [ ] Access data is persisted in one authoritative profile linked one-to-one to the Identity user.

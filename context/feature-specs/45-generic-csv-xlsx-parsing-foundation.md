@@ -22,7 +22,7 @@ Before implementation, read:
 10. `context/feature-specs/44-import-ui-foundation.md`
 11. `context/feature-specs/45-generic-csv-xlsx-parsing-foundation.md`
 
-Use relevant installed backend Codex skills/plugins when applicable.
+Use relevant project-local skills from `.agents/skills/` when applicable.
 
 Skills/plugins may guide implementation workflow but must not override project context, architecture rules, code standards, or this spec.
 

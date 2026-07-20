@@ -28,7 +28,7 @@ Before implementation, read:
 12. `context/feature-specs/53-dashboard-ui.md`
 13. `context/feature-specs/54-localization-foundation.md`
 
-Use relevant frontend skills from `frontend/.agents/` when applicable.
+Use relevant project-local skills from `.agents/skills/` when applicable.
 
 Before creating custom UI primitives:
 

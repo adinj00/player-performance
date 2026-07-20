@@ -1,5 +1,10 @@
 # Progress Tracker
 
+## Official agent skills migration and review
+
+- Status: complete. Official copied skills are centralized under `.agents/skills/`, the duplicate verified `frontend/.agents` shadcn copy was removed, and project documentation now uses the root workflow.
+- Added official provenance inventory and evidence-backed review records in `context/references/`. No production dependencies, architecture, contracts, migrations, or product scope changed.
+
 ## Unit 57: Production Configuration Readiness
 
 - Status: complete for application production-readiness; **production deployment remains BLOCKED** pending required infrastructure/provider decisions.

@@ -165,7 +165,7 @@ Inspect the implemented outputs and final contracts from:
 - Unit 16 frontend auth shell and session provider.
 - Unit 18 backend login and required password change.
 
-Use relevant frontend skills from `frontend/.agents/` when applicable. Skills may guide implementation but must not override the project context files, active feature spec, or existing codebase conventions.
+Use relevant project-local skills from `.agents/skills/` when applicable. Skills may guide implementation but must not override the project context files, active feature spec, or existing codebase conventions.
 
 ### Final contract inspection
 
@@ -405,7 +405,7 @@ Use the existing React Router/routing solution, TanStack Query, React Hook Form,
 ## Verification checklist
 
 - [ ] `AGENTS.md`, all required context files, the current build plan, and this feature spec were read before implementation.
-- [ ] Relevant frontend skills from `frontend/.agents/` were used when applicable without overriding project context.
+- [ ] Relevant project-local skills from `.agents/skills/` were used when applicable without overriding project context.
 - [ ] Final Unit 18 login, session, CSRF, change-password, logout, and ProblemDetails contracts were inspected before frontend types were finalized.
 - [ ] The sign-in form calls the real `POST /api/auth/login` endpoint.
 - [ ] Login uses the approved CSRF mechanism and includes cookie credentials.
