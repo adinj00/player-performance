@@ -8,7 +8,7 @@ import {
 import { MoreHorizontal, Plus } from "lucide-react";
 import { useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { z } from "zod";
 import { EmptyState } from "@/components/common/empty-state";
 import { DatePicker } from "@/components/common/date-picker";
@@ -140,7 +140,6 @@ function refresh(qc: ReturnType<typeof useQueryClient>, id?: string) {
 export function PlayersPage() {
   const { user } = useSession();
   const admin = user?.primaryRole === "ADMIN";
-  const nav = useNavigate();
   const qc = useQueryClient();
   const [filters, setFilters] = useState({
     search: "",
@@ -280,13 +279,14 @@ export function PlayersPage() {
               </TableHeader>
               <TableBody>
                 {data.data!.items.map((p) => (
-                  <TableRow
-                    key={p.id}
-                    className="cursor-pointer"
-                    onClick={() => nav(`/players/${p.id}`)}
-                  >
+                  <TableRow key={p.id}>
                     <TableCell className="font-medium">
-                      {p.displayName}
+                      <Link
+                        className="focus-visible:ring-ring rounded-sm hover:underline focus-visible:ring-2 focus-visible:outline-none"
+                        to={`/players/${p.id}`}
+                      >
+                        {p.displayName}
+                      </Link>
                     </TableCell>
                     <TableCell>
                       <Status status={p.status} />
@@ -300,7 +300,7 @@ export function PlayersPage() {
                         : "Nije uneseno"}
                     </TableCell>
                     {admin && (
-                      <TableCell onClick={(e) => e.stopPropagation()}>
+                      <TableCell>
                         <Menu
                           player={p}
                           edit={() => setEdit(p)}
@@ -601,7 +601,6 @@ export function PlayerDetailPage() {
   const canViewMedicalDetails =
     admin || user?.permissions.canViewMedicalDetails === true;
   const canRecordInjury = admin || user?.primaryRole === "MEDICAL_STAFF";
-  const nav = useNavigate();
   const qc = useQueryClient();
   const [add, setAdd] = useState(false);
   const [end, setEnd] = useState<PlayerAssignment | null>(null);
@@ -636,7 +635,9 @@ export function PlayerDetailPage() {
         title="Igrač nije dostupan"
         description="Igrač ne postoji ili nemate pristup njegovim podacima."
         action={
-          <Button onClick={() => nav("/players")}>Nazad na igrače</Button>
+          <Button nativeButton={false} render={<Link to="/players" />}>
+            Nazad na igrače
+          </Button>
         }
       />
     );
@@ -689,10 +690,11 @@ export function PlayerDetailPage() {
                   key={assignment.teamId}
                   size="sm"
                   variant="outline"
-                  onClick={() =>
-                    nav(
-                      `${routePaths.medical}?teamId=${assignment.teamId}&medicalView=injuries&injuryPlayerId=${playerId}`,
-                    )
+                  nativeButton={false}
+                  render={
+                    <Link
+                      to={`${routePaths.medical}?teamId=${assignment.teamId}&medicalView=injuries&injuryPlayerId=${playerId}`}
+                    />
                   }
                 >
                   Povrede: {assignment.teamName}
@@ -703,10 +705,11 @@ export function PlayerDetailPage() {
                     <Button
                       key={`create-injury-${assignment.teamId}`}
                       size="sm"
-                      onClick={() =>
-                        nav(
-                          `${routePaths.medical}?teamId=${assignment.teamId}&medicalView=injuries&injuryPlayerId=${playerId}&injuryCreatePlayerId=${playerId}`,
-                        )
+                      nativeButton={false}
+                      render={
+                        <Link
+                          to={`${routePaths.medical}?teamId=${assignment.teamId}&medicalView=injuries&injuryPlayerId=${playerId}&injuryCreatePlayerId=${playerId}`}
+                        />
                       }
                     >
                       Evidentiraj: {assignment.teamName}

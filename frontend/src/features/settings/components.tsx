@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Archive, ArrowDown, ArrowUp, RotateCcw } from "lucide-react";
 import {
+  Link,
   Outlet,
   useLocation,
   useNavigate,
@@ -65,7 +66,10 @@ export function SettingsLayout() {
         title="Pristup nije dozvoljen"
         description="Ovu stranicu mogu otvoriti samo administratori."
         action={
-          <Button onClick={() => navigate(routePaths.dashboard)}>
+          <Button
+            nativeButton={false}
+            render={<Link to={routePaths.dashboard} />}
+          >
             Na kontrolnu ploču
           </Button>
         }

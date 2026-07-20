@@ -13,7 +13,7 @@ import {
 } from "nuqs";
 import { MoreHorizontal, Plus } from "lucide-react";
 import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 import { routePaths } from "@/app/route-paths";
@@ -152,7 +152,14 @@ export function MatchesPage() {
     () => [
       {
         header: "Datum i vrijeme",
-        cell: (item: MatchResponse) => formatUtcDateTime(item.kickoffAtUtc),
+        cell: (item: MatchResponse) => (
+          <Link
+            className="font-medium hover:underline"
+            to={routePaths.matchDetail(item.id)}
+          >
+            {formatUtcDateTime(item.kickoffAtUtc)}
+          </Link>
+        ),
       },
       { header: "Selekcija", cell: (item: MatchResponse) => item.team.name },
       {
@@ -434,21 +441,9 @@ export function MatchesPage() {
               </TableHeader>
               <TableBody>
                 {table.getRowModel().rows.map((row) => (
-                  <TableRow
-                    className="cursor-pointer"
-                    key={row.id}
-                    onClick={() =>
-                      navigate(routePaths.matchDetail(row.original.id))
-                    }
-                  >
+                  <TableRow key={row.id}>
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell
-                        key={cell.id}
-                        onClick={(event) => {
-                          if (cell.column.id === "actions")
-                            event.stopPropagation();
-                        }}
-                      >
+                      <TableCell key={cell.id}>
                         {flexRender(
                           cell.column.columnDef.cell,
                           cell.getContext(),

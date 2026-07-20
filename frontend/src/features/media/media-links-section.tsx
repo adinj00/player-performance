@@ -66,6 +66,7 @@ export function MediaLinksSection({
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="font-heading text-xl">{title}</h2>
         <Button
+          nativeButton={false}
           variant="outline"
           render={
             <Link

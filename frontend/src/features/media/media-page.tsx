@@ -17,6 +17,7 @@ import {
   UserRoundPlus,
 } from "lucide-react";
 import { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { toast } from "sonner";
 import {
   useReactTable,
@@ -82,6 +83,7 @@ import { ErrorState } from "@/components/common/error-state";
 import { LoadingState } from "@/components/common/loading-state";
 import { useSession } from "@/features/auth/hooks/use-session";
 import { isApiError } from "@/lib/api/api-client";
+import { withLocationQuery } from "@/lib/location-query";
 import { settingsApi } from "@/features/settings/api";
 import { mediaApi } from "./api";
 import type { MediaCategory, MediaItem, MediaLinkTargetType } from "./types";
@@ -99,6 +101,7 @@ function canMutate(role: string | null | undefined) {
 }
 
 export function MediaPage() {
+  const location = useLocation();
   const { user } = useSession();
   const client = useQueryClient();
   const [createOpen, setCreateOpen] = useState(false);
@@ -148,6 +151,9 @@ export function MediaPage() {
   });
   const change = (v: Partial<typeof state>) =>
     void setState({ ...v, page: v.page === undefined ? 1 : v.page });
+  const mediaDetailUrl = (mediaId: string) => {
+    return withLocationQuery(location, { media: mediaId });
+  };
   const clearFilters = () =>
     void setState({
       search: null,
@@ -185,7 +191,18 @@ export function MediaPage() {
     void client.invalidateQueries({ queryKey: ["mediaList"] });
   };
   const columns: ColumnDef<MediaItem>[] = [
-    { header: "Naziv", accessorKey: "title" },
+    {
+      header: "Naziv",
+      accessorKey: "title",
+      cell: ({ row }) => (
+        <Link
+          className="font-medium hover:underline"
+          to={mediaDetailUrl(row.original.id)}
+        >
+          {row.original.title}
+        </Link>
+      ),
+    },
     { header: "Selekcija", accessorKey: "teamName" },
     {
       header: "Kategorija",
@@ -361,18 +378,9 @@ export function MediaPage() {
               </TableHeader>
               <TableBody>
                 {table.getRowModel().rows.map((row) => (
-                  <TableRow
-                    className="cursor-pointer"
-                    key={row.id}
-                    onClick={() => change({ media: row.original.id })}
-                  >
+                  <TableRow key={row.id}>
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell
-                        key={cell.id}
-                        onClick={(e) =>
-                          cell.column.id === "actions" && e.stopPropagation()
-                        }
-                      >
+                      <TableCell key={cell.id}>
                         {flexRender(
                           cell.column.columnDef.cell,
                           cell.getContext(),

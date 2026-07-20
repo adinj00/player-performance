@@ -887,6 +887,7 @@ function ImportDetail({
                   </p>
                   <Button
                     className="mt-3"
+                    nativeButton={false}
                     variant="outline"
                     render={<a href={importsApi.sourceUrl(job.id)} download />}
                   >

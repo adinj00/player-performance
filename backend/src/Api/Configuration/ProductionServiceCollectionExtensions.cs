@@ -37,10 +37,12 @@ internal static class ProductionServiceCollectionExtensions
             }));
         });
 
-        if (!environment.IsDevelopment() && !environment.IsEnvironment("Testing"))
+        var protection = configuration.GetSection(DataProtectionSettings.SectionName).Get<DataProtectionSettings>();
+        if (!string.IsNullOrWhiteSpace(protection?.ApplicationName) && !string.IsNullOrWhiteSpace(protection.KeysPath))
         {
-            var protection = configuration.GetSection(DataProtectionSettings.SectionName).Get<DataProtectionSettings>()!;
-            services.AddDataProtection().SetApplicationName(protection.ApplicationName!).PersistKeysToFileSystem(new DirectoryInfo(protection.KeysPath!));
+            services.AddDataProtection()
+                .SetApplicationName(protection.ApplicationName)
+                .PersistKeysToFileSystem(new DirectoryInfo(protection.KeysPath));
         }
         else
             services.AddDataProtection();

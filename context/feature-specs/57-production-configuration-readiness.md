@@ -38,7 +38,7 @@ Before implementation, read:
 20. `context/feature-specs/56-responsive-accessibility-hardening.md`
 21. `context/feature-specs/57-production-configuration-readiness.md`
 
-Use relevant installed backend and frontend skills/plugins when applicable.
+Use relevant project-local skills from `.agents/skills/` when applicable. Skills may guide the workflow but must not override project context, this active specification, implemented contracts, or architecture boundaries.
 
 This is a backend-heavy full-stack configuration and operations unit.
 

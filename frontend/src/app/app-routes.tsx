@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { NuqsAdapter } from "nuqs/adapters/react-router/v7";
-import { useEffect } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import {
   BrowserRouter,
   Navigate,
@@ -12,6 +12,7 @@ import {
 
 import { routePaths } from "@/app/route-paths";
 import { NotFoundPage } from "@/components/common/not-found-page";
+import { LoadingState } from "@/components/common/loading-state";
 import { RouteFocusManager } from "@/components/common/route-focus-manager";
 import { AppShell } from "@/components/layout/app-shell";
 import {
@@ -23,33 +24,100 @@ import {
   SignInPage,
 } from "@/features/auth";
 import { sessionQueryKey } from "@/features/auth/hooks/use-session";
-import { DashboardPage } from "@/pages/dashboard-page";
-import { ImportsPage } from "@/pages/imports-page";
-import { MatchesPage } from "@/pages/matches-page";
-import { MatchDetailPage, MatchReportsPage } from "@/features/matches";
-import { MedicalPage } from "@/pages/medical-page";
-import { MediaPage } from "@/features/media";
-import { PlayersPage } from "@/pages/players-page";
-import { PlayerDetailPage } from "@/features/players";
-import { TeamsPage } from "@/pages/teams-page";
-import {
-  TrainingSessionDetailPage,
-  TrainingSessionsPage,
-} from "@/features/training/pages";
-import { UsersPage } from "@/pages/users-page";
 import { AcceptInvitationPage } from "@/pages/accept-invitation-page";
-import { SettingsLayout } from "@/features/settings/components";
-import {
-  NamedSettingsPage,
-  SeasonsSettingsPage,
-  TeamsSettingsPage,
-} from "@/features/settings/pages";
+const DashboardPage = lazy(() =>
+  import("@/pages/dashboard-page").then(({ DashboardPage }) => ({
+    default: DashboardPage,
+  })),
+);
+const ImportsPage = lazy(() =>
+  import("@/pages/imports-page").then(({ ImportsPage }) => ({
+    default: ImportsPage,
+  })),
+);
+const MatchesPage = lazy(() =>
+  import("@/pages/matches-page").then(({ MatchesPage }) => ({
+    default: MatchesPage,
+  })),
+);
+const MatchDetailPage = lazy(() =>
+  import("@/features/matches").then(({ MatchDetailPage }) => ({
+    default: MatchDetailPage,
+  })),
+);
+const MatchReportsPage = lazy(() =>
+  import("@/features/matches").then(({ MatchReportsPage }) => ({
+    default: MatchReportsPage,
+  })),
+);
+const MedicalPage = lazy(() =>
+  import("@/pages/medical-page").then(({ MedicalPage }) => ({
+    default: MedicalPage,
+  })),
+);
+const MediaPage = lazy(() =>
+  import("@/features/media").then(({ MediaPage }) => ({
+    default: MediaPage,
+  })),
+);
+const PlayersPage = lazy(() =>
+  import("@/pages/players-page").then(({ PlayersPage }) => ({
+    default: PlayersPage,
+  })),
+);
+const PlayerDetailPage = lazy(() =>
+  import("@/features/players").then(({ PlayerDetailPage }) => ({
+    default: PlayerDetailPage,
+  })),
+);
+const TeamsPage = lazy(() =>
+  import("@/pages/teams-page").then(({ TeamsPage }) => ({
+    default: TeamsPage,
+  })),
+);
+const TrainingSessionsPage = lazy(() =>
+  import("@/features/training/pages").then(({ TrainingSessionsPage }) => ({
+    default: TrainingSessionsPage,
+  })),
+);
+const TrainingSessionDetailPage = lazy(() =>
+  import("@/features/training/pages").then(({ TrainingSessionDetailPage }) => ({
+    default: TrainingSessionDetailPage,
+  })),
+);
+const UsersPage = lazy(() =>
+  import("@/pages/users-page").then(({ UsersPage }) => ({
+    default: UsersPage,
+  })),
+);
+const SettingsLayout = lazy(() =>
+  import("@/features/settings/components").then(({ SettingsLayout }) => ({
+    default: SettingsLayout,
+  })),
+);
+const NamedSettingsPage = lazy(() =>
+  import("@/features/settings/pages").then(({ NamedSettingsPage }) => ({
+    default: NamedSettingsPage,
+  })),
+);
+const SeasonsSettingsPage = lazy(() =>
+  import("@/features/settings/pages").then(({ SeasonsSettingsPage }) => ({
+    default: SeasonsSettingsPage,
+  })),
+);
+const TeamsSettingsPage = lazy(() =>
+  import("@/features/settings/pages").then(({ TeamsSettingsPage }) => ({
+    default: TeamsSettingsPage,
+  })),
+);
 
 function ProtectedAppShell() {
   return (
     <ProtectedRoute>
       <AppShell>
-        <Outlet />
+        <Suspense fallback={<LoadingState label="Učitavanje stranice..." />}>
+          <Outlet />
+        </Suspense>
       </AppShell>
     </ProtectedRoute>
   );

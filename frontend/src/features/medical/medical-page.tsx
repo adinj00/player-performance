@@ -6,6 +6,7 @@ import {
 } from "@tanstack/react-table";
 import { parseAsInteger, parseAsString, useQueryStates } from "nuqs";
 import { useEffect, useRef, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -66,6 +67,7 @@ import {
 import { settingsApi } from "@/features/settings/api";
 import { formatDate } from "@/lib/date-format";
 import { isApiError } from "@/lib/api/api-client";
+import { withLocationQuery } from "@/lib/location-query";
 import {
   medicalApi,
   type AvailabilityItem,
@@ -331,6 +333,7 @@ function Availability({
   auditPage: number;
   setUrl: (value: Record<string, unknown>) => Promise<URLSearchParams>;
 }) {
+  const location = useLocation();
   const data = useQuery({
     queryKey: ["availability", teamId, status, search, page],
     queryFn: () => medicalApi.availability({ teamId, status, search, page }),
@@ -344,6 +347,12 @@ function Availability({
   const [editing, setEditing] = useState<AvailabilityItem | null>(null);
   const selected =
     data.data?.items.find((item) => item.playerId === playerId) ?? null;
+  const availabilityDetailUrl = (availabilityPlayerId: string) => {
+    return withLocationQuery(location, {
+      availabilityPlayerId,
+      availabilityDetailView: "revisions",
+    });
+  };
   const columns: ColumnDef<AvailabilityItem>[] = [
     {
       accessorKey: "displayName",
@@ -404,6 +413,8 @@ function Availability({
         ) : null,
     },
   ];
+  // TanStack Table creates a mutable table instance; React Compiler must not memoize it.
+  // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data: data.data?.items ?? [],
     columns,
@@ -478,19 +489,18 @@ function Availability({
                 {table.getRowModel().rows.map((row) => {
                   const item = row.original;
                   return (
-                    <TableRow
-                      key={item.playerId}
-                      className="cursor-pointer"
-                      onClick={() => {
-                        if (item.status !== "UNKNOWN")
-                          void setUrl({
-                            availabilityPlayerId: item.playerId,
-                            availabilityDetailView: "revisions",
-                          });
-                      }}
-                    >
+                    <TableRow key={item.playerId}>
                       <TableCell className="font-medium">
-                        {item.displayName}
+                        {item.status === "UNKNOWN" ? (
+                          item.displayName
+                        ) : (
+                          <Link
+                            className="hover:underline"
+                            to={availabilityDetailUrl(item.playerId)}
+                          >
+                            {item.displayName}
+                          </Link>
+                        )}
                       </TableCell>
                       <TableCell>
                         <Badge variant="secondary">
@@ -519,10 +529,7 @@ function Availability({
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={(event) => {
-                              event.stopPropagation();
-                              setEditing(item);
-                            }}
+                            onClick={() => setEditing(item)}
                           >
                             Ažuriraj
                           </Button>
@@ -880,6 +887,7 @@ function Injuries({
   createPlayerId: string | null;
   setUrl: (value: Record<string, unknown>) => Promise<URLSearchParams>;
 }) {
+  const location = useLocation();
   const data = useQuery({
     queryKey: [
       "medical",
@@ -907,6 +915,9 @@ function Injuries({
   const { user } = useSession();
   const canWrite =
     user?.primaryRole === "ADMIN" || user?.primaryRole === "MEDICAL_STAFF";
+  const injuryDetailUrl = (selectedInjuryId: string) => {
+    return withLocationQuery(location, { injuryId: selectedInjuryId });
+  };
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-wrap justify-between gap-3">
@@ -986,12 +997,15 @@ function Injuries({
             </TableHeader>
             <TableBody>
               {data.data?.items.map((item) => (
-                <TableRow
-                  key={item.id}
-                  className="cursor-pointer"
-                  onClick={() => void setUrl({ injuryId: item.id })}
-                >
-                  <TableCell className="font-mono text-xs">{item.id}</TableCell>
+                <TableRow key={item.id}>
+                  <TableCell className="font-mono text-xs">
+                    <Link
+                      className="hover:underline"
+                      to={injuryDetailUrl(item.id)}
+                    >
+                      {item.id}
+                    </Link>
+                  </TableCell>
                   <TableCell>{formatDate(item.occurredOn)}</TableCell>
                   <TableCell>
                     <Badge variant="secondary">

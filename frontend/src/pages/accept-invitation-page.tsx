@@ -64,7 +64,7 @@ export function AcceptInvitationPage() {
       ) : done ? (
         <div className="flex flex-col gap-4">
           <p>Lozinka je postavljena. Sada se možete prijaviti.</p>
-          <Button render={<Link to={routePaths.signIn} />}>
+          <Button nativeButton={false} render={<Link to={routePaths.signIn} />}>
             Nastavi na prijavu
           </Button>
         </div>

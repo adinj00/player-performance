@@ -3,13 +3,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { invalidateDashboardOverview } from "@/features/dashboard";
 import { Plus, Search } from "lucide-react";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
-import {
-  Link,
-  useNavigate,
-  useParams,
-  useSearchParams,
-} from "react-router-dom";
+import { useForm, useWatch } from "react-hook-form";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import { z } from "zod";
 import { PageHeader } from "@/components/common/page-header";
 import { DatePicker } from "@/components/common/date-picker";
@@ -104,7 +99,6 @@ function errorText(error: unknown) {
 
 export function TrainingSessionsPage() {
   const { user } = useSession();
-  const nav = useNavigate();
   const [params, setParams] = useSearchParams();
   const [create, setCreate] = useState(false);
   const filters: TrainingFilters = {
@@ -245,7 +239,8 @@ export function TrainingSessionsPage() {
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => nav(`/training-sessions/${item.id}`)}
+                      nativeButton={false}
+                      render={<Link to={`/training-sessions/${item.id}`} />}
                     >
                       Pregled
                     </Button>
@@ -314,6 +309,11 @@ function TrainingDialog({
       description: "",
     },
   });
+  const teamId = useWatch({ control: form.control, name: "teamId" });
+  const sessionDate = useWatch({
+    control: form.control,
+    name: "sessionDate",
+  });
   const mutation = useMutation({
     mutationFn: (v: Values) =>
       trainingApi.create({
@@ -342,7 +342,7 @@ function TrainingDialog({
             <Field data-invalid={!!form.formState.errors.teamId}>
               <FieldLabel>Selekcija</FieldLabel>
               <Select
-                value={form.watch("teamId")}
+                value={teamId}
                 onValueChange={(v) => form.setValue("teamId", v ?? "")}
               >
                 <SelectTrigger aria-invalid={!!form.formState.errors.teamId}>
@@ -364,7 +364,7 @@ function TrainingDialog({
               <FieldLabel htmlFor="training-date">Datum</FieldLabel>
               <DatePicker
                 id="training-date"
-                value={form.watch("sessionDate")}
+                value={sessionDate}
                 onChange={(sessionDate) =>
                   form.setValue("sessionDate", sessionDate, {
                     shouldValidate: true,

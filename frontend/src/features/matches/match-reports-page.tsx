@@ -7,7 +7,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { parseAsInteger, parseAsString, useQueryStates } from "nuqs";
 import { useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { MoreHorizontal } from "lucide-react";
 
 import { routePaths } from "@/app/route-paths";
@@ -118,9 +118,12 @@ export function MatchReportsPage() {
         header: "Utakmica",
         cell: (item: MatchReportListItem) => (
           <div className="flex flex-col gap-1">
-            <span>
+            <Link
+              className="font-medium hover:underline"
+              to={`${routePaths.matchDetail(item.matchId)}?tab=audit`}
+            >
               {item.team.name} – {item.opponent.name}
-            </span>
+            </Link>
             <span className="text-muted-foreground text-sm">
               {formatUtcDateTime(item.kickoffAtUtc)}
             </span>
@@ -339,24 +342,9 @@ export function MatchReportsPage() {
               </TableHeader>
               <TableBody>
                 {table.getRowModel().rows.map((row) => (
-                  <TableRow
-                    className="cursor-pointer"
-                    key={row.id}
-                    onClick={() =>
-                      navigate(
-                        `${routePaths.matchDetail(row.original.matchId)}?tab=audit`,
-                      )
-                    }
-                  >
+                  <TableRow key={row.id}>
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell
-                        key={cell.id}
-                        onClick={(event) => {
-                          if (cell.column.id === "actions") {
-                            event.stopPropagation();
-                          }
-                        }}
-                      >
+                      <TableCell key={cell.id}>
                         {flexRender(
                           cell.column.columnDef.cell,
                           cell.getContext(),

@@ -4,6 +4,23 @@
 
 - Status: complete. Official copied skills are centralized under `.agents/skills/`, the duplicate verified `frontend/.agents` shadcn copy was removed, and project documentation now uses the root workflow.
 - Added official provenance inventory and evidence-backed review records in `context/references/`. No production dependencies, architecture, contracts, migrations, or product scope changed.
+- Follow-up: toast notifications now explicitly use the approved light theme; the unused `next-themes` dependency was removed. Unit 57's skill-location wording now points to `.agents/skills/`.
+- Performance follow-up: protected route pages now load through React lazy imports behind the existing accessible loading state. This preserves the React Router and TanStack Query architecture while reducing the initial JavaScript payload.
+- React Compiler follow-up: the training form now subscribes to its two rendered field values through `useWatch` instead of calling `form.watch()` during render; validation and mutation behavior remain unchanged.
+- Navigation accessibility follow-up: static destinations from training, users, settings, and player-detail error states now render as React Router links through the existing Button composition, preserving keyboard and new-tab link semantics.
+- Player-list accessibility follow-up: player names are now semantic detail links; the table rows are no longer mouse-only navigation controls.
+- Player-detail accessibility follow-up: medical detail and injury-entry destinations are now links, retaining their exact team/player query state while supporting standard link behavior.
+- Frontend test foundation: added Vitest, jsdom, and React Testing Library with one-shot `npm run test`; initial tests cover safe post-auth return paths and protected-route redirects/rendering.
+- List-navigation follow-up: match and match-report tables now use explicit links in their primary column instead of click handlers on the entire table row.
+- Base UI follow-up: fixed the linked-media action's `Button` composition by setting `nativeButton={false}` when it renders a React Router link, eliminating its development accessibility warning.
+- Medical-navigation follow-up: availability player names and injury IDs now preserve the active URL query state as semantic detail links instead of making whole table rows clickable.
+- Frontend lint follow-up: documented the intentional TanStack Table React Compiler opt-out in the medical availability table, consistent with the existing match and media table integrations.
+- Dependency-security follow-up: npm audit identified only indirect `brace-expansion` and `js-yaml` DoS advisories; the compatible patch-level audit fix updated both lockfile resolutions, and a follow-up online audit reports zero vulnerabilities.
+- Media-navigation follow-up: media titles now preserve active URL state as semantic detail links instead of making whole media-library rows clickable.
+- Base UI composition sweep: added `nativeButton={false}` to the invitation-return link and import-source download anchor; all known Button-to-link/anchor compositions now preserve correct semantics.
+- URL-state test follow-up: extracted a small, shared location-query helper for media and medical detail links. Vitest now verifies query preservation, replacement, removal, and hash retention.
+- Local authentication runtime fix: Data Protection now honors an explicitly configured application/key-ring pair in Development as well as Production. The ignored local backend configuration uses a private project-specific development key ring, avoiding the corrupted shared user key ring while preserving production validation requirements.
+- Authentication verification follow-up: a fresh Development API instance returned `200` for health, CSRF, and the configured administrator login after reading the local credential as UTF-8. The focused `AuthEndpointsTests` integration suite passes (9/9). In-app browser UI verification remains unavailable in this Codex session because no browser instance is attached.
 
 ## Unit 57: Production Configuration Readiness
 
@@ -833,3 +850,7 @@ This file intentionally starts lightweight. It should become more detailed as bu
 - Dialog usability follow-up: the new-import dialog uses a viewport-bounded, scrollable form body with a sticky action footer so cancel/upload actions remain visible on smaller screens.
 - Import empty-stream fix: removed the import endpoint's premature third `MultipartReader.ReadNextSectionAsync` call. That call drained the selected file section before storage consumed it, producing `File content cannot be empty.` The API was rebuilt successfully and restarted on port 5051; `/health` returned 200 after restart.
 - Audit presentation follow-up: import audit history now resolves selection/match identifiers, numeric or string enum payloads, source/format/status labels, content types, and byte counts into staff-readable values instead of exposing GUIDs, enum numbers, MIME strings, or raw byte totals.
+
+## Local runtime cleanup
+
+- Removed the temporary `.tmp/local-runtime` logs and the development-only `.local-data-protection` key ring at the maintainer's request. The related local `.env` settings and `.gitignore` entry were removed so the artifacts are not recreated automatically.
