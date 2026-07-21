@@ -1,5 +1,13 @@
 # Progress Tracker
 
+## Responsive shell and club identity redesign
+
+- Status: complete on `feat/responsive-layout-redesign`. Removed the duplicated desktop top bar and its non-functional season/selection placeholders; route-level `PageHeader` remains the single page-title/action source. Tablet and mobile now use a compact club-branded app bar and navigation Sheet, while desktop retains the persistent sidebar.
+- Replaced the sidebar's future-action placeholder with a functional bottom-anchored staff dropdown containing the authenticated email, localized role, and CSRF-backed logout action. The same menu remains available inside the responsive navigation Sheet.
+- Renamed the supplied club asset to `frontend/public/fk-velez-mostar-logo.svg`, used it in the authenticated shell and public auth shell, and replaced the Vite favicon/title defaults. HTML now declares Bosnian as the document language.
+- Added metadata for all public auth routes plus Players detail matching, retained Matches and Training detail matching, and added route-resolution tests so legitimate routes no longer receive the `Stranica nije pronađena` browser-tab title. Unknown nested routes still fail closed.
+- Verification: frontend format and format check, lint, production build, and Vitest passed (20 tests). The build contains the renamed club SVG. In-app browser discovery returned no available browser, so no screenshot or interactive viewport run is claimed for this change.
+
 ## Official agent skills migration and review
 
 - Status: complete. Official copied skills are centralized under `.agents/skills/`, the duplicate verified `frontend/.agents` shadcn copy was removed, and project documentation now uses the root workflow.

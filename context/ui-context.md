@@ -283,15 +283,15 @@ The authenticated application uses a desktop-first dashboard shell:
 
 ```txt
 App Shell
-├── Left Sidebar
-├── Top Bar
+├── Left Sidebar (desktop)
+├── Mobile App Bar + Navigation Sheet (tablet/mobile)
 └── Main Content Area
 ```
 
 The shell must support responsive behavior:
 
-- Desktop: persistent or collapsible sidebar.
-- Tablet: collapsible sidebar, clean content scaling.
+- Desktop: persistent sidebar with the functional user menu anchored at its bottom.
+- Tablet: sidebar navigation opens in a Sheet so dense content retains usable width.
 - Mobile: sidebar opens as a drawer/sheet; essential viewing and lightweight actions remain usable.
 
 Dense data entry, imports, and analysis workflows are optimized for desktop and tablet screens.
@@ -329,19 +329,14 @@ Rules:
 - Sidebar active states must use semantic tokens and shadcn-compatible styling.
 - The sidebar may support collapsed icon-only mode on desktop.
 
-### Top Bar
+### Mobile App Bar and Page Context
 
-The top bar provides page context and high-level actions.
-
-Common elements:
-
-- Page title.
-- Breadcrumbs when useful.
-- Selected season.
-- Selected team/selection.
-- User menu.
-- Primary page action.
-- Optional global search later if needed.
+- The shared shell must not repeat the route title already rendered by the route-level `PageHeader`; each route keeps one visible `h1` and one source of page actions.
+- Desktop does not render a persistent top bar until a real cross-route action requires it.
+- Tablet and mobile use a compact app bar containing only the navigation trigger and club/system identity. The functional user menu remains available at the bottom of the navigation Sheet.
+- The functional user menu is anchored at the bottom of the desktop sidebar and contains the current staff identity, role, logout, and future account actions.
+- Season and team selection stay inside the route that owns the real context until a shared global context contract exists. Do not render non-functional shell placeholders.
+- Breadcrumbs belong to detail pages when useful; primary page actions belong to the route-level `PageHeader`.
 
 Season and team selection should be treated as important dashboard context. When the selected season/team affects shareable page state, use the app's React Router search-param conventions. High-frequency list search/filter inputs should remain local state unless shareable URL state is explicitly required.
 

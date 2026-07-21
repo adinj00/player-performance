@@ -56,6 +56,31 @@ export interface NavigationGroupDefinition {
 
 export const appRouteDefinitions: AppRouteDefinition[] = [
   {
+    path: routePaths.signIn,
+    title: "Prijava",
+    description: "Prijava za ovlašteno osoblje kluba.",
+  },
+  {
+    path: routePaths.forgotPassword,
+    title: "Povrat lozinke",
+    description: "Povrat pristupa korisničkom računu.",
+  },
+  {
+    path: routePaths.resetPassword,
+    title: "Postavljanje nove lozinke",
+    description: "Postavljanje nove korisničke lozinke.",
+  },
+  {
+    path: routePaths.changePassword,
+    title: "Promjena lozinke",
+    description: "Promjena privremene ili postojeće lozinke.",
+  },
+  {
+    path: routePaths.acceptInvitation,
+    title: "Prihvatanje poziva",
+    description: "Aktivacija pozvanog korisničkog računa.",
+  },
+  {
     path: routePaths.dashboard,
     title: "Kontrolna ploča",
     description: "Pregled sistema će biti dodan u kasnijem feature specu.",
@@ -77,7 +102,7 @@ export const appRouteDefinitions: AppRouteDefinition[] = [
   },
   {
     path: routePaths.trainingGps,
-    title: "Trening GPS",
+    title: "Treninzi i GPS",
     description:
       "Modul za GPS i fizičko opterećenje će biti dodan u kasnijem feature specu.",
   },
@@ -95,13 +120,13 @@ export const appRouteDefinitions: AppRouteDefinition[] = [
   },
   {
     path: routePaths.medical,
-    title: "Medicinski status",
+    title: "Dostupnost igrača",
     description:
       "Modul za medicinski status i dostupnost igrača će biti dodan u kasnijem feature specu.",
   },
   {
     path: routePaths.media,
-    title: "Medijska biblioteka",
+    title: "Medijateka",
     description:
       "Modul za medije i vanjske reference će biti dodan u kasnijem feature specu.",
   },
@@ -191,19 +216,27 @@ export const navigationGroups: NavigationGroupDefinition[] = [
 ];
 
 export function getRouteDefinition(pathname: string) {
-  if (pathname.startsWith(`${routePaths.matches}/`)) {
-    return (
-      appRouteDefinitions.find((route) => route.path === routePaths.matches) ??
-      null
-    );
-  }
-  if (pathname.startsWith(`${routePaths.trainingGps}/`)) {
-    return (
-      appRouteDefinitions.find(
-        (route) => route.path === routePaths.trainingGps,
-      ) ?? null
-    );
-  }
+  const normalizedPathname =
+    pathname.length > 1 ? pathname.replace(/\/+$/, "") : pathname;
+  const exactMatch = appRouteDefinitions.find(
+    (route) => route.path === normalizedPathname,
+  );
 
-  return appRouteDefinitions.find((route) => route.path === pathname) ?? null;
+  if (exactMatch) return exactMatch;
+
+  const detailParentPaths = [
+    routePaths.matches,
+    routePaths.players,
+    routePaths.trainingGps,
+  ];
+  const detailParent = detailParentPaths.find((parentPath) => {
+    if (!normalizedPathname.startsWith(`${parentPath}/`)) return false;
+
+    const detailId = normalizedPathname.slice(parentPath.length + 1);
+    return detailId.length > 0 && !detailId.includes("/");
+  });
+
+  return detailParent
+    ? (appRouteDefinitions.find((route) => route.path === detailParent) ?? null)
+    : null;
 }
