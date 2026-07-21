@@ -97,11 +97,48 @@ public sealed class PlayerEndpointsTests
         Assert.Equal(HttpStatusCode.Conflict, repeated.StatusCode);
     }
 
+    [Fact]
+    public async Task CurrentAssignment_ShouldBlockDeactivateAndArchiveWithStableProblemDetails()
+    {
+        using var factory = new IdentityTestApplicationFactory();
+        var admin = await factory.CreateUserAsync("admin.player.lifecycle@example.com", "Temporary!Pass123");
+        await factory.CreateAccessProfileAsync(admin.Id, StaffRole.ADMIN);
+        using var client = CreateClient(factory);
+        await LoginAsync(client, admin.Email!);
+        var csrf = await GetCsrfAsync(client);
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+
+        using var teamResponse = await SendJsonAsync(client, HttpMethod.Post, "/api/settings/teams", new { name = "Lifecycle Team", trackingLevel = "STANDARD" }, csrf);
+        Assert.Equal(HttpStatusCode.Created, teamResponse.StatusCode);
+        var teamId = await GetIdAsync(teamResponse);
+
+        using var playerResponse = await SendJsonAsync(client, HttpMethod.Post, "/api/players", new { firstName = "Lifecycle", lastName = "Player" }, csrf);
+        Assert.Equal(HttpStatusCode.Created, playerResponse.StatusCode);
+        var playerId = await GetIdAsync(playerResponse);
+
+        using var assignmentResponse = await SendJsonAsync(client, HttpMethod.Post, $"/api/players/{playerId}/assignments", new { teamId, startDate = today.AddDays(-1).ToString("yyyy-MM-dd") }, csrf);
+        Assert.Equal(HttpStatusCode.Created, assignmentResponse.StatusCode);
+
+        using var deactivate = await SendAsync(client, HttpMethod.Post, $"/api/players/{playerId}/deactivate", csrf);
+        await AssertCurrentAssignmentConflictAsync(deactivate);
+
+        using var archive = await SendAsync(client, HttpMethod.Post, $"/api/players/{playerId}/archive", csrf);
+        await AssertCurrentAssignmentConflictAsync(archive);
+    }
+
     private static HttpClient CreateClient(WebApplicationFactory<Program> factory) => factory.CreateClient(new WebApplicationFactoryClientOptions { BaseAddress = new Uri("https://localhost") });
     private static async Task<Guid> GetIdAsync(HttpResponseMessage response)
     {
         using var body = await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync());
         return body.RootElement.GetProperty("id").GetGuid();
+    }
+
+    private static async Task AssertCurrentAssignmentConflictAsync(HttpResponseMessage response)
+    {
+        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+        using var body = await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync());
+        Assert.Equal("player_has_current_assignments", body.RootElement.GetProperty("code").GetString());
+        Assert.Equal("Current player assignments must be ended first.", body.RootElement.GetProperty("detail").GetString());
     }
     private static async Task<HttpResponseMessage> SendJsonAsync(HttpClient client, HttpMethod method, string path, object payload, string csrf)
     {

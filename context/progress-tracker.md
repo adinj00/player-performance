@@ -1,5 +1,11 @@
 # Progress Tracker
 
+## Player lifecycle assignment-conflict UX follow-up
+
+- Deactivation and archival now share an assignment-aware preflight in the Players UI. When the player has current selection assignments, the confirmation dialog no longer sends a lifecycle request that the backend is known to reject; it identifies the blocking selections and links directly to the player's assignment-history controls so the administrator can end them first.
+- The backend remains authoritative and continues returning `409 Conflict` with `player_has_current_assignments` if a client bypasses the preflight. Focused integration coverage now verifies the stable ProblemDetails code and detail for both deactivate and archive endpoints.
+- Added focused frontend coverage for all four lifecycle actions. Verification passed: frontend format/check, lint, production build, and 24 Vitest tests; four focused Player endpoint integration tests passed using an isolated build output because the local API process held the standard apphost executable.
+
 ## Responsive shell and club identity redesign
 
 - Status: complete on `feat/responsive-layout-redesign`. Removed the duplicated desktop top bar and its non-functional season/selection placeholders; route-level `PageHeader` remains the single page-title/action source. Tablet and mobile now use a compact club-branded app bar and navigation Sheet, while desktop retains the persistent sidebar.

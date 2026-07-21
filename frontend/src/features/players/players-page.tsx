@@ -17,6 +17,7 @@ import { ErrorState } from "@/components/common/error-state";
 import { FilterSelect } from "@/components/common/filter-select";
 import { LoadingState } from "@/components/common/loading-state";
 import { PageHeader } from "@/components/common/page-header";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -66,6 +67,10 @@ import { settingsApi } from "@/features/settings/api";
 import { isApiError } from "@/lib/api/api-client";
 import { formatDate } from "@/lib/date-format";
 import { playersApi } from "./api";
+import {
+  getLifecycleBlockingAssignments,
+  type PlayerLifecycleAction,
+} from "./lifecycle";
 import {
   assignmentTimingLabels,
   playerStatusLabels,
@@ -380,7 +385,7 @@ export function PlayersPage() {
     </div>
   );
 }
-type Action = "activate" | "deactivate" | "archive" | "restore";
+type Action = PlayerLifecycleAction;
 function Menu({
   player,
   edit,
@@ -567,6 +572,11 @@ function Lifecycle({
     archive: "Arhiviraj",
     restore: "Vrati iz arhive",
   };
+  const blockingAssignments = getLifecycleBlockingAssignments(
+    value.a,
+    value.p.currentAssignments,
+  );
+  const blocked = blockingAssignments.length > 0;
   return (
     <Dialog open onOpenChange={(o) => !o && close()}>
       <DialogContent>
@@ -576,15 +586,46 @@ function Lifecycle({
             Potvrdite promjenu statusa za igrača {value.p.displayName}.
           </DialogDescription>
         </DialogHeader>
+        {blocked ? (
+          <Alert>
+            <AlertTitle>Prvo završite trenutne pripadnosti</AlertTitle>
+            <AlertDescription>
+              <p>
+                Igrača nije moguće{" "}
+                {value.a === "archive" ? "arhivirati" : "deaktivirati"} dok ima
+                trenutnu pripadnost selekciji.
+              </p>
+              <p>
+                Trenutne selekcije:{" "}
+                {blockingAssignments
+                  .map((assignment) => assignment.teamName)
+                  .join(", ")}
+                .
+              </p>
+            </AlertDescription>
+          </Alert>
+        ) : null}
         {mutation.error && <FieldError>{message(mutation.error)}</FieldError>}
         <DialogFooter>
-          <Button
-            variant={value.a === "archive" ? "destructive" : "default"}
-            disabled={mutation.isPending}
-            onClick={() => mutation.mutate()}
-          >
-            {mutation.isPending ? "Obrada..." : "Potvrdi"}
-          </Button>
+          {blocked ? (
+            <Button
+              nativeButton={false}
+              render={
+                <Link to={`/players/${value.p.id}#pripadnosti-selekcijama`} />
+              }
+              onClick={close}
+            >
+              Upravljaj pripadnostima
+            </Button>
+          ) : (
+            <Button
+              variant={value.a === "archive" ? "destructive" : "default"}
+              disabled={mutation.isPending}
+              onClick={() => mutation.mutate()}
+            >
+              {mutation.isPending ? "Obrada..." : "Potvrdi"}
+            </Button>
+          )}
           <DialogClose render={<Button variant="outline" />}>
             Odustani
           </DialogClose>
@@ -769,7 +810,10 @@ export function PlayerDetailPage() {
           </Table>
         </div>
       </section>
-      <section className="flex flex-col gap-3">
+      <section
+        id="pripadnosti-selekcijama"
+        className="flex scroll-mt-6 flex-col gap-3"
+      >
         <h2 className="font-heading text-xl">
           Historija pripadnosti selekcijama
         </h2>
