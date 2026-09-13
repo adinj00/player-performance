@@ -1,5 +1,10 @@
 # Progress Tracker
 
+## Claude skill symlink mirror
+
+- Added portable relative symbolic links under `.claude/skills/` for all 32 skill directories in `.agents/skills/`; no skill contents were copied.
+- Verification confirms a one-to-one source/link match, native Windows symbolic-link reparse points, resolvable targets, and Git mode `120000` for every link using an isolated temporary index.
+
 ## Player lifecycle assignment-conflict UX follow-up
 
 - Deactivation and archival now share an assignment-aware preflight in the Players UI. When the player has current selection assignments, the confirmation dialog no longer sends a lifecycle request that the backend is known to reject; it identifies the blocking selections and links directly to the player's assignment-history controls so the administrator can end them first.
