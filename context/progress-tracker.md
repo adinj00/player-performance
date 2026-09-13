@@ -2,7 +2,7 @@
 
 ## Claude skill symlink mirror
 
-- Added portable relative symbolic links under `.claude/skills/` for all 32 skill directories in `.agents/skills/`; no skill contents were copied.
+- Added portable relative symbolic links under `.claude/skills/` for all 41 skill directories in `.agents/skills/`; no skill contents were copied. A follow-up replaced nine newly added junctions with the required symbolic links.
 - Verification confirms a one-to-one source/link match, native Windows symbolic-link reparse points, resolvable targets, and Git mode `120000` for every link using an isolated temporary index.
 
 ## Player lifecycle assignment-conflict UX follow-up
