@@ -7,35 +7,34 @@
 
 ## Build approach
 
-<TBD, set by /scope>
+Tracer Bullet. Future work should prove a real path through data, API, interface, and staff behavior.
 
-## Application Building Context
+## Project authority
 
-Read the following files in order before implementing or making any architectural decision:
+Use this source order for every task:
 
-1. `context/project-overview.md` — product definition, goals, features, and scope
-2. `context/architecture.md` — system structure, boundaries, storage model, and invariants
-3. `context/ui-context.md` — theme, colors, typography, and component conventions
-4. `context/code-standards.md` — implementation rules and conventions
-5. `context/ai-workflow-rules.md` — development workflow, scoping rules, and delivery approach
-6. `context/progress-tracker.md` — current phase, completed work, open questions, and next steps
+1. Follow platform instructions and the current user request.
+2. Read every applicable `AGENTS.md` from the repository root toward the area being changed. These files own workflow, repository boundaries, local conventions, and commands.
+3. Read [docs/scope/index.md](docs/scope/index.md) and the relevant scope area. Scope owns product boundaries, priority, and feature status.
+4. For interface work, read [DESIGN.md](DESIGN.md). It owns visual and interaction direction within the current product scope.
+5. Read relevant specifications in [docs/specs/](docs/specs/). Accepted specifications own durable decisions. A scope linked proposed or in progress specification is a build contract only for its named active feature.
+6. Inspect code, tests, migrations, configuration, and runtime behavior as evidence of what exists. Repository evidence does not create product scope or silently override an active decision.
+7. Treat `CLAUDE.md` files as loader shims to their matching `AGENTS.md` files. Treat skills as workflow aids, not project decisions.
+8. Use README files and other current references for orientation only when they do not conflict with an authority above.
+9. Treat everything under [docs/legacy/](docs/legacy/) as historical evidence only. Read it only when the user requests historical analysis or a current authority links to it as evidence.
 
-The `context/` files are the primary source of truth.
+If current authorities conflict, stop only the disputed work and use the workflow named by the source owner. Use `/scope` for product scope, `/architect` for durable decisions and design conflicts, and `/sync` for repository guidance after the underlying decision is clear.
 
 Use relevant Codex skills or plugins when applicable:
 
-- Project-local skills are in `.agents/skills/`
-- Installed Codex plugins may provide additional optional capabilities, but they are not repository requirements
+- Project local skills are in `.agents/skills/`
+- Installed Codex plugins may provide optional capabilities, but they are not repository requirements
 
-For frontend UI work, read `DESIGN.md` as the design system source of truth and also read `context/references/shadcn-components.md` before creating new UI primitives or interaction patterns.
+For frontend UI work, read `DESIGN.md` as the design system source of truth. Check the current component inventory and installed shadcn primitives before creating new UI primitives or interaction patterns.
 
-Skills and plugins may guide implementation workflow, but must not override the project context files, active feature spec, architecture rules, code standards, or documented scope.
+Skills and plugins may guide implementation workflow, but must not override applicable `AGENTS.md` files, current scope, `DESIGN.md`, accepted decisions, or an active feature specification.
 
-Update `context/progress-tracker.md` after each meaningful implementation change.
-
-If implementation changes the architecture, scope, or standards documented in the context files, update the relevant file before continuing.
-
-## Context files
+## Area guidance
 
 - [backend/AGENTS.md](backend/AGENTS.md) (ASP.NET Core projects, tests, persistence, and commands)
 - [frontend/AGENTS.md](frontend/AGENTS.md) (React application structure, UI rules, tests, and commands)

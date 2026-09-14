@@ -32,7 +32,7 @@ Administrators can invite staff, assign one role, set team scope and explicit pe
 - [ ] Review it: `/check review staff access and account administration`
 - [ ] Document it: `/document staff access and account administration`
 
-Legacy specs [Unit 23](../../context/feature-specs/23-staff-users-team-scope-account-lifecycle-backend.md) and [Unit 24](../../context/feature-specs/24-staff-users-roles-ui.md) · code in `backend/src/Api/Endpoints/Users/` and `frontend/src/features/users/`
+Legacy specs [Unit 23](../legacy/context/feature-specs/23-staff-users-team-scope-account-lifecycle-backend.md) and [Unit 24](../legacy/context/feature-specs/24-staff-users-roles-ui.md) · code in `backend/src/Api/Endpoints/Users/` and `frontend/src/features/users/`
 
 ### 4. Responsive shell and accessibility · existing
 
@@ -40,4 +40,4 @@ The Bosnian Latin staff interface provides the club shell, responsive navigation
 
 **Done when:** protected routes retain clear landmarks and headings, keyboard and narrow viewport use remains practical, and privacy restricted content never leaks through hidden or focusable interface state.
 
-Legacy spec [Unit 56](../../context/feature-specs/56-responsive-accessibility-hardening.md) · code in `frontend/src/app/`, `frontend/src/components/`, and `frontend/src/index.css`
+Legacy spec [Unit 56](../legacy/context/feature-specs/56-responsive-accessibility-hardening.md) · code in `frontend/src/app/`, `frontend/src/components/`, and `frontend/src/index.css`

@@ -26,7 +26,7 @@ The dashboard provides team and season context, recent matches, report workflow,
 
 **Done when:** each authorized role receives one bounded overview that respects team scope and does not reconstruct hidden workflow, medical, or incompatible workload data.
 
-Legacy specs [Unit 52](../../context/feature-specs/52-dashboard-backend-read-models.md) and [Unit 53](../../context/feature-specs/53-dashboard-ui.md) · code in `backend/src/Api/Endpoints/DashboardEndpoints.cs` and `frontend/src/features/dashboard/`
+Legacy specs [Unit 52](../legacy/context/feature-specs/52-dashboard-backend-read-models.md) and [Unit 53](../legacy/context/feature-specs/53-dashboard-ui.md) · code in `backend/src/Api/Endpoints/DashboardEndpoints.cs` and `frontend/src/features/dashboard/`
 
 ## Slice 3: Upcoming opponent preparation
 

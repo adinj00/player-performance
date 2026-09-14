@@ -49,7 +49,7 @@ Staff can manually record tracking level driven player and goalkeeper statistics
 - [ ] Review it: `/check review manual match statistics`
 - [ ] Document it: `/document manual match statistics`
 
-Legacy specs [Unit 33](../../context/feature-specs/33-manual-match-statistics-backend.md) and [Unit 36](../../context/feature-specs/36-manual-match-statistics-ui.md) · code in `backend/src/Application/Matches/MatchStatisticsService.cs` and `frontend/src/features/matches/`
+Legacy specs [Unit 33](../legacy/context/feature-specs/33-manual-match-statistics-backend.md) and [Unit 36](../legacy/context/feature-specs/36-manual-match-statistics-ui.md) · code in `backend/src/Application/Matches/MatchStatisticsService.cs` and `frontend/src/features/matches/`
 
 ### 10. Match report review · in-progress
 
@@ -63,7 +63,7 @@ Reports move through draft, review, correction, verification, and archive states
 - [ ] Review it: `/check review match report review`
 - [ ] Document it: `/document match report review`
 
-Legacy specs [Unit 32](../../context/feature-specs/32-match-report-workflow-backend.md) and [Unit 37](../../context/feature-specs/37-match-report-review-ui.md) · code in `backend/src/Application/Matches/MatchReportsService.cs` and `frontend/src/features/matches/`
+Legacy specs [Unit 32](../legacy/context/feature-specs/32-match-report-workflow-backend.md) and [Unit 37](../legacy/context/feature-specs/37-match-report-review-ui.md) · code in `backend/src/Application/Matches/MatchReportsService.cs` and `frontend/src/features/matches/`
 
 ### 11. Audit history · in-progress
 
@@ -78,4 +78,4 @@ Important staff, report, statistics, media, import, and availability changes use
 - [ ] Review it: `/check review audit history`
 - [ ] Document it: `/document audit history`
 
-Legacy specs [Unit 38](../../context/feature-specs/38-audit-backend-foundation.md) and [Unit 39](../../context/feature-specs/39-audit-ui-foundation.md) · code in `backend/src/Application/Auditing/`, `backend/src/Infrastructure/Auditing/`, and `frontend/src/features/audit/`
+Legacy specs [Unit 38](../legacy/context/feature-specs/38-audit-backend-foundation.md) and [Unit 39](../legacy/context/feature-specs/39-audit-ui-foundation.md) · code in `backend/src/Application/Auditing/`, `backend/src/Infrastructure/Auditing/`, and `frontend/src/features/audit/`

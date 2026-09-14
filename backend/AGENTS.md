@@ -49,6 +49,6 @@ dotnet ef database update --project src/Infrastructure/PlayerPerformance.Infrast
 - Local settings come from the ignored `backend/.env`. Only `.env.example` is committed, and production must use real environment variables or an approved secret store.
 - `IdentityTestApplicationFactory` replaces PostgreSQL with the EF Core in memory provider. The base `TestApplicationFactory` keeps the production provider and uses an unreachable test connection for startup and configuration checks.
 - Production startup must not apply migrations. Run `dotnet ef database update` as an explicit deployment or local verification step.
-- The context rules prohibit direct EF Core queries in API endpoints, while `src/Api/Endpoints/Players/MedicalEndpoints.cs` and `src/Api/Endpoints/Training/TrainingSessionEndpoints.cs` currently inject `AppDbContext`. This is unresolved documentation and code drift. Do not treat either side as the new convention without an explicit decision.
+- `src/Api/Endpoints/Players/MedicalEndpoints.cs` and `src/Api/Endpoints/Training/TrainingSessionEndpoints.cs` currently inject `AppDbContext`, which differs from the boundary documented above. Keep this drift visible and do not expand it without a focused decision or refactor.
 
 _Drafted by /audit from the repo, worth a quick human pass. Edit freely: once a line stops matching this draft, later runs treat it as curated and will flag rather than overwrite it._

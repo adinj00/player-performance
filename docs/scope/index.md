@@ -66,4 +66,4 @@ English localization remains unscheduled. Bosnian Latin is the only current inte
 
 **Workflow:** GA normally runs `/check verify`, `/test`, `/check review`, and `/document` after `/develop`. A feature can use a different level when its heading says so.
 
-**Pointers:** existing feature specs are legacy planning evidence under `context/feature-specs/`. They are not new `/architect` specifications under `docs/specs/`.
+**Pointers:** existing feature specs are [legacy planning evidence](../legacy/context/feature-specs/00-build-plan.md) under `docs/legacy/context/feature-specs/`. They are not new `/architect` specifications under `docs/specs/`.

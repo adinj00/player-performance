@@ -10,7 +10,7 @@ Team scoped availability gives coaches safe operational status, while injury det
 
 **Done when:** authorized staff can maintain current availability and injury history, ordinary roles see only coach safe information, and permission loss removes restricted data from active interface state.
 
-Legacy specs [Unit 50](../../context/feature-specs/50-medical-availability-backend.md) and [Unit 51](../../context/feature-specs/51-medical-availability-ui.md) · code in `backend/src/Api/Endpoints/Players/MedicalEndpoints.cs` and `frontend/src/features/medical/`
+Legacy specs [Unit 50](../legacy/context/feature-specs/50-medical-availability-backend.md) and [Unit 51](../legacy/context/feature-specs/51-medical-availability-ui.md) · code in `backend/src/Api/Endpoints/Players/MedicalEndpoints.cs` and `frontend/src/features/medical/`
 
 ### 17. Media references · existing
 

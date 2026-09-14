@@ -46,8 +46,7 @@ npm run build
 - When a shadcn `Button` renders a React Router link or an anchor, preserve link semantics with the supported Base UI composition and `nativeButton={false}`.
 - Route focus management should react to path changes. Search, filter, tab, and pagination updates must not steal focus.
 - Charts need a text description and an equivalent bounded table or list. Workload charts must not combine incompatible comparison groups.
-- Root `DESIGN.md` is present and defines the intended dark stadium night and deep slate design system. The current `src/index.css` and frontend implementation appear light only, so this remains unresolved design drift. Do not resolve it during `/audit`.
-- `context/code-standards.md` says Nuqs is not installed, while `package.json` and current frontend code install and use it. This is unresolved documentation and code drift. Do not treat either side as the new convention without an explicit decision.
-- The context rules place high frequency Users filters in local React state, while `src/features/users/users-page.tsx` currently stores them in Nuqs URL state. This is unresolved documentation and code drift. Do not treat either side as the new convention without an explicit decision.
+- Root `DESIGN.md` defines the intended dark stadium night and deep slate design system. The current `src/index.css` and frontend implementation remain light only, so this is unresolved design drift. Do not resolve it without an approved design decision and scoped implementation.
+- Nuqs is installed and current Users filters use URL state. A future feature specification should name whether each new filter is local or shareable instead of treating every filter the same way.
 
 _Drafted by /audit from the repo, worth a quick human pass. Edit freely: once a line stops matching this draft, later runs treat it as curated and will flag rather than overwrite it._

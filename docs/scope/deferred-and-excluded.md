@@ -12,7 +12,7 @@ Application level production safeguards and runbooks exist, but real deployment 
 
 - [ ] Decide the deployment boundary (spec): `/architect production deployment`
 
-Legacy spec [Unit 57](../../context/feature-specs/57-production-configuration-readiness.md) · code and operations guidance in `backend/src/Api/`, `frontend/src/lib/`, and `context/operations/`
+Legacy spec [Unit 57](../legacy/context/feature-specs/57-production-configuration-readiness.md) · code in `backend/src/Api/` and `frontend/src/lib/`; [legacy operations evidence](../legacy/context/operations/production-readiness-checklist.md) is archived separately
 
 ## Excluded from the active direction
 
@@ -26,7 +26,7 @@ Code in `backend/src/Api/Endpoints/Training/`, `backend/src/Application/Physical
 
 GPeXe, GPS, Zone14, and other vendor integrations are outside the current scope. No vendor processor should be activated, no export fields should be guessed, and the generic preview foundation does not count as an integration.
 
-The legacy [Unit 46](../../context/feature-specs/46-gpexe-sample-review-mapping-gate.md) remains evidence of an earlier blocked plan, not active scope.
+The legacy [Unit 46](../legacy/context/feature-specs/46-gpexe-sample-review-mapping-gate.md) remains evidence of an earlier blocked plan, not active scope.
 
 ### 22. Video analysis · dropped
 
