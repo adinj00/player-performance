@@ -34,6 +34,15 @@ For frontend UI work, read `DESIGN.md` as the design system source of truth. Che
 
 Skills and plugins may guide implementation workflow, but must not override applicable `AGENTS.md` files, current scope, `DESIGN.md`, accepted decisions, or an active feature specification.
 
+## Confirmed feature spec handoff
+
+For an existing planned feature, use this handoff under [spec 0001](docs/specs/0001-project-context-authority.md).
+
+1. `/architect` owns the decision and spec and leaves scope edits to `/scope`. After the engineer confirms the design, leave the unbuilt feature spec `Proposed` and return the feature number, name, and spec path under `docs/specs/` for `/scope link confirmed spec for feature <number>: <spec path>`.
+2. `/scope` treats that request as an update to the existing feature. Match its number and name in `docs/scope/index.md` and the area file, and verify that the confirmed spec covers that feature. In the area file, add the relative spec link, tick the decision checkbox labeled `(spec)`, and add an unchecked `Build it` box for `/develop <feature>` with a short rollup of milestones and their acceptance criteria from the spec's build plan. Add unchecked closing steps for the feature's workflow tier (`/check verify` for Alpha and above, `/test` for Beta and above, and `/check review` and `/document` for GA).
+3. In the same scope update, set both the index row and the area heading to `in-progress`, replacing `needs a decision` in the heading. Update the area's status summary in the index to match. Preserve the feature's number, name, phase, intent, and definition of done.
+4. `/develop` uses the spec as the build contract for this feature only after `/scope` completes the update and the linked spec passes the build gate. Feature specs reach `Accepted` after the feature is built and verified.
+
 ## Area guidance
 
 - [backend/AGENTS.md](backend/AGENTS.md) (ASP.NET Core projects, tests, persistence, and commands)
