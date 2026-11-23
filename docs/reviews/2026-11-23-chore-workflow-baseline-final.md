@@ -24,4 +24,3 @@ Both Major findings from the November 22 review are resolved. The documented Win
 The fresh Git checkout exercised filesystem discovery. The feature 13 fixture exercised the documented edits and assertions. Neither check involved live Claude discovery or a live sequence of agent invocations. The existing upstream sync caveat at `.agents/skills/sync/agent-prompt.md:163` remains recorded in the November 22 review. For future feature acceptance, spec 0001 requires completed verification.
 
 `git diff --check origin/main...HEAD` passed. Application source and tests have no changes in this PR, so xUnit and Vitest were outside this review. The GitHub snapshot showed PR #1 open and mergeable at the reviewed head, with an empty status check rollup. [Pull request #1](https://github.com/adinj00/player-performance/pull/1)
-
