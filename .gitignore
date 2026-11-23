@@ -66,6 +66,8 @@ mono_crash.*
 
 # Build results
 [Dd]ebug/
+# Exception: canonical JSMastery debug skill
+!/.agents/skills/debug/
 [Dd]ebugPublic/
 [Rr]elease/
 [Rr]eleases/
