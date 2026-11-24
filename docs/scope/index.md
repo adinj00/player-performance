@@ -3,11 +3,11 @@
 Player Performance is the internal FK Velež Mostar system for collecting, managing, and analyzing football player performance data. It serves club staff, with the player and the player’s match performance as the center of the product.
 
 **Build approach:** Tracer Bullet (future work should prove a real path through data, API, interface, and staff behavior).
-**Workflow:** GA (`/check verify`, then `/test`, then `/check review`, then `/document` after `/develop`). This is the project default because authentication, permissions, medical details, and audit history need careful verification. `/architect` remains the recommended first stop when a real decision is still open.
+**Workflow:** Beta (`/check verify`, then `/test`). Features tagged `· GA` add an independent `/check review` and `/document` for changes. GA applies to the shared migration and persistence baseline, authentication and permissions, official statistics and report integrity, audit history, restricted data and file handling, and production readiness.
 
 _These are recommendations that keep future work orderly. You may skip a stage when it does not fit, and you decide when a feature is done._
 
-This is a brownfield baseline. `existing` means the repository records explicit completion and verification evidence. It does not mean this scope run repeated that verification. `in-progress` means the implementation is partial, blocked, or not verified well enough to call complete. Code presence alone is not treated as proof.
+The [as-built feature inventory](../reviews/2026-11-23-as-built-feature-inventory.md) records implementation and historical evidence. The Status column carries that implementation baseline. Current runtime verification is **UNVERIFIED / NOT RUN** for the 16 implemented or partially implemented active features. Production deployment (19) is **BLOCKED** pending approved operating decisions and a production storage adapter. The planned and dropped features have no current runtime verdict.
 
 ## At a glance
 
@@ -38,15 +38,29 @@ This is a brownfield baseline. `existing` means the repository records explicit 
 
 ## Areas
 
-[Foundations and access](foundations-and-access.md) has three existing features and one feature in progress. The next unfinished step is real application verification of staff access and account administration.
+[Foundations and access](foundations-and-access.md) has three existing features and one in progress. Start with application foundation, then authenticate and verify staff access.
 
-[Core player and match loop](core-player-match-loop.md) has four existing features and three features in progress. The recommended first resume point is `/develop manual match statistics`.
+[Core player and match loop](core-player-match-loop.md) has four existing features and three in progress. Baseline manual statistics before its remaining build work and collect audit evidence while checking mutations.
 
-[Player analysis](player-analysis.md) has two existing features and two planned features. Detailed player performance over time is the next player centered capability after the manual data path is complete.
+[Player analysis](player-analysis.md) has two existing features and two planned. Verify the profile and dashboard once their data sources are proven. Player performance history is the next planned capability.
 
-[Supporting capabilities](supporting-capabilities.md) has two existing features and one feature in progress. They support the core loop but do not replace manual entry or player analysis.
+[Supporting capabilities](supporting-capabilities.md) has two existing features and one in progress. Verify availability and media before their dependent views, and generic import preview after local storage.
 
-[Deferred and excluded](deferred-and-excluded.md) keeps one incomplete deployment concern and three capabilities outside the active direction. Existing training and physical workload code remains recorded without making it active scope.
+[Deferred and excluded](deferred-and-excluded.md) has one deferred feature in progress and three dropped features. Production verification is blocked. Surviving training and workload exposure is recorded as drift.
+
+## Verification order
+
+**Next:** `/check verify application foundation`.
+
+1. **1 → 2 → 4 (shell smoke).** Apply migrations explicitly to disposable PostgreSQL, inspect the migration history and schema, and prove API health, structured errors, and browser connectivity. Then prove staff bootstrap, CSRF, first password change, protected reload and logout. Use that session to smoke check shell navigation and focus.
+2. **3 → 5 → 6 → 7 → 8.** Start staff lifecycle checks, then use club reference workflows to establish two team contexts and finish testing selected team access. Create a player, dated assignment, played match, lineup and appearances. Reuse the fixtures for allowed and denied cases.
+3. **9 → 10.** Baseline manual statistics and resolve gaps that block reliable reviewed data. Verify report transitions and permission boundaries, including correction and locks on match, lineup and statistics edits.
+4. **16 → 17 → 18 → 12 and 14 → 4 (full workflows) → 11 (close).** Verify restricted availability and media before their consumers. Verify import preview after local storage and relevant match context. Complete profile and dashboard checks with the proven data, then finish keyboard and responsive checks with representative records. Collect audit evidence during 3, 5–10 and 16–18, then close the history check across its writers.
+5. **Later:** design 13 after 8–10 establish reliable reviewed data, then design 15 after the player history direction is clear. Feature 19 waits for its deferred decision. Features 20–22 have no verification campaign.
+
+Use Playwright CLI or MCP for browser observations and the existing xUnit and Vitest suites for regression coverage. Use real PostgreSQL for migrations, relational constraints, query translation, transactions and concurrency. Add maintained Playwright E2E tests selectively through `/test` when a critical journey and its regression risk justify them.
+
+Record each runtime outcome and its evidence through `/check verify`. Use `/debug` for observed defects, `/architect` for unresolved contracts, and `/develop` for scoped gaps or justified refactoring. Capture before and after behavior when making changes, and rerun the affected checks before the tier's remaining steps.
 
 ## Current boundary
 
@@ -58,12 +72,12 @@ English localization remains unscheduled. Bosnian Latin is the only current inte
 
 ## Legend
 
-**Next step:** the first unticked box in a feature section.
+**Next step:** follow the verification order across features, then the first applicable unticked box in the feature section.
 
 **needs a decision:** `/architect` is the recommended next step because an important product or technical decision is still open.
 
-**Status:** `planned` means approved scope that has not started. `in-progress` means partial or not verified enough. `existing` means it predates this scope and has explicit repository completion evidence. `dropped` means it is outside the active direction and stays visible for history.
+**Status:** `planned` means approved scope awaiting implementation. `in-progress` means partial, blocked, or historically incomplete. `existing` means the repository records earlier completion evidence. `dropped` means outside the active direction. Completed legacy boxes record historical work. Current acceptance requires fresh evidence.
 
-**Workflow:** GA normally runs `/check verify`, `/test`, `/check review`, and `/document` after `/develop`. A feature can use a different level when its heading says so.
+**Workflow:** a heading without a tier tag inherits Beta. A GA tag on a dropped feature records the depth if it is reopened.
 
 **Pointers:** existing feature specs are [legacy planning evidence](../legacy/context/feature-specs/00-build-plan.md) under `docs/legacy/context/feature-specs/`. They are not new `/architect` specifications under `docs/specs/`.

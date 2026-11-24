@@ -4,9 +4,11 @@ These items are not part of the active manual entry and player analysis directio
 
 ## Deferred
 
-### 19. Production deployment · in-progress · needs a decision
+### 19. Production deployment · in-progress · needs a decision · GA
 
 Application level production safeguards and runbooks exist, but real deployment remains blocked by hosting, storage, database, backup, email, monitoring, and operating decisions. No provider should be selected through this scope.
+
+Current verification is **BLOCKED** pending those decisions and a production storage adapter. This remains deferred from the local campaign.
 
 **Done when:** approved infrastructure decisions are recorded, required production adapters and operations are implemented and verified, and the readiness checklist can truthfully move from blocked to ready.
 
@@ -20,9 +22,11 @@ Legacy spec [Unit 57](../legacy/context/feature-specs/57-production-configuratio
 
 Training session and physical workload code exists, including backend models, routes, and interface surfaces. The current product direction excludes GPS and training data integration, so this capability is recorded for history and is not active work.
 
+The player profile and team dashboard still expose workload reads. Check their behavior and privacy under 12 and 14. Any cleanup or change to surviving exposure needs an explicit scope decision.
+
 Code in `backend/src/Api/Endpoints/Training/`, `backend/src/Application/Physical/`, and `frontend/src/features/training/`
 
-### 21. Vendor data integrations · dropped
+### 21. Vendor data integrations · dropped · GA
 
 GPeXe, GPS, Zone14, and other vendor integrations are outside the current scope. No vendor processor should be activated, no export fields should be guessed, and the generic preview foundation does not count as an integration.
 
